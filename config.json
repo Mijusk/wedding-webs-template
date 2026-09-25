@@ -3,62 +3,64 @@
   "event": {
     "type": "boda",
     "couple": [
-      "Lucía",
-      "Martín"
+      "Maria",
+      "Philipp"
     ],
-    "date": "2027-06-12T18:00:00+02:00",
-    "end": "2027-06-13T03:00:00+02:00",
+    "date": "2027-04-03T17:00:00+02:00",
+    "end": "2027-04-04T03:00:00+02:00",
     "tagline": "Nos casamos y queremos celebrarlo contigo",
-    "photo": "assets/couple.webp",
-    "photoFocus": "24% 40%",
-    "photoAlt": "Lucía y Martín abrazados a la orilla del río al atardecer"
+    "photo": "assets/atardecer.webp",
+    "photoFocus": "47% 55%",
+    "photoAlt": "Maria y Philipp mirándose frente al mar a la puesta de sol"
   },
   "story": {
     "chapters": [
       {
-        "meta": "Septiembre, orilla del Tajo",
-        "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas."
+        "meta": "Una JMJ",
+        "text": "Nos conocimos en una JMJ, entre miles de jóvenes que habían ido a buscar a Dios. Allí nos encontramos también el uno al otro."
       },
       {
-        "meta": "Aranjuez",
-        "text": "Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+        "meta": "Barcelona · Múnich",
+        "text": "Después vinieron años de aviones y llamadas entre Barcelona y Múnich. Con Dios en medio, la distancia se hizo camino: Él ha sido siempre la vía por la que nos llega el amor.",
+        "photo": "assets/hora-dorada.webp",
+        "photoFocus": "50% 30%",
+        "photoAlt": "Maria y Philipp abrazados en una celebración al atardecer"
+      },
+      {
+        "meta": "Sant Cugat",
+        "text": "Ahora queremos prometernos para siempre delante de Él, y que tú estés allí.",
+        "photo": "assets/mar.webp",
+        "photoFocus": "48% 50%",
+        "photoAlt": "Maria y Philipp en una terraza frente al mar"
       }
     ]
   },
   "venue": {
-    "name": "Finca El Olivar",
-    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
-    "city": "Aranjuez",
-    "mapsUrl": "https://maps.google.com/?q=Aranjuez"
+    "name": "Sant Cugat del Vallès",
+    "address": "Barcelona",
+    "city": "Sant Cugat",
+    "mapsUrl": "https://maps.google.com/?q=Sant+Cugat+del+Vall%C3%A8s"
   },
   "schedule": [
     {
-      "time": "18:00",
-      "label": "Ceremonia",
-      "place": "Jardín de los olivos"
+      "time": "17:00",
+      "label": "Ceremonia"
     },
     {
-      "time": "19:30",
-      "label": "Cóctel",
-      "place": "Patio central"
+      "time": "19:00",
+      "label": "Cóctel"
     },
     {
       "time": "21:00",
-      "label": "Cena",
-      "place": "Salón de la bodega"
+      "label": "Cena"
     },
     {
       "time": "23:30",
-      "label": "Fiesta",
-      "place": "Hasta que el cuerpo aguante"
+      "label": "Fiesta"
     }
   ],
-  "gifts": {
-    "holder": "Lucía Ortega y Martín Sanz",
-    "iban": "ES91 2100 0418 4502 0005 1332"
-  },
   "rsvp": {
-    "deadline": "2027-05-01",
+    "deadline": "",
     "buttonLabel": "Confirmar asistencia",
     "endpoint": ""
   },
@@ -128,7 +130,6 @@
     "story",
     "details",
     "schedule",
-    "gifts",
     "closing",
     "rsvp"
   ]
