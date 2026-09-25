@@ -130,7 +130,12 @@
     "story",
     "details",
     "schedule",
+    "gifts",
     "closing",
     "rsvp"
-  ]
+  ],
+  "gifts": {
+    "holder": "Maria Ochoteco Asensio",
+    "iban": "ES72 1586 0001 4862 9665 8811"
+  }
 }
