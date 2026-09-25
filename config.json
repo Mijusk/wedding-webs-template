@@ -1,0 +1,27 @@
+{
+  "event": {
+    "type": "boda",
+    "couple": ["Lucía", "Martín"],
+    "date": "2027-06-12T18:00:00+02:00",
+    "tagline": "Nos casamos y queremos celebrarlo contigo",
+    "photo": "assets/couple.svg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez"
+  },
+  "schedule": [
+    { "time": "18:00", "label": "Ceremonia", "place": "Jardín de los olivos" },
+    { "time": "19:30", "label": "Cóctel", "place": "Patio central" },
+    { "time": "21:00", "label": "Cena", "place": "Salón de la bodega" },
+    { "time": "23:30", "label": "Fiesta", "place": "Hasta que el cuerpo aguante" }
+  ],
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "sections": ["hero", "details", "schedule", "rsvp"]
+}

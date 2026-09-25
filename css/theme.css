@@ -1,0 +1,16 @@
+/* Tokens de la boda. Cada rama de cliente solo debería tocar este archivo. */
+:root {
+  color-scheme: light;
+  --paper: #eef0ea;
+  --paper-2: #e2e7df;
+  --ink: #22302b;
+  --muted: #5f6f67;
+  --line: #c3cdc4;
+  --accent: #8f6f43;
+  --accent-ink: #fbf8f2;
+  --ok: #3f6f52;
+  --error: #9b3b2e;
+
+  --font-display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --font-body: "Jost", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
