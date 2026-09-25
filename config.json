@@ -1,4 +1,5 @@
 {
+  "locale": "es-ES",
   "event": {
     "type": "boda",
     "couple": [
@@ -6,14 +7,19 @@
       "Martín"
     ],
     "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
     "tagline": "Nos casamos y queremos celebrarlo contigo",
     "photo": "assets/couple.webp",
     "photoFocus": "24% 40%",
-    "photoAlt": "Lucía y Martín"
+    "photoAlt": "Lucía y Martín abrazados a la orilla del río al atardecer"
+  },
+  "story": {
+    "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas. Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
   },
   "venue": {
     "name": "Finca El Olivar",
     "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
     "mapsUrl": "https://maps.google.com/?q=Aranjuez"
   },
   "schedule": [
@@ -38,15 +44,83 @@
       "place": "Hasta que el cuerpo aguante"
     }
   ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
   "rsvp": {
     "deadline": "2027-05-01",
     "buttonLabel": "Confirmar asistencia",
     "endpoint": ""
   },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "scrollHint": "Desliza"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Cómo llegar"
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "De la tarde a la madrugada"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Lo mejor que puedes traer eres tú",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado"
+    },
+    "closing": {
+      "eyebrow": "{date} · {city}",
+      "title": "Nos vemos allí",
+      "text": "Confírmanos si vienes antes del {deadline}."
+    },
+    "rsvp": {
+      "eyebrow": "RSVP",
+      "title": "¿Vienes?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se pudo enviar. Revisa tu conexión y vuelve a intentarlo.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
   "sections": [
     "hero",
+    "story",
     "details",
     "schedule",
+    "gifts",
+    "closing",
     "rsvp"
   ]
 }

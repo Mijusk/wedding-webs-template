@@ -1,37 +1,69 @@
-.rsvp-fab {
-  position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 20;
-  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px;
-  padding: 14px 24px; font: 500 15px var(--font-body); letter-spacing: .04em; cursor: pointer;
-  box-shadow: 0 8px 24px rgb(34 48 43 / .22);
+/* Botón flotante: aparece al dejar la portada y se retira en el cierre, que ya tiene el suyo */
+.rsvp-pill {
+  position: fixed; z-index: 20; right: 24px; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 10px 30px rgb(0 0 0 / .18);
+  opacity: 0; transform: translateY(24px); pointer-events: none;
+  transition: opacity .5s ease, transform .6s var(--ease-out), background-color .35s ease, color .35s ease;
 }
-.rsvp-fab:hover { filter: brightness(1.08); }
-.rsvp-panel {
-  position: fixed; right: 20px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 21;
-  width: min(380px, calc(100vw - 32px)); max-height: calc(100vh - 120px); overflow: auto;
-  background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
-  box-shadow: 0 18px 48px rgb(34 48 43 / .25); padding: 24px;
+.rsvp-pill.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+
+.rsvp-dialog {
+  width: min(460px, 100% - 32px); max-height: min(760px, 100% - 32px);
+  padding: 0; border: 0; border-radius: 6px; overflow: auto;
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0 30px 80px rgb(0 0 0 / .3);
 }
-.rsvp-panel h2 { font-size: 28px; }
-.rsvp-panel form { display: grid; gap: 18px; margin-top: 16px; }
-.field { display: grid; gap: 6px; }
-.field label, .field legend { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0; }
+.rsvp-dialog[open] { animation: dialog-in .55s var(--ease-out); }
+.rsvp-dialog::backdrop { background: rgb(12 16 20 / .5); backdrop-filter: blur(3px); animation: fade-in .4s ease; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(16px); } }
+
+.rsvp-dialog__inner { position: relative; display: grid; gap: 14px; padding: clamp(24px, 5vw, 40px); }
+.rsvp-title { font-size: clamp(40px, 6vw, 52px); line-height: 1; font-style: italic; }
+.rsvp-note { color: var(--muted); font-size: 15px; }
+.rsvp-close {
+  position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; border: 0; background: none; cursor: pointer;
+  color: var(--muted); font: 300 26px/1 var(--font-body); transition: color .3s ease, background-color .3s ease;
+}
+.rsvp-close:hover { color: var(--ink); background: var(--paper-2); }
+
+.rsvp-form { display: grid; gap: 26px; margin-top: 14px; }
+.field { display: grid; gap: 8px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.field > label, .field > legend { padding: 0; font-size: 12px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.field > legend { margin-bottom: 10px; }
 .field input[type="text"] {
-  font: inherit; color: var(--ink); background: #fff8; border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px;
+  font: inherit; color: var(--ink); background: transparent; width: 100%;
+  border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 8px 0 10px;
+  transition: border-color .3s ease, box-shadow .3s ease;
 }
-fieldset.field { border: 0; margin: 0; padding: 0; }
-.choice { display: flex; gap: 8px; }
+.field input[type="text"]::placeholder { color: var(--muted); opacity: .7; }
+.field input[type="text"]:focus { outline: none; border-bottom-color: var(--ink); box-shadow: 0 1px 0 var(--ink); }
+
+.choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .choice label {
-  flex: 1; text-align: center; border: 1px solid var(--line); border-radius: 4px; padding: 10px; cursor: pointer;
-  text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--ink);
+  position: relative; text-align: center; border: 1px solid var(--line); border-radius: 999px;
+  padding: 12px 10px; cursor: pointer; font-size: 15px; line-height: 1.3;
+  transition: border-color .3s ease, background-color .3s ease, color .3s ease;
 }
+.choice label:hover { border-color: var(--ink); }
 .choice input { position: absolute; opacity: 0; pointer-events: none; }
-.choice input:checked + span { font-weight: 600; }
-.choice label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
-.choice label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-.error { color: var(--error); font-size: 14px; margin: 0; min-height: 1.2em; }
-.submit { background: var(--ink); color: var(--paper); border: 0; border-radius: 4px; padding: 12px; font: 500 15px var(--font-body); cursor: pointer; }
-.submit:disabled { opacity: .6; cursor: wait; }
-.note { font-size: 13px; color: var(--muted); margin: 0; }
-.thanks { display: grid; gap: 10px; }
-.thanks p { margin: 0; }
-.close { float: right; background: none; border: 0; font-size: 22px; line-height: 1; color: var(--muted); cursor: pointer; }
+.choice label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.choice label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.rsvp-error { color: var(--error); font-size: 14px; min-height: 1.4em; margin-block: -12px -8px; }
+.rsvp-form .button { width: 100%; }
+.rsvp-form .button:disabled { opacity: .6; cursor: wait; }
+.rsvp-thanks { display: grid; gap: 12px; margin-top: 8px; }
+.rsvp-thanks h3 { margin: 0; font: italic 400 32px/1.1 var(--font-display); }
+.rsvp-thanks p { color: var(--muted); }
+
+@media (max-width: 760px) {
+  .rsvp-pill { left: 16px; right: 16px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  /* En móvil el formulario sube como una hoja desde abajo */
+  .rsvp-dialog {
+    width: 100%; max-width: 100%; max-height: 92svh; margin: auto 0 0;
+    border-radius: 18px 18px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .rsvp-dialog[open] { animation-name: sheet-in; }
+  @keyframes sheet-in { from { transform: translateY(100%); } }
+}

@@ -1,16 +1,77 @@
-/* Tokens de la boda. Cada rama de cliente solo debería tocar este archivo. */
+/* Tokens de la boda. Cada rama de cliente solo debería tocar este archivo.
+   La página "atardece": js/tone.js pone data-hour en <html> según la sección
+   que cruza el centro de la pantalla, y los colores se funden entre horas. */
+
+@property --paper   { syntax: "<color>"; inherits: true; initial-value: #e8ebea; }
+@property --paper-2 { syntax: "<color>"; inherits: true; initial-value: #dde2e1; }
+@property --ink     { syntax: "<color>"; inherits: true; initial-value: #1a232b; }
+@property --muted   { syntax: "<color>"; inherits: true; initial-value: #56626b; }
+@property --line    { syntax: "<color>"; inherits: true; initial-value: #bcc5c7; }
+@property --accent  { syntax: "<color>"; inherits: true; initial-value: #8e524d; }
+
 :root {
   color-scheme: light;
-  --paper: #eef0ea;
-  --paper-2: #e2e7df;
-  --ink: #22302b;
-  --muted: #5f6f67;
-  --line: #c3cdc4;
-  --accent: #8f6f43;
-  --accent-ink: #fbf8f2;
-  --ok: #3f6f52;
-  --error: #9b3b2e;
+
+  /* Tarde: bruma fría sobre el agua */
+  --paper: #e8ebea;
+  --paper-2: #dde2e1;
+  --ink: #1a232b;
+  --muted: #56626b;
+  --line: #bcc5c7;
+  --accent: #8e524d;
+
+  /* Texto sobre la foto de portada */
+  --photo-ink: #f6f1ec;
+  --photo-accent: #f0c2b5;
+  --photo-shade: 16 22 28;
+
+  --error: #a3392c;
 
   --font-display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
   --font-body: "Jost", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+
+  --tone-duration: 1.4s;
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+
+  transition:
+    --paper var(--tone-duration) ease, --paper-2 var(--tone-duration) ease,
+    --ink var(--tone-duration) ease, --muted var(--tone-duration) ease,
+    --line var(--tone-duration) ease, --accent var(--tone-duration) ease;
+}
+
+/* Atardecer: el rosa del horizonte */
+:root[data-hour="dusk"] {
+  --paper: #e6d6d0;
+  --paper-2: #dbc7c0;
+  --ink: #2a1f24;
+  --muted: #6c5558;
+  --line: #c9aea7;
+  --accent: #8b4a48;
+}
+
+/* Hora azul */
+:root[data-hour="blue"] {
+  color-scheme: dark;
+  --paper: #3c4b5a;
+  --paper-2: #465668;
+  --ink: #f1ebe4;
+  --muted: #c1c7ce;
+  --line: #5b6b7b;
+  --accent: #f0b7a9;
+}
+
+/* Noche */
+:root[data-hour="night"] {
+  color-scheme: dark;
+  --paper: #12181e;
+  --paper-2: #1b232b;
+  --ink: #ede6dd;
+  --muted: #98a2ab;
+  --line: #2b3540;
+  --accent: #e3a597;
+  --error: #f09a8a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --tone-duration: 0s; }
 }
