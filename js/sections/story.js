@@ -3,18 +3,18 @@ import { toneAt } from "../tone.js";
 
 // La historia en capítulos: cada uno con su etiqueta (lugar, época...), su texto y, si quiere, una foto.
 // Las fotos alternan de lado para que el scroll tenga ritmo.
+// Capítulo sin foto: etiqueta en la columna estrecha y texto grande en la ancha.
+// Con foto: la foto ocupa media página y la etiqueta y el texto, la otra mitad.
 function chapter(c, i) {
+  const meta = c.meta ? `<p class="label chapter__meta">${esc(c.meta)}</p>` : "<span></span>";
+  const text = `<p class="chapter__text reveal" style="--i:1">${esc(c.text)}</p>`;
+  if (!c.photo) return `<li class="chapter chapter--text">${meta}${text}</li>`;
+
   const focus = c.photoFocus ? ` style="object-position:${esc(c.photoFocus)}"` : "";
-  const photo = c.photo
-    ? `<figure class="chapter__photo reveal"><img src="${esc(c.photo)}" alt="${esc(c.photoAlt)}"${focus} loading="lazy"></figure>`
-    : "";
   return `
-    <li class="chapter${c.photo ? "" : " chapter--text"}${i % 2 ? " chapter--flip" : ""}">
-      ${c.meta ? `<p class="label chapter__meta">${esc(c.meta)}</p>` : "<span></span>"}
-      <div class="chapter__body">
-        ${photo}
-        <p class="chapter__text reveal" style="--i:1">${esc(c.text)}</p>
-      </div>
+    <li class="chapter chapter--photo${i % 2 ? " chapter--flip" : ""}">
+      <figure class="chapter__photo reveal"><img src="${esc(c.photo)}" alt="${esc(c.photoAlt)}"${focus} loading="lazy"></figure>
+      <div class="chapter__copy">${meta}${text}</div>
     </li>`;
 }
 
