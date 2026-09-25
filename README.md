@@ -30,6 +30,7 @@ El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si
 | `js/sections/*.js` | Una sección por archivo: `hero`, `story`, `details`, `schedule`, `gifts`, `closing` |
 | `js/tone.js` | Cambio de tono de la página según la hora de la sección visible |
 | `js/reveal.js` | Entradas suaves de lo que queda por debajo de la primera pantalla |
+| `js/hero-shape.js` | Si la foto de portada es vertical, en escritorio la coloca a la izquierda en vez de recortarla |
 | `js/fit.js` | Ajusta la firma final al ancho de la pantalla |
 | `js/copy.js` | Botón de copiar IBAN |
 | `js/calendar.js` | Enlace "Añadir al calendario" (Google Calendar) |
@@ -40,8 +41,10 @@ El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si
 ## Nueva boda
 
 1. Rama nueva desde `main`.
-2. Edita `config.json` (datos y textos), `css/theme.css` si cambia la paleta, y cambia la foto en `assets/`. `event.photoFocus` decide qué parte de la foto se ve en móvil.
+2. Edita `config.json` (datos y textos), `css/theme.css` si cambia la paleta, y cambia la foto en `assets/`. `event.photoFocus` decide qué parte de la foto se ve en móvil. La portada acepta fotos horizontales o verticales.
 3. Para guardar respuestas en Sheets: pega `integrations/google-sheets.gs` en la hoja (Extensiones > Apps Script), despliega como aplicación web con acceso "Cualquiera" y pon la URL en `rsvp.endpoint`.
+
+La historia va en `story.chapters`: cada capítulo tiene `meta` (una etiqueta corta: lugar, año...), `text` y, si se quiere, `photo`, `photoAlt` y `photoFocus`. Las fotos alternan de lado.
 
 Los textos admiten huecos entre llaves que se rellenan solos: `{days}` en la cuenta atrás, `{deadline}` con la fecha límite del RSVP, `{date}` y `{city}` en el cierre, `{a}` y `{b}` con los nombres en el título del calendario, y `{name}` y `{song}` en el agradecimiento del RSVP.
 

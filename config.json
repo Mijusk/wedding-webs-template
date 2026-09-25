@@ -14,7 +14,16 @@
     "photoAlt": "Lucía y Martín abrazados a la orilla del río al atardecer"
   },
   "story": {
-    "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas. Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+    "chapters": [
+      {
+        "meta": "Septiembre, orilla del Tajo",
+        "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas."
+      },
+      {
+        "meta": "Aranjuez",
+        "text": "Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+      }
+    ]
   },
   "venue": {
     "name": "Finca El Olivar",

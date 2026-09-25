@@ -10,6 +10,7 @@ import { watchTone } from "./tone.js";
 import { reveal } from "./reveal.js";
 import { fitText } from "./fit.js";
 import { bindCopy } from "./copy.js";
+import { heroShape } from "./hero-shape.js";
 
 // Registro de secciones: añadir galería, alojamiento, etc. es crear un archivo y registrarlo aquí.
 const SECTIONS = { hero, story, details, schedule, gifts, closing };
@@ -25,6 +26,7 @@ async function start() {
     main.innerHTML = config.sections.filter((s) => SECTIONS[s]).map((s) => SECTIONS[s](config)).join("");
     if (config.sections.includes("rsvp")) mountRsvp(document.getElementById("rsvp"), config);
 
+    heroShape(main);
     watchTone(main);
     reveal(main);
     fitText(main);
