@@ -5,7 +5,7 @@ export function hero({ event }) {
   const days = Math.max(0, Math.ceil((new Date(event.date) - Date.now()) / 864e5));
   return `
   <section class="hero">
-    <figure class="hero__photo"><img src="${esc(event.photo)}" alt="${esc(event.photoAlt)}"></figure>
+    <figure class="hero__photo"><img src="${esc(event.photo)}" alt="${esc(event.photoAlt)}"${event.photoFocus ? ` style="object-position:${esc(event.photoFocus)}"` : ""}></figure>
     <div class="hero__text">
       <p class="eyebrow">Nuestra ${esc(event.type)}</p>
       <h1 class="hero__names">${esc(a)}<span class="amp">&amp;</span>${esc(b)}</h1>
