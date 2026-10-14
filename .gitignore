@@ -2,6 +2,3 @@
 node_modules/
 .vercel/
 .netlify/
-
-# Fotos de prueba locales (generadas con IA): no se suben
-studio/demo/*.jpg
