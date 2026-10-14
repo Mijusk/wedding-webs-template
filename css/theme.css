@@ -1,4 +1,5 @@
-/* Tokens de la boda. Cada rama de cliente solo debería tocar este archivo. */
+/* Tokens de la boda. Cada rama de cliente solo debería tocar este archivo.
+   Estilo por defecto: "olivar". Las variantes de css/themes/ sobrescriben estos tokens (config.theme). */
 :root {
   color-scheme: light;
   --paper: #eef0ea;
@@ -10,6 +11,8 @@
   --accent-ink: #fbf8f2;
   --ok: #3f6f52;
   --error: #9b3b2e;
+  --field: #fff8;
+  --shadow: rgb(34 48 43 / .24);
 
   --font-display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
   --font-body: "Jost", "Avenir Next", "Segoe UI", system-ui, sans-serif;

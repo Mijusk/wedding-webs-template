@@ -1,0 +1,122 @@
+{
+  "brand": {
+    "name": "Webs de Boda",
+    "tagline": "Vuestra web de boda, lista antes que las invitaciones."
+  },
+  "templates": {
+    "clasica": {
+      "name": "Clásica",
+      "url": "../index.html"
+    }
+  },
+  "styles": [
+    {
+      "id": "olivar",
+      "name": "Olivar",
+      "template": "clasica",
+      "theme": "olivar",
+      "status": "available",
+      "swatch": [
+        "#eef0ea",
+        "#8f6f43"
+      ],
+      "description": "Verde salvia y dorado, con una serif de alto contraste. Para bodas de campo y fincas."
+    },
+    {
+      "id": "atardecer",
+      "name": "Atardecer",
+      "template": "clasica",
+      "theme": "atardecer",
+      "status": "available",
+      "swatch": [
+        "#f4ece2",
+        "#b0532c"
+      ],
+      "description": "Arena y teja, cálida y luminosa. Para bodas de verano, costa o cortijo."
+    },
+    {
+      "id": "noche",
+      "name": "Noche",
+      "template": "clasica",
+      "theme": "noche",
+      "status": "available",
+      "swatch": [
+        "#141a2a",
+        "#d1b06a"
+      ],
+      "description": "Azul noche con detalles dorados. Para bodas de tarde que acaban de madrugada."
+    },
+    {
+      "id": "editorial",
+      "name": "Editorial",
+      "template": null,
+      "status": "soon",
+      "swatch": [
+        "#ffffff",
+        "#222222"
+      ],
+      "description": "Otra maquetación, con la historia de la pareja en capítulos y fotos a página completa."
+    }
+  ],
+  "generator": {
+    "firstRunMs": 3000,
+    "switchMs": 700,
+    "maxPhotos": 3,
+    "messages": [
+      "Leyendo vuestros datos…",
+      "Colocando vuestras fotos…",
+      "Eligiendo tipografías…",
+      "Generando vuestra súper web…"
+    ]
+  },
+  "pricing": {
+    "currency": "€",
+    "tiers": [
+      {
+        "id": "tal-cual",
+        "name": "Tal cual",
+        "price": [
+          60,
+          80
+        ],
+        "summary": "Os quedáis con el estilo que habéis probado, con vuestros datos y fotos.",
+        "includes": [
+          "Vuestros datos, fotos y programa del día",
+          "Confirmaciones de asistencia en vuestra hoja de Google",
+          "Publicada y lista para compartir"
+        ]
+      },
+      {
+        "id": "con-cambios",
+        "name": "Con cambios",
+        "price": [
+          120,
+          150
+        ],
+        "summary": "Partimos de una plantilla y la ajustamos a vuestro gusto.",
+        "includes": [
+          "Todo lo de Tal cual",
+          "Colores, tipografías y textos a medida",
+          "Secciones extra: galería, regalos, alojamiento"
+        ]
+      },
+      {
+        "id": "a-medida",
+        "name": "A medida",
+        "price": [
+          200,
+          200
+        ],
+        "summary": "Un diseño propio, hecho desde cero para vuestra boda.",
+        "includes": [
+          "Todo lo de Con cambios",
+          "Diseño único, sin plantilla de partida",
+          "Hasta 3 rondas de revisiones"
+        ]
+      }
+    ]
+  },
+  "contact": {
+    "endpoint": ""
+  }
+}

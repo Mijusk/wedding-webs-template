@@ -22,6 +22,8 @@ python3 -m http.server 8000
 | `js/sections/*.js` | Una sección por archivo (hero, detalles, programa) |
 | `js/rsvp.js` | Formulario flotante de confirmación |
 | `js/storage.js` | Guardado del RSVP: Google Sheets si hay `rsvp.endpoint`, si no, simulado en localStorage |
+| `css/themes/*.css` | Estilos alternativos (`config.theme`): sobrescriben los tokens de `theme.css` |
+| `studio/` | Escaparate comercial con el generador de vista previa (ver abajo) |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 
 ## Nueva boda
@@ -35,3 +37,12 @@ python3 -m http.server 8000
 Crea `js/sections/<nombre>.js` exportando una función `(config) => html`, regístrala en `SECTIONS` dentro de `js/main.js` y añade su nombre a `config.sections`.
 
 La fecha y la hora se muestran tal cual están en el config (hora local del lugar), sin convertir a la zona horaria del invitado.
+
+## Escaparate y generador (`studio/`)
+
+`http://localhost:8000/studio/` es la web comercial: estilos con ejemplos en vivo, un formulario mínimo que genera la web de la pareja con su nombre, fecha, lugar y fotos, tarifas y formulario de reserva.
+
+- `studio/studio.json` manda: marca, estilos del selector (`status: "available"` o `"soon"`), tiempos de la carga, tarifas y `contact.endpoint` (Apps Script para guardar reservas; vacío = simulado en el navegador).
+- La plantilla se pinta en un iframe con `index.html#preview`: en ese modo no lee `config.json`, lo recibe del escaparate por `postMessage`. Cambiar de estilo es reenviar el config con otro `theme`, sin recargar.
+- Las fotos se reducen en el navegador y no se suben a ningún sitio.
+- Un estilo nuevo con la misma maquetación = un archivo en `css/themes/` y una entrada en `styles`. Una maquetación nueva = otra carpeta con su `index.html` que entienda el modo `#preview`, y una entrada en `templates`.

@@ -1,0 +1,16 @@
+/* Estilo "Atardecer": tonos arena y teja, serif clásica. Sobrescribe css/theme.css. */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Karla:wght@400;500;600&display=swap");
+:root {
+  --paper: #f4ece2;
+  --paper-2: #eadccb;
+  --ink: #3b2a22;
+  --muted: #7a6153;
+  --line: #dcc7b3;
+  --accent: #b0532c;
+  --accent-ink: #fff7f0;
+  --field: #fffaf4;
+  --shadow: rgb(59 42 34 / .22);
+
+  --font-display: "Cormorant Garamond", "Garamond", Georgia, serif;
+  --font-body: "Karla", "Helvetica Neue", system-ui, sans-serif;
+}

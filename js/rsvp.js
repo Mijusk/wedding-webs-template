@@ -42,7 +42,10 @@ export function mountRsvp(root, config) {
 
   fab.addEventListener("click", () => toggle(panel.hidden));
   $("rsvp-close").addEventListener("click", () => toggle(false));
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") toggle(false); });
+  // Se puede montar varias veces (vista previa): quita el listener del montaje anterior.
+  document.removeEventListener("keydown", root._onKey);
+  root._onKey = (e) => { if (e.key === "Escape") toggle(false); };
+  document.addEventListener("keydown", root._onKey);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();

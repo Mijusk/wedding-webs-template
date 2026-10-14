@@ -1,0 +1,19 @@
+/* Estilo "Noche": fondo azul noche con dorado, para bodas de tarde-noche. Sobrescribe css/theme.css. */
+@import url("https://fonts.googleapis.com/css2?family=Italiana&family=Mulish:wght@400;500;600&display=swap");
+:root {
+  color-scheme: dark;
+  --paper: #141a2a;
+  --paper-2: #1e2639;
+  --ink: #ece5d6;
+  --muted: #a9a594;
+  --line: #34405b;
+  --accent: #d1b06a;
+  --accent-ink: #141a2a;
+  --ok: #8fc4a2;
+  --error: #f0a08f;
+  --field: #1b2234;
+  --shadow: rgb(0 0 0 / .45);
+
+  --font-display: "Italiana", "Didot", Georgia, serif;
+  --font-body: "Mulish", "Avenir Next", system-ui, sans-serif;
+}
