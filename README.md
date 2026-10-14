@@ -5,9 +5,11 @@ Web de boda configurable desde un único `config.json`. HTML, CSS y JS sin frame
 ## Probar en local
 
 ```bash
-python3 -m http.server 8000
-# abre http://localhost:8000
+npx serve .          # o: python3 -m http.server 8000
+# plantilla: http://localhost:3000/   escaparate: http://localhost:3000/studio/
 ```
+
+No hay `npm run dev`: no hay paso de build.
 
 (Hace falta un servidor: `fetch("config.json")` no funciona abriendo el archivo directamente.)
 

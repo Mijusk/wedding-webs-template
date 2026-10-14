@@ -6,11 +6,11 @@
   "templates": {
     "clasica": {
       "name": "Clásica",
-      "url": "../index.html"
+      "url": "../"
     },
     "editorial": {
       "name": "Editorial",
-      "url": "../plantillas/editorial/index.html"
+      "url": "../plantillas/editorial/"
     }
   },
   "styles": [
