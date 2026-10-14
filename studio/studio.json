@@ -122,7 +122,7 @@
     ]
   },
   "contact": {
-    "endpoint": ""
+    "endpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"
   },
   "demoPhotos": {
     "folder": "demo/",
