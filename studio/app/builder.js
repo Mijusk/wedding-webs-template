@@ -39,6 +39,7 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
     f.nameA.value = "Ana"; f.nameB.value = "Pablo";
     f.date.value = d.toISOString().slice(0, 10); f.time.value = "18:30";
     f.venue.value = "Cortijo Los Almendros"; f.city.value = "Ronda, Málaga";
+    f.email.value = "ana.y.pablo@example.com"; f.consent.checked = true;
     err.textContent = "";
     photos = [];
     for (const url of pickRandom(demoPhotos, max)) {
@@ -54,6 +55,8 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
       ["date", "b-date", "Falta la fecha de la boda."], ["time", "b-time", "Falta la hora de la ceremonia."],
       ["venue", "b-venue", "Falta el lugar de la boda."]].find(([k]) => !String(d[k] || "").trim());
     if (missing) { err.textContent = missing[2]; return $(`#${missing[1]}`).focus(); }
+    if (!/^\S+@\S+\.\S+$/.test(d.email || "")) { err.textContent = "Revisad el email: os enviamos ahí el enlace de vuestra web."; return $("#b-email").focus(); }
+    if (!d.consent) { err.textContent = "Marcad la casilla para que podamos escribiros."; return $("#b-consent").focus(); }
     err.textContent = "";
     const style = studio.styles.find((s) => s.id === d.style) || available[0];
     closeBuilder();
@@ -61,6 +64,7 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
       couple: [d.nameA.trim(), d.nameB.trim()],
       date: d.date, time: d.time,
       venue: d.venue.trim(), city: (d.city || "").trim(),
+      email: d.email.trim(),
       photos: [...photos],
     }, style);
   });

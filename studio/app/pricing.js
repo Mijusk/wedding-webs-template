@@ -44,7 +44,7 @@ export function setupPricing({ studio, templateUrl }) {
     const btn = $("#c-submit");
     btn.disabled = true; btn.textContent = "Enviando…";
     try {
-      const { simulated } = await saveLead({ ...d, wedding: chosen ? withoutPhotos(chosen.config) : null }, studio.contact);
+      const { simulated } = await saveLead({ type: "reserva", ...d, wedding: chosen ? withoutPhotos(chosen.config) : null }, studio.contact);
       const tier = tiers.find((t) => t.id === d.tier);
       form.hidden = true;
       $("#contact-thanks").innerHTML = `
@@ -57,6 +57,12 @@ export function setupPricing({ studio, templateUrl }) {
       btn.disabled = false; btn.textContent = "Enviar reserva";
     }
   });
+
+  // Lo que ya escribieron en el generador no se vuelve a pedir.
+  setupPricing.prefill = (w) => {
+    if (!$("#c-email").value) $("#c-email").value = w.email;
+    if (!$("#c-name").value) $("#c-name").value = w.couple.join(" y ");
+  };
 
   // La web elegida en la vista previa
   setupPricing.choose = ({ config, style }) => {

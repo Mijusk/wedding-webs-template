@@ -4,6 +4,7 @@ import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.
 import { setupStage, prepareStage, openStage, closeStage } from "./stage.js";
 import { setupPricing } from "./pricing.js";
 import { toConfig } from "./wedding.js";
+import { saveLead } from "./leads.js";
 import { findDemoPhotos, applyDemoPhotos } from "./demo.js";
 
 async function getJson(url) {
@@ -81,6 +82,9 @@ async function start() {
   setupBuilder({
     studio, demoPhotos,
     onGenerate: async (wedding, style) => {
+      // Cada prueba es un contacto: se guarda en cuanto se genera (sin fotos).
+      saveLead(leadFromTrial(wedding, style), studio.contact).catch(() => {});
+      setupPricing.prefill(wedding);
       const ready = prepareStage(wedding, style);
       await Promise.all([ready, playLoading(wedding, studio.generator)]);
       openStage();
@@ -95,6 +99,18 @@ async function start() {
   });
 
   setupNudge();
+}
+
+function leadFromTrial(w, style) {
+  return {
+    type: "prueba",
+    email: w.email,
+    name: w.couple.join(" y "),
+    weddingDate: `${w.date} ${w.time}`,
+    venue: [w.venue, w.city].filter(Boolean).join(", "),
+    style: style.id,
+    photos: w.photos.length,
+  };
 }
 
 // Aviso "¿Probamos con vuestra boda?" al llegar a los estilos. Una vez por visita.

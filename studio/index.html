@@ -177,6 +177,14 @@
         <legend class="label">Estilo</legend>
         <div class="style-pick" id="b-styles"></div>
       </fieldset>
+      <div class="field">
+        <label for="b-email">Vuestro email</label>
+        <input type="email" id="b-email" name="email" autocomplete="email" placeholder="Para enviaros el enlace de vuestra web" required>
+      </div>
+      <label class="consent" for="b-consent">
+        <input type="checkbox" id="b-consent" name="consent" value="si" required>
+        <span>Acepto que me escribáis sobre mi web. Solo usaremos este email para eso, y podéis pedirnos que lo borremos cuando queráis.</span>
+      </label>
       <p class="error" id="b-error" role="alert"></p>
       <button class="btn btn--wide" type="submit">Crear nuestra web</button>
     </form>

@@ -27,6 +27,7 @@ No hay `npm run dev`: no hay paso de build.
 | `css/themes/*.css` | Estilos alternativos (`config.theme`): sobrescriben los tokens de `theme.css` |
 | `studio/` | Escaparate comercial con el generador de vista previa (ver abajo) |
 | `plantillas/editorial/` | Segunda plantilla (portada a pantalla completa, historia en capítulos, la página atardece). Autocontenida |
+| `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 
 ## Nueva boda
