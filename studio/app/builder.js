@@ -1,10 +1,11 @@
 import { $, esc, sleep, syncScrollLock } from "./util.js";
+import { pickRandom } from "./demo.js";
 
 // Formulario "Contadnos lo mínimo": recoge los datos de la pareja (ver wedding.js).
 let photos = []; // data URLs ya reducidas
 let opener = null;
 
-export function setupBuilder({ studio, onGenerate }) {
+export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
   const sheet = $("#builder"), form = $("#builder-form"), err = $("#b-error");
   const available = studio.styles.filter((s) => s.status === "available");
 
@@ -14,7 +15,7 @@ export function setupBuilder({ studio, onGenerate }) {
       <span class="swatch" style="--sw-a:${esc(s.swatch[0])};--sw-b:${esc(s.swatch[1])}"></span>
       ${esc(s.name)}${s.status !== "available" ? ' <span class="opt">pronto</span>' : ""}
     </label>`).join("");
-  form.style.value = available[0].id;
+  form.elements.style.value = available[0].id;
 
   const max = studio.generator.maxPhotos;
   const input = $("#b-photo-input");
@@ -28,6 +29,21 @@ export function setupBuilder({ studio, onGenerate }) {
       catch { err.textContent = `No se pudo leer «${file.name}». Prueba con una foto JPG o PNG.`; }
     }
     $("#b-photos").classList.remove("is-busy");
+    renderPhotos(max);
+  });
+
+  // Para probar rápido: datos inventados y tres fotos de ejemplo al azar, si las hay.
+  $("#b-sample").addEventListener("click", async () => {
+    const d = new Date(); d.setMonth(d.getMonth() + 10);
+    const f = form.elements;
+    f.nameA.value = "Ana"; f.nameB.value = "Pablo";
+    f.date.value = d.toISOString().slice(0, 10); f.time.value = "18:30";
+    f.venue.value = "Cortijo Los Almendros"; f.city.value = "Ronda, Málaga";
+    err.textContent = "";
+    photos = [];
+    for (const url of pickRandom(demoPhotos, max)) {
+      try { photos.push(await shrink(await (await fetch(url)).blob())); } catch { /* foto ilegible: se salta */ }
+    }
     renderPhotos(max);
   });
 
@@ -85,7 +101,7 @@ function renderPhotos(max) {
   add.hidden = photos.length >= max;
 }
 
-// Reduce la foto a 1400 px de lado mayor en JPEG: cabe de sobra en un postMessage
+// Reduce la foto (File o Blob) a 1400 px de lado mayor en JPEG: cabe de sobra en un postMessage
 // y en la vista previa, y no sale del navegador.
 function shrink(file, maxSide = 1400) {
   return new Promise((resolve, reject) => {

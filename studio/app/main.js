@@ -4,6 +4,7 @@ import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.
 import { setupStage, prepareStage, openStage, closeStage } from "./stage.js";
 import { setupPricing } from "./pricing.js";
 import { toConfig } from "./wedding.js";
+import { findDemoPhotos, applyDemoPhotos } from "./demo.js";
 
 async function getJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -20,6 +21,8 @@ async function start() {
   const templateIds = [...new Set(available.map((s) => s.template))];
   const bases = Object.fromEntries(await Promise.all(templateIds.map(async (id) =>
     [id, await getJson(new URL("config.json", new URL(studio.templates[id].url, location.href)))])));
+  const demoPhotos = await findDemoPhotos(studio.demoPhotos);
+  Object.values(bases).forEach((base) => applyDemoPhotos(base, demoPhotos));
   const configFor = (style, wedding) => toConfig(bases[style.template], wedding, style);
   const withTheme = (style) => configFor(style, null);
 
@@ -76,7 +79,7 @@ async function start() {
     onKeep: (state) => setupPricing.choose(state),
   });
   setupBuilder({
-    studio,
+    studio, demoPhotos,
     onGenerate: async (wedding, style) => {
       const ready = prepareStage(wedding, style);
       await Promise.all([ready, playLoading(wedding, studio.generator)]);
