@@ -1,12 +1,16 @@
 {
   "brand": {
-    "name": "Webs de Boda",
+    "name": "WeddingWebs",
     "tagline": "Vuestra web de boda, lista antes que las invitaciones."
   },
   "templates": {
     "clasica": {
       "name": "Clásica",
       "url": "../index.html"
+    },
+    "editorial": {
+      "name": "Editorial",
+      "url": "../plantillas/editorial/index.html"
     }
   },
   "styles": [
@@ -49,13 +53,14 @@
     {
       "id": "editorial",
       "name": "Editorial",
-      "template": null,
-      "status": "soon",
+      "template": "editorial",
+      "status": "available",
       "swatch": [
-        "#ffffff",
-        "#222222"
+        "#e6d6d0",
+        "#12181e"
       ],
-      "description": "Otra maquetación, con la historia de la pareja en capítulos y fotos a página completa."
+      "description": "Foto a pantalla completa, vuestra historia en capítulos y una página que pasa de la tarde a la noche al bajar.",
+      "theme": "editorial"
     }
   ],
   "generator": {

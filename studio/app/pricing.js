@@ -3,7 +3,7 @@ import { saveLead } from "./leads.js";
 
 let chosen = null; // { config, style } de la web generada, si la hay
 
-export function setupPricing({ studio, templateBase }) {
+export function setupPricing({ studio, templateUrl }) {
   const { tiers, currency } = studio.pricing;
   $("#tiers").innerHTML = tiers.map((t) => `
     <article class="tier" data-tier="${esc(t.id)}">
@@ -62,7 +62,7 @@ export function setupPricing({ studio, templateBase }) {
   setupPricing.choose = ({ config, style }) => {
     chosen = { config, style };
     const [a, b] = config.event.couple;
-    const photo = new URL(config.event.photo, templateBase).href;
+    const photo = new URL(config.event.photo, templateUrl(style)).href;
     $("#chosen").innerHTML = `<img src="${esc(photo)}" alt=""><p><strong>${esc(a)} & ${esc(b)}</strong>Estilo ${esc(style.name)}, con vuestros datos.</p>`;
     $("#chosen").hidden = false;
     styleSel.value = style.id;

@@ -2,7 +2,7 @@ import { $, esc, sleep, syncScrollLock } from "./util.js";
 import { showInFrame } from "./preview.js";
 
 // Pantalla de resultado: la web a tamaño real, con cambio de estilo instantáneo.
-let state = null; // { config, style, demo }
+let state = null; // { wedding (null en los ejemplos), style, config }
 let ctx = null;
 
 export function setupStage(context) {
@@ -42,16 +42,19 @@ export function setupStage(context) {
 }
 
 // Carga el iframe antes de mostrarlo, para que la web ya esté pintada al acabar la barra.
-export function prepareStage(config, style, { demo = false } = {}) {
-  state = { config: { ...config, theme: style.theme }, style, demo };
-  showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
-  const [a, b] = config.event.couple;
+// wedding = null muestra el ejemplo de la plantilla.
+export function prepareStage(wedding, style) {
+  const demo = !wedding;
+  state = { wedding, style, config: ctx.configFor(style, wedding) };
+  const ready = showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
+  const [a, b] = state.config.event.couple;
   $("#stage-kind").textContent = demo ? "Web de ejemplo" : "Vuestra web";
   $("#stage-title").textContent = `${a} & ${b}`;
   $("#stage-edit").hidden = demo;
   $("#stage-keep").hidden = demo;
   $("#stage-try").hidden = !demo;
   markStyle();
+  return ready;
 }
 
 export function openStage() {
@@ -71,16 +74,17 @@ function markStyle() {
     b.setAttribute("aria-checked", b.dataset.style === state.style.id));
 }
 
-// Los datos ya están cargados: cambiar de estilo es reenviar el config con otro tema.
+// Los datos ya están cargados: con la misma plantilla, cambiar de estilo es reenviar el config;
+// con otra plantilla, el iframe carga la nueva y recibe los mismos datos.
 async function switchStyle(id) {
   if (id === state.style.id) return;
   const style = ctx.studio.styles.find((s) => s.id === id);
   const overlay = $("#switching");
   $("#switching-msg").textContent = `Aplicando estilo ${style.name}…`;
   overlay.hidden = false;
-  state = { ...state, style, config: { ...state.config, theme: style.theme } };
+  state = { ...state, style, config: ctx.configFor(style, state.wedding) };
   markStyle();
-  showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
-  await sleep(ctx.studio.generator.switchMs);
+  const ready = showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
+  await Promise.all([ready, sleep(ctx.studio.generator.switchMs)]);
   overlay.hidden = true;
 }

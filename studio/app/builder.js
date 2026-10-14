@@ -1,10 +1,10 @@
 import { $, esc, sleep, syncScrollLock } from "./util.js";
 
-// Formulario "Contadnos lo mínimo" -> config.json de la plantilla.
+// Formulario "Contadnos lo mínimo": recoge los datos de la pareja (ver wedding.js).
 let photos = []; // data URLs ya reducidas
 let opener = null;
 
-export function setupBuilder({ studio, demo, onGenerate }) {
+export function setupBuilder({ studio, onGenerate }) {
   const sheet = $("#builder"), form = $("#builder-form"), err = $("#b-error");
   const available = studio.styles.filter((s) => s.status === "available");
 
@@ -41,7 +41,12 @@ export function setupBuilder({ studio, demo, onGenerate }) {
     err.textContent = "";
     const style = studio.styles.find((s) => s.id === d.style) || available[0];
     closeBuilder();
-    onGenerate(buildConfig(d, photos, demo, style), style);
+    onGenerate({
+      couple: [d.nameA.trim(), d.nameB.trim()],
+      date: d.date, time: d.time,
+      venue: d.venue.trim(), city: (d.city || "").trim(),
+      photos: [...photos],
+    }, style);
   });
 
   sheet.querySelector("[data-close]").addEventListener("click", closeBuilder);
@@ -100,52 +105,10 @@ function shrink(file, maxSide = 1400) {
   });
 }
 
-const addMinutes = (hhmm, mins) => {
-  const [h, m] = hhmm.split(":").map(Number);
-  const t = (h * 60 + m + mins) % 1440;
-  return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
-};
-
-// Fecha límite del RSVP: 6 semanas antes, si todavía no ha pasado.
-function rsvpDeadline(date) {
-  const d = new Date(`${date}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 42);
-  return d > new Date() ? d.toISOString().slice(0, 10) : "";
-}
-
-export function buildConfig(d, photos, demo, style) {
-  const a = d.nameA.trim(), b = d.nameB.trim(), venue = d.venue.trim(), city = (d.city || "").trim();
-  const config = structuredClone(demo);
-  config.event = {
-    ...demo.event,
-    couple: [a, b],
-    date: `${d.date}T${d.time}:00`,
-    photo: photos[0] || demo.event.photo,
-    photoAlt: `${a} y ${b}`,
-  };
-  if (photos[0]) delete config.event.photoFocus;
-  config.venue = {
-    name: venue,
-    address: city,
-    mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue, city].filter(Boolean).join(", "))}`,
-  };
-  config.schedule = [
-    { time: d.time, label: "Ceremonia", place: venue },
-    { time: addMinutes(d.time, 90), label: "Cóctel", place: "" },
-    { time: addMinutes(d.time, 180), label: "Cena", place: "" },
-    { time: addMinutes(d.time, 330), label: "Fiesta", place: "Hasta que el cuerpo aguante" },
-  ];
-  config.gallery = photos.slice(1);
-  config.rsvp = { ...demo.rsvp, deadline: rsvpDeadline(d.date), endpoint: "" };
-  config.sections = ["hero", "details", "gallery", "schedule", "rsvp"];
-  config.theme = style.theme;
-  return config;
-}
-
 // Barra de progreso de la primera generación. El trabajo real (montar el config)
 // ya está hecho; esto es la espera que hace que se sienta "generada".
-export async function playLoading(config, { firstRunMs, messages }) {
-  const [a, b] = config.event.couple;
+export async function playLoading(wedding, { firstRunMs, messages }) {
+  const [a, b] = wedding.couple;
   $("#loading-names").textContent = `${a} & ${b}`;
   const bar = $("#loading-bar"), msg = $("#loading-msg");
   $("#loading").hidden = false;
