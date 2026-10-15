@@ -23,6 +23,26 @@
     "postal": {
       "name": "Postal",
       "url": "../plantillas/postal/"
+    },
+    "villa": {
+      "name": "Villa",
+      "url": "../plantillas/villa/"
+    },
+    "etiqueta": {
+      "name": "Etiqueta",
+      "url": "../plantillas/etiqueta/"
+    },
+    "lacre": {
+      "name": "Lacre",
+      "url": "../plantillas/lacre/"
+    },
+    "acuarela": {
+      "name": "Acuarela",
+      "url": "../plantillas/acuarela/"
+    },
+    "monograma": {
+      "name": "Monograma",
+      "url": "../plantillas/monograma/"
     }
   },
   "styles": [
@@ -109,6 +129,66 @@
         "#6f7d5c"
       ],
       "description": "La invitación de papel de siempre, en una sola tarjeta. Lo justo y nada más."
+    },
+    {
+      "id": "villa",
+      "name": "Villa",
+      "template": "villa",
+      "theme": "villa",
+      "status": "available",
+      "swatch": [
+        "#f6f2ea",
+        "#5e6b3c"
+      ],
+      "description": "Escudo de olivo con vuestras iniciales y una foto que se abre como una ventana. Lujo tranquilo para fincas y villas."
+    },
+    {
+      "id": "etiqueta",
+      "name": "Etiqueta",
+      "template": "etiqueta",
+      "theme": "etiqueta",
+      "status": "available",
+      "swatch": [
+        "#0f1b2d",
+        "#c6a15b"
+      ],
+      "description": "Azul marino y oro, como una invitación grabada. Con código de vestimenta, para bodas de gala."
+    },
+    {
+      "id": "lacre",
+      "name": "Lacre",
+      "template": "lacre",
+      "theme": "lacre",
+      "status": "available",
+      "swatch": [
+        "#f4efe6",
+        "#7a1f2b"
+      ],
+      "description": "Un sobre cerrado con sello de lacre que se abre al tocarlo. Dentro, la invitación de papel."
+    },
+    {
+      "id": "acuarela",
+      "name": "Acuarela",
+      "template": "acuarela",
+      "theme": "acuarela",
+      "status": "available",
+      "swatch": [
+        "#fbfaf7",
+        "#9daa92"
+      ],
+      "description": "Manchas de acuarela suaves, fotos con borde pintado e iconos dibujados a mano. Romántica y luminosa, para primavera y jardín."
+    },
+    {
+      "id": "monograma",
+      "name": "Monograma",
+      "template": "monograma",
+      "theme": "monograma",
+      "status": "available",
+      "swatch": [
+        "#f5efe4",
+        "#6e1f2f"
+      ],
+      "description": "Vuestras iniciales entrelazadas, sin foto de portada. Papel, tinta burdeos y mucha calma."
     }
   ],
   "sections": {
@@ -136,6 +216,10 @@
       "schedule": {
         "name": "Horario del día",
         "hint": "Ceremonia, cóctel, cena, fiesta"
+      },
+      "dresscode": {
+        "name": "Código de vestimenta",
+        "hint": "Cómo ir vestidos, con paleta de colores"
       },
       "gifts": {
         "name": "Regalo",

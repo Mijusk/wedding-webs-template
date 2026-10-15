@@ -30,6 +30,11 @@ No hay `npm run dev`: no hay paso de build.
 | `plantillas/minimal/` | Minimalista: blanco y negro, nombres enormes, secciones numeradas con líneas finas, fotos en gris. Autocontenida |
 | `plantillas/verbena/` | Exagerada: fiesta de pueblo con banderines, pegatinas, cinta que corre, cuenta atrás grande y fotos tipo polaroid. Autocontenida |
 | `plantillas/postal/` | Sencilla: una sola tarjeta de invitación de papel con todo lo esencial, más el regalo. Autocontenida |
+| `plantillas/villa/` | Elegante, "lujo tranquilo": escudo de olivo con las iniciales, foto que se abre como contraventanas, código de vestimenta con paleta. Autocontenida |
+| `plantillas/etiqueta/` | Gala: azul marino y oro, marco grabado, código de vestimenta obligatorio. Autocontenida |
+| `plantillas/lacre/` | Sobre cerrado con sello de lacre que se abre al tocarlo (o solo a los 3 s); dentro, invitación de papel. Autocontenida |
+| `plantillas/acuarela/` | Manchas de acuarela generadas por pareja, fotos con borde pintado, iconos a línea en el programa. Autocontenida |
+| `plantillas/monograma/` | Sin foto de portada: iniciales entrelazadas en SVG, crema y burdeos. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
