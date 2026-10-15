@@ -117,9 +117,9 @@ function renderPhotos(max) {
   add.hidden = photos.length >= max;
 }
 
-// Reduce la foto (File o Blob) a 1400 px de lado mayor en JPEG: cabe de sobra en un postMessage
-// y en la vista previa, y no sale del navegador.
-function shrink(file, maxSide = 1400) {
+// Reduce la foto (File o Blob) a 2000 px de lado mayor en JPEG de calidad alta: la pareja tiene
+// que ver sus fotos bien en la prueba. Cabe en un postMessage y no sale del navegador.
+function shrink(file, maxSide = 2000) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -128,9 +128,11 @@ function shrink(file, maxSide = 1400) {
       const c = document.createElement("canvas");
       c.width = Math.round(img.naturalWidth * k);
       c.height = Math.round(img.naturalHeight * k);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const g = c.getContext("2d");
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
-      resolve(c.toDataURL("image/jpeg", 0.82));
+      resolve(c.toDataURL("image/jpeg", 0.9));
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("imagen ilegible")); };
     img.src = url;

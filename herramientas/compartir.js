@@ -2,32 +2,19 @@
 // (1200×630) y el icono con las iniciales usando las fuentes y colores de su propia
 // plantilla, y escribe la cabecera del index.html (título, og:*, icono).
 // WhatsApp no ejecuta JavaScript: todo esto tiene que estar escrito en el HTML publicado.
+import { fillWebSelect, esc, writeFile as write } from "./webs.js";
+
 const $ = (s) => document.querySelector(s);
-const WEBS = [
-  ["../", "Clásica"],
-  ["../plantillas/editorial/", "Editorial"],
-  ["../plantillas/minimal/", "Minimal"],
-  ["../plantillas/verbena/", "Verbena"],
-  ["../plantillas/postal/", "Postal"],
-];
 const W = 1200, H = 630, ICON = 192;
 const START = /<!-- compartir:start[\s\S]*?<!-- compartir:end -->/;
 
 let current = null; // { config, webUrl, shot: Blob, icon: Blob }
 
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const remember = (k, v) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } };
 const recall = (k) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
 
 async function init() {
-  const found = [];
-  for (const [path, name] of WEBS) {
-    try { if ((await fetch(new URL(path + "config.json", location.href), { method: "HEAD", cache: "no-store" })).ok) found.push([path, name]); }
-    catch { /* no está en esta rama */ }
-  }
-  $("#web").innerHTML = found.map(([p, n]) => `<option value="${esc(p)}">${esc(n)} · ${esc(p.replace("../", "/") || "/")}</option>`).join("");
-  const wanted = new URLSearchParams(location.search).get("web");
-  if (wanted && found.some(([p]) => p === wanted)) $("#web").value = wanted;
+  const found = await fillWebSelect($("#web"));
   $("#web").addEventListener("change", load);
   $("#url").addEventListener("input", () => { remember(`compartir:${$("#web").value}`, $("#url").value.trim()); paint(); });
   $("#save").addEventListener("click", save);
@@ -36,7 +23,7 @@ async function init() {
     $("#save").hidden = true;
     $("#dl").classList.remove("ghost");
   }
-  if (found.length) load();
+  if (found) load();
   else status("No encuentro ninguna web con config.json. Abre esta página desde el servidor de la web (npx serve .).", "error");
 }
 
@@ -297,11 +284,6 @@ async function save() {
   }
 }
 
-async function write(dir, name, data) {
-  const file = await (await dir.getFileHandle(name, { create: true })).createWritable();
-  await file.write(data);
-  await file.close();
-}
 
 function download() {
   if (!current) return;

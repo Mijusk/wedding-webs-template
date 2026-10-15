@@ -39,9 +39,10 @@ No hay `npm run dev`: no hay paso de build.
 ## Nueva boda
 
 1. Rama nueva desde `main`.
-2. Edita `config.json`, `css/theme.css` y cambia la foto en `assets/`.
-3. Para guardar respuestas en Sheets: pega `integrations/google-sheets.gs` en la hoja (Extensiones > Apps Script), despliega como aplicación web con acceso "Cualquiera" y pon la URL en `rsvp.endpoint`.
-4. Con la web arrancada (`npx serve .`), abre `/herramientas/compartir.html`, elige la web, escribe la dirección donde se publicará y pulsa "Guardar en la carpeta de la web" (Chrome o Edge). Crea `compartir.jpg` (la tarjeta de WhatsApp, con la foto y los nombres en las fuentes de la plantilla), `icono.png` (iniciales para la pestaña y el móvil) y reescribe la cabecera del `index.html` entre `compartir:start` y `compartir:end`. Vuelve a hacerlo si cambian los nombres, la fecha, la foto o la dirección.
+2. Edita `config.json` y `css/theme.css`.
+3. Fotos: con la web arrancada (`npx serve .`), abre `/herramientas/fotos.html`, elige la web y arrastra las fotos originales de la pareja. Las que ya caben (hasta 2560 px) se guardan sin recomprimir, solo sin metadatos (GPS incluido); las más grandes, giradas o en PNG se pasan a JPG al 92 %. Marca la portada y pulsa sobre las caras para el encuadre viendo la web en móvil y ordenador. "Guardar en la carpeta de la web" escribe `assets/portada.jpg`, `assets/foto-2.jpg`… y actualiza `config.json`. Las HEIC de iPhone hay que pedirlas en JPG.
+4. Para guardar respuestas en Sheets: pega `integrations/google-sheets.gs` en la hoja (Extensiones > Apps Script), despliega como aplicación web con acceso "Cualquiera" y pon la URL en `rsvp.endpoint`.
+5. Después de las fotos, abre `/herramientas/compartir.html`, elige la web, escribe la dirección donde se publicará y pulsa "Guardar en la carpeta de la web" (Chrome o Edge). Crea `compartir.jpg` (la tarjeta de WhatsApp, con la foto y los nombres en las fuentes de la plantilla), `icono.png` (iniciales para la pestaña y el móvil) y reescribe la cabecera del `index.html` entre `compartir:start` y `compartir:end`. Vuelve a hacerlo si cambian los nombres, la fecha, la foto o la dirección.
    WhatsApp guarda la tarjeta la primera vez que alguien manda el enlace: prepárala antes de compartirlo. Si ya se compartió con la tarjeta vieja, manda el enlace con `?v=2` al final.
 
 Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "Añadir al calendario" y la cuenta atrás usan la zona del invitado.
