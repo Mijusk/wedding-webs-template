@@ -76,11 +76,13 @@ main section, .contact { scroll-margin-top: 80px; }
 
 /* Cabeceras de sección */
 .section-head { display: grid; gap: 10px; margin-bottom: 36px; max-width: 62ch; }
-.section-head h2 { font-size: clamp(32px, 4.4vw, 48px); }
+.section-head h2, .section-head h1 { font-size: clamp(32px, 4.4vw, 48px); }
 .section-note { color: var(--muted); }
 
 /* Estilos */
 .styles__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 28px; }
+.top__nav a.btn { color: var(--accent-ink); }
+.styles__more { display: flex; justify-content: center; margin-top: 40px; }
 .style-card { display: grid; gap: 14px; align-content: start; min-width: 0; }
 .style-card .scaled { aspect-ratio: 4 / 3; border-radius: var(--radius); border: 1px solid var(--line); }
 .style-card h3 { font-size: 26px; }
@@ -223,6 +225,7 @@ main section, .contact { scroll-margin-top: 80px; }
 }
 @media (max-width: 560px) {
   .top__nav a { display: none; }
+  .top__nav a.btn { display: inline-flex; }
   .field-row { grid-template-columns: 1fr; }
   .sheet { padding: 24px 18px; }
   .stage__actions .seg { display: none; }

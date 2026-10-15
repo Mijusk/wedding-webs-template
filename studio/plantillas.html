@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plantillas · WeddingWebs</title>
+<meta name="description" content="Todas las plantillas de WeddingWebs, con un ejemplo en vivo de cada una.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Plantillas · WeddingWebs">
+<meta property="og:description" content="Todas las plantillas, con un ejemplo en vivo de cada una. Probadlas con vuestros nombres y fotos.">
+<meta property="og:locale" content="es_ES">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="studio.css">
+<link rel="stylesheet" href="entrance.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top__inner">
+    <a class="brand" href="./" data-brand>WeddingWebs</a>
+    <nav class="top__nav" aria-label="Secciones">
+      <a href="./#estilos">Inicio</a>
+      <a href="./#tarifas">Tarifas</a>
+      <a class="btn btn--small" href="./?probar=">Probar con vuestra boda</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="styles wrap" aria-labelledby="catalog-title">
+    <div class="section-head">
+      <p class="eyebrow">Plantillas</p>
+      <h1 id="catalog-title">Todas las plantillas</h1>
+      <p class="section-note" id="catalog-note">Cada ejemplo es la web de verdad. Probad cualquiera con vuestros nombres, la fecha y vuestras fotos.</p>
+    </div>
+    <div class="styles__grid" id="catalog-grid"></div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p><span data-brand>WeddingWebs</span> · Webs para bodas, aniversarios y otras celebraciones.</p>
+  <nav class="foot__legal" aria-label="Información legal">
+    <a href="legal.html#aviso-legal">Aviso legal</a>
+    <a href="legal.html#privacidad">Privacidad</a>
+    <a href="legal.html#condiciones">Condiciones de contratación</a>
+  </nav>
+</footer>
+
+<script type="module">
+  import { loadCatalog, renderStyleCards } from "./app/catalog.js";
+  import { revealOnScroll } from "./app/entrance.js";
+  try {
+    const catalog = await loadCatalog();
+    document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = catalog.studio.brand.name; });
+    document.title = `Plantillas · ${catalog.studio.brand.name}`;
+    renderStyleCards(document.getElementById("catalog-grid"), catalog, { links: true });
+    revealOnScroll(".section-head, .style-card, .foot");
+  } catch (e) {
+    document.getElementById("catalog-grid").innerHTML = `<p class="error">No se pudieron cargar las plantillas: ${e.message}</p>`;
+  }
+</script>
+</body>
+</html>

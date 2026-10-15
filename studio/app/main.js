@@ -1,32 +1,15 @@
 import { $, esc, session } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
+import { loadCatalog, renderStyleCards, limitToTwoRows } from "./catalog.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
 import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } from "./stage.js";
 import { setupPricing } from "./pricing.js";
-import { toConfig } from "./wedding.js";
 import { saveLead } from "./leads.js";
-import { findDemoPhotos, applyDemoPhotos } from "./demo.js";
 import { startEntrance, revealOnScroll } from "./entrance.js";
 
-async function getJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`No se pudo cargar ${url} (${res.status})`);
-  return res.json();
-}
-
 async function start() {
-  const studio = await getJson("studio.json");
-  const styles = studio.styles;
-  const available = styles.filter((s) => s.status === "available");
-  const urlOf = (style) => studio.templates[style.template].url;
-  // Cada plantilla trae su config de ejemplo: sirve de demo y de base para cada web generada.
-  const templateIds = [...new Set(available.map((s) => s.template))];
-  const bases = Object.fromEntries(await Promise.all(templateIds.map(async (id) =>
-    [id, await getJson(new URL("config.json", new URL(studio.templates[id].url, location.href)))])));
-  const demoPhotos = await findDemoPhotos(studio.demoPhotos);
-  Object.values(bases).forEach((base) => applyDemoPhotos(base, demoPhotos));
-  const configFor = (style, wedding) => toConfig(bases[style.template], wedding, style);
-  const withTheme = (style) => configFor(style, null);
+  const catalog = await loadCatalog();
+  const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
   $("#brand-name").textContent = studio.brand.name;
@@ -44,28 +27,8 @@ async function start() {
   $("#styles-note").textContent =
     `Ahora mismo hay ${templates.size === 1 ? "una plantilla" : `${templates.size} plantillas`} en ${available.length} estilos.`
     + (soon.length ? ` ${soon.join(", ")} está en camino.` : "");
-  $("#styles-grid").innerHTML = styles.map((s) => s.status === "available" ? `
-    <article class="style-card">
-      <div class="scaled" data-base-width="1280" data-base-height="960" data-style="${esc(s.id)}">
-        <iframe title="Ejemplo del estilo ${esc(s.name)}" tabindex="-1" aria-hidden="true" loading="lazy"></iframe>
-      </div>
-      <div><h3>${esc(s.name)}</h3><p class="style-card__meta">Plantilla ${esc(studio.templates[s.template].name)}</p></div>
-      <p class="style-card__desc">${esc(s.description)}</p>
-      <div class="style-card__actions">
-        <button class="btn btn--small" type="button" data-try="${esc(s.id)}">Probar con vuestra boda</button>
-        <button class="btn btn--small btn--ghost" type="button" data-demo="${esc(s.id)}">Ver ejemplo</button>
-      </div>
-    </article>` : `
-    <article class="style-card style-card--soon">
-      <div class="soon-box">Próximamente</div>
-      <div><h3>${esc(s.name)}</h3><p class="style-card__meta"><span class="tag">Nueva plantilla</span></p></div>
-      <p class="style-card__desc">${esc(s.description)}</p>
-    </article>`).join("");
-  $("#styles-grid").querySelectorAll(".scaled").forEach((box) => {
-    const style = styles.find((s) => s.id === box.dataset.style);
-    fitScaled(box);
-    showInFrame(box.querySelector("iframe"), urlOf(style), withTheme(style));
-  });
+  renderStyleCards($("#styles-grid"), catalog);
+  limitToTwoRows($("#styles-grid"), $("#styles-more"));
   $("#styles-grid").addEventListener("click", (e) => {
     const t = e.target.closest("[data-try], [data-demo]");
     if (!t) return;
@@ -109,6 +72,13 @@ async function start() {
   });
 
   setupNudge();
+
+  // Desde plantillas.html: ?probar=<estilo> abre el generador y ?ver=<estilo> el ejemplo.
+  const params = new URLSearchParams(location.search);
+  const pick = (id) => available.find((s) => s.id === id);
+  if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
+  else if (pick(params.get("ver"))) { prepareStage(null, pick(params.get("ver"))); openStage(); }
+  if (params.has("probar") || params.has("ver")) history.replaceState(null, "", location.pathname + location.hash);
 }
 
 function leadFromTrial(w, style) {
