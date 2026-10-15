@@ -35,6 +35,11 @@ No hay `npm run dev`: no hay paso de build.
 | `plantillas/lacre/` | Sobre cerrado con sello de lacre que se abre al tocarlo (o solo a los 3 s); dentro, invitación de papel. Autocontenida |
 | `plantillas/acuarela/` | Manchas de acuarela generadas por pareja, fotos con borde pintado, iconos a línea en el programa. Autocontenida |
 | `plantillas/monograma/` | Sin foto de portada: iniciales entrelazadas en SVG, crema y burdeos. Autocontenida |
+| `plantillas/negro/` | Editorial Negro: portada de revista, foto en blanco y negro que gana color al bajar, historia como entrevista, programa como sumario. Autocontenida |
+| `plantillas/toile/` | Toile de Jouy azul dibujado en SVG, entrada con lazo que se deshace, paralaje suave. Autocontenida |
+| `plantillas/palacio/` | Art Déco: puertas doradas de entrada, abanicos, esmeralda y negro, código de vestimenta años 20. Autocontenida |
+| `plantillas/jardin/` | Jardín Inglés: flores prensadas en SVG que caen y se mueven con el ratón. Autocontenida |
+| `plantillas/lino/` | Lino y Piedra: minimal cálido, fundidos lentos, mucho aire. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |

@@ -43,6 +43,26 @@
     "monograma": {
       "name": "Monograma",
       "url": "../plantillas/monograma/"
+    },
+    "negro": {
+      "name": "Editorial Negro",
+      "url": "../plantillas/negro/"
+    },
+    "toile": {
+      "name": "Toile",
+      "url": "../plantillas/toile/"
+    },
+    "palacio": {
+      "name": "Palacio",
+      "url": "../plantillas/palacio/"
+    },
+    "jardin": {
+      "name": "Jardín Inglés",
+      "url": "../plantillas/jardin/"
+    },
+    "lino": {
+      "name": "Lino y Piedra",
+      "url": "../plantillas/lino/"
     }
   },
   "styles": [
@@ -189,6 +209,66 @@
         "#6e1f2f"
       ],
       "description": "Vuestras iniciales entrelazadas, sin foto de portada. Papel, tinta burdeos y mucha calma."
+    },
+    {
+      "id": "negro",
+      "name": "Editorial Negro",
+      "template": "negro",
+      "theme": "negro",
+      "status": "available",
+      "swatch": [
+        "#0e0e0e",
+        "#9e1b22"
+      ],
+      "description": "Portada de revista de moda: foto en blanco y negro que gana color al bajar, nombres enormes y vuestra historia como entrevista."
+    },
+    {
+      "id": "toile",
+      "name": "Toile",
+      "template": "toile",
+      "theme": "toile",
+      "status": "available",
+      "swatch": [
+        "#f7f1e6",
+        "#4f6d8f"
+      ],
+      "description": "Estampado francés de escenas campestres en azul y un lazo de seda que se deshace al entrar. Romántica, para jardín o château."
+    },
+    {
+      "id": "palacio",
+      "name": "Palacio",
+      "template": "palacio",
+      "theme": "palacio",
+      "status": "available",
+      "swatch": [
+        "#0f4c3a",
+        "#c9a55c"
+      ],
+      "description": "Art Déco de los años 20: puertas doradas que se abren, abanicos y esmeralda. Para bodas de noche con mucho baile."
+    },
+    {
+      "id": "jardin",
+      "name": "Jardín Inglés",
+      "template": "jardin",
+      "theme": "jardin",
+      "status": "available",
+      "swatch": [
+        "#faf6ef",
+        "#7c8b5e"
+      ],
+      "description": "Flores prensadas que caen y se posan alrededor de vuestra foto. Delicada y natural, para bodas de primavera."
+    },
+    {
+      "id": "lino",
+      "name": "Lino y Piedra",
+      "template": "lino",
+      "theme": "lino",
+      "status": "available",
+      "swatch": [
+        "#ede6db",
+        "#6e5e4c"
+      ],
+      "description": "Minimal cálido: lino, piedra y mucho aire, como la web de un hotel boutique. Todo aparece despacio."
     }
   ],
   "sections": {

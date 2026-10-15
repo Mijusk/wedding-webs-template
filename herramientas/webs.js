@@ -11,6 +11,11 @@ const WEBS = [
   ["../plantillas/lacre/", "Lacre"],
   ["../plantillas/acuarela/", "Acuarela"],
   ["../plantillas/monograma/", "Monograma"],
+  ["../plantillas/negro/", "Editorial Negro"],
+  ["../plantillas/toile/", "Toile"],
+  ["../plantillas/palacio/", "Palacio"],
+  ["../plantillas/jardin/", "Jardín Inglés"],
+  ["../plantillas/lino/", "Lino y Piedra"],
 ];
 
 export async function fillWebSelect(select) {
