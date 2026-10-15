@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Preparar para compartir</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: light; --ink: #1f1a24; --muted: #6d6574; --line: #e2dde4; --bg: #f7f5f2; --accent: #7a2f4d; --ok: #2f6b3b; --error: #a8322a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 40px 16px 80px; display: grid; gap: 28px; }
+  h1 { margin: 0; font-size: 30px; line-height: 1.15; }
+  h2 { margin: 0 0 6px; font-size: 18px; }
+  p { margin: 0; }
+  .muted { color: var(--muted); }
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  label { font-weight: 600; font-size: 14px; }
+  input[type="text"], input[type="url"], select { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; min-width: 0; width: 100%; background: #fff; }
+  .field { display: grid; gap: 6px; flex: 1 1 280px; }
+  button, .btn { font: 600 15px/1 system-ui, sans-serif; padding: 13px 18px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; text-decoration: none; }
+  button.ghost, .btn.ghost { background: #fff; color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
+  .shot img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  .icon { display: flex; gap: 14px; align-items: center; }
+  .icon img { width: 64px; height: 64px; border-radius: 14px; border: 1px solid var(--line); }
+  /* Burbuja con la tarjeta tal y como sale en WhatsApp */
+  .wa { background: #e5ddd5; border-radius: 14px; padding: 18px; }
+  .wa__bubble { margin-left: auto; max-width: 300px; background: #d9fdd3; border-radius: 10px; padding: 4px; box-shadow: 0 1px 1px rgb(0 0 0 / .1); font-size: 14px; }
+  .wa__card { background: #cfeec9; border-radius: 8px; overflow: hidden; }
+  .wa__card img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; }
+  .wa__text { padding: 8px 10px 10px; display: grid; gap: 2px; }
+  .wa__title { font-weight: 600; }
+  .wa__desc { color: #4a5a48; font-size: 13px; }
+  .wa__host { color: #6b7a69; font-size: 12px; }
+  .wa__msg { padding: 6px 6px 2px; color: #1f6aa5; word-break: break-all; }
+  .status { min-height: 1.5em; font-weight: 600; }
+  .status.ok { color: var(--ok); } .status.error { color: var(--error); }
+  textarea { width: 100%; min-height: 220px; font: 12px/1.5 ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  details summary { cursor: pointer; font-weight: 600; }
+  iframe.offstage { position: fixed; left: -10000px; top: 0; width: 1200px; height: 900px; border: 0; visibility: hidden; }
+  @media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Preparar la web para compartir</h1>
+    <p class="muted">Crea la imagen que sale al mandar el enlace por WhatsApp, el icono de la pestaña y los datos de la cabecera, a partir del <code>config.json</code> de la boda.</p>
+  </header>
+
+  <section class="panel">
+    <div class="row">
+      <div class="field">
+        <label for="web">Web de la boda</label>
+        <select id="web"></select>
+      </div>
+      <div class="field">
+        <label for="url">Dirección donde estará publicada</label>
+        <input id="url" type="url" placeholder="https://luciaymartin.vercel.app" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <p class="muted" id="url-note">Sin la dirección completa WhatsApp no puede mostrar la foto.</p>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>Imagen para compartir</h2>
+      <div class="shot"><img id="shot" alt="Imagen para compartir"></div>
+      <div class="icon"><img id="icon" alt="Icono"><p class="muted">Icono de la pestaña y del acceso directo del móvil.</p></div>
+    </div>
+    <div class="panel">
+      <h2>Así se verá en WhatsApp</h2>
+      <div class="wa">
+        <div class="wa__bubble">
+          <div class="wa__card">
+            <img id="wa-img" alt="">
+            <div class="wa__text"><span class="wa__title" id="wa-title"></span><span class="wa__desc" id="wa-desc"></span><span class="wa__host" id="wa-host"></span></div>
+          </div>
+          <p class="wa__msg" id="wa-url"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Guardar</h2>
+    <p class="muted">Elige la carpeta de esta web en tu ordenador (la que tiene su <code>index.html</code> y su <code>config.json</code>). Se guardan <code>compartir.jpg</code> e <code>icono.png</code> y se actualiza la cabecera del <code>index.html</code>.</p>
+    <div class="row">
+      <button id="save" type="button" disabled>Guardar en la carpeta de la web</button>
+      <button id="dl" class="ghost" type="button" disabled>Descargar los archivos</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+    <details>
+      <summary>Ver la cabecera para pegarla a mano</summary>
+      <p class="muted">Sustituye en el <code>index.html</code> todo lo que hay entre <code>&lt;!-- compartir:start</code> y <code>&lt;!-- compartir:end --&gt;</code>.</p>
+      <textarea id="block" readonly></textarea>
+    </details>
+  </section>
+</main>
+<script type="module" src="compartir.js"></script>
+</body>
+</html>

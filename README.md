@@ -41,7 +41,8 @@ No hay `npm run dev`: no hay paso de build.
 1. Rama nueva desde `main`.
 2. Edita `config.json`, `css/theme.css` y cambia la foto en `assets/`.
 3. Para guardar respuestas en Sheets: pega `integrations/google-sheets.gs` en la hoja (Extensiones > Apps Script), despliega como aplicación web con acceso "Cualquiera" y pon la URL en `rsvp.endpoint`.
-4. Cambia a mano las etiquetas `og:` de `index.html` (título, texto y la URL completa de la foto): son la tarjeta que sale al compartir el enlace por WhatsApp, que no ejecuta JavaScript.
+4. Con la web arrancada (`npx serve .`), abre `/herramientas/compartir.html`, elige la web, escribe la dirección donde se publicará y pulsa "Guardar en la carpeta de la web" (Chrome o Edge). Crea `compartir.jpg` (la tarjeta de WhatsApp, con la foto y los nombres en las fuentes de la plantilla), `icono.png` (iniciales para la pestaña y el móvil) y reescribe la cabecera del `index.html` entre `compartir:start` y `compartir:end`. Vuelve a hacerlo si cambian los nombres, la fecha, la foto o la dirección.
+   WhatsApp guarda la tarjeta la primera vez que alguien manda el enlace: prepárala antes de compartirlo. Si ya se compartió con la tarjeta vieja, manda el enlace con `?v=2` al final.
 
 Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "Añadir al calendario" y la cuenta atrás usan la zona del invitado.
 
