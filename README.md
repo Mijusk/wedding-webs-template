@@ -27,9 +27,12 @@ No hay `npm run dev`: no hay paso de build.
 | `css/themes/*.css` | Estilos alternativos (`config.theme`): sobrescriben los tokens de `theme.css` |
 | `studio/` | Escaparate comercial con el generador de vista previa (ver abajo) |
 | `plantillas/editorial/` | Segunda plantilla (portada a pantalla completa, historia en capítulos, la página atardece). Autocontenida |
+| `plantillas/minimal/` | Minimalista: blanco y negro, nombres enormes, secciones numeradas con líneas finas, fotos en gris. Autocontenida |
+| `plantillas/verbena/` | Exagerada: fiesta de pueblo con banderines, pegatinas, cinta que corre, cuenta atrás grande y fotos tipo polaroid. Autocontenida |
+| `plantillas/postal/` | Sencilla: una sola tarjeta de invitación de papel con todo lo esencial, más el regalo. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
-| `fonts/`, `plantillas/editorial/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
+| `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
 | `studio/legal.html` | Aviso legal, privacidad y condiciones. Los datos del titular y los plazos salen de `studio.json > legal` |
 | `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas |
 
@@ -42,14 +45,10 @@ No hay `npm run dev`: no hay paso de build.
 
 Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "Añadir al calendario" y la cuenta atrás usan la zona del invitado.
 
-### Entrada
-
-`"intro": "firma"` en el config de la Editorial (ahora desactivada: la entrada vive en el escaparate; se retomará al revisar las plantillas): los nombres se escriben solos y la foto se abre desde un arco hasta la portada (~4 s). Se salta con un toque, sale una vez por visita (siempre en la vista previa del escaparate) y no sale con las animaciones del sistema desactivadas. Quitando la clave, la web empieza directamente en la portada. Código en `plantillas/editorial/js/intro.js` y `css/intro.css`.
-
 ### Qué hace la web sola según la fecha
 
 - Hasta `rsvp.deadline` (incluido): formulario abierto.
-- Pasada la fecha límite: el formulario se cierra y sale `rsvp.closedText` (Clásica) o `copy.rsvp.closedText` (Editorial).
+- Pasada la fecha límite: el formulario se cierra y sale `rsvp.closedText` (Clásica) o `copy.rsvp.closedText` (el resto).
 - El día de la boda: "Es hoy". Después: sin cuenta atrás ni botón de confirmar.
 - Si la hoja no confirma que ha guardado la respuesta, el invitado ve un error y puede reintentar (nunca un "gracias" falso). Si alguien contesta dos veces con el mismo nombre, vale la última respuesta.
 

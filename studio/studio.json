@@ -11,6 +11,18 @@
     "editorial": {
       "name": "Editorial",
       "url": "../plantillas/editorial/"
+    },
+    "minimal": {
+      "name": "Minimal",
+      "url": "../plantillas/minimal/"
+    },
+    "verbena": {
+      "name": "Verbena",
+      "url": "../plantillas/verbena/"
+    },
+    "postal": {
+      "name": "Postal",
+      "url": "../plantillas/postal/"
     }
   },
   "styles": [
@@ -61,6 +73,42 @@
       ],
       "description": "Foto a pantalla completa, vuestra historia en capítulos y una página que pasa de la tarde a la noche al bajar.",
       "theme": "editorial"
+    },
+    {
+      "id": "minimal",
+      "name": "Minimal",
+      "template": "minimal",
+      "theme": "minimal",
+      "status": "available",
+      "swatch": [
+        "#fafaf7",
+        "#141414"
+      ],
+      "description": "Blanco, negro y mucho aire. Nombres enormes, líneas finas y fotos en blanco y negro. Para parejas de pocas palabras."
+    },
+    {
+      "id": "verbena",
+      "name": "Verbena",
+      "template": "verbena",
+      "theme": "verbena",
+      "status": "available",
+      "swatch": [
+        "#f5d547",
+        "#e2412b"
+      ],
+      "description": "Banderines, pegatinas y colores a tope. Para bodas que son, sobre todo, un fiestón."
+    },
+    {
+      "id": "postal",
+      "name": "Postal",
+      "template": "postal",
+      "theme": "postal",
+      "status": "available",
+      "swatch": [
+        "#e9e3d6",
+        "#6f7d5c"
+      ],
+      "description": "La invitación de papel de siempre, en una sola tarjeta. Lo justo y nada más."
     }
   ],
   "generator": {
