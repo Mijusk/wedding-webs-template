@@ -11,6 +11,7 @@ import { reveal } from "./reveal.js";
 import { fitText } from "./fit.js";
 import { bindCopy } from "./copy.js";
 import { heroShape } from "./hero-shape.js";
+import { intro } from "./intro.js";
 
 // Registro de secciones: añadir galería, alojamiento, etc. es crear un archivo y registrarlo aquí.
 const SECTIONS = { hero, story, details, schedule, gifts, closing };
@@ -44,6 +45,7 @@ function render(config) {
   reveal(main);
   fitText(main);
   bindCopy(main);
+  intro(config, { preview: isPreview });
 }
 
 async function start() {

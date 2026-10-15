@@ -42,6 +42,10 @@ No hay `npm run dev`: no hay paso de build.
 
 Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "Añadir al calendario" y la cuenta atrás usan la zona del invitado.
 
+### Entrada
+
+`"intro": "firma"` en el config de la Editorial: los nombres se escriben solos y la foto se abre desde un arco hasta la portada (~4 s). Se salta con un toque, sale una vez por visita (siempre en la vista previa del escaparate) y no sale con las animaciones del sistema desactivadas. Quitando la clave, la web empieza directamente en la portada. Código en `plantillas/editorial/js/intro.js` y `css/intro.css`.
+
 ### Qué hace la web sola según la fecha
 
 - Hasta `rsvp.deadline` (incluido): formulario abierto.
