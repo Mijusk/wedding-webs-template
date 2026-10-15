@@ -265,6 +265,7 @@
         <button type="button" id="view-desktop" aria-pressed="true">Escritorio</button>
         <button type="button" id="view-mobile" aria-pressed="false">Móvil</button>
       </div>
+      <button class="btn btn--small btn--ghost" type="button" id="stage-sections" aria-expanded="false" aria-controls="sections-panel">Secciones</button>
       <button class="btn btn--small btn--ghost" type="button" id="stage-next">Otro estilo</button>
       <button class="btn btn--small btn--ghost" type="button" id="stage-edit">Editar datos</button>
       <button class="btn btn--small" type="button" id="stage-keep">Me la quedo</button>
@@ -273,6 +274,14 @@
     </div>
   </div>
   <div class="stage__view">
+    <div class="sections-panel" id="sections-panel" role="group" aria-labelledby="sections-title" hidden>
+      <div class="sections-panel__head">
+        <p class="sections-panel__title" id="sections-title">Qué sale en vuestra web</p>
+        <button class="close" type="button" id="sections-close" aria-label="Cerrar secciones">×</button>
+      </div>
+      <ul class="sections-panel__list" id="sections-list"></ul>
+      <p class="sections-panel__note" id="sections-note"></p>
+    </div>
     <div class="stage__frame" id="stage-frame-wrap">
       <iframe id="stage-frame" title="Vista previa de la web"></iframe>
       <div class="switching" id="switching" hidden><p id="switching-msg"></p></div>

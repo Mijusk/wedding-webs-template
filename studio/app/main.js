@@ -1,7 +1,7 @@
 import { $, esc, session } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
-import { setupStage, prepareStage, openStage, closeStage } from "./stage.js";
+import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } from "./stage.js";
 import { setupPricing } from "./pricing.js";
 import { toConfig } from "./wedding.js";
 import { saveLead } from "./leads.js";
@@ -104,6 +104,7 @@ async function start() {
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (!$("#builder").hidden) closeBuilder();
+    else if (!$("#sections-panel").hidden) toggleSectionsPanel(false);
     else if (!$("#stage").hidden) closeStage();
   });
 

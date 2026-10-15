@@ -111,6 +111,42 @@
       "description": "La invitación de papel de siempre, en una sola tarjeta. Lo justo y nada más."
     }
   ],
+  "sections": {
+    "note": "Podéis cambiarlo cuando queráis, también después de contratarla. Entra en todas las tarifas.",
+    "list": {
+      "hero": {
+        "name": "Portada",
+        "fixed": true
+      },
+      "card": {
+        "name": "Invitación",
+        "fixed": true
+      },
+      "details": {
+        "name": "Fecha y lugar",
+        "fixed": true
+      },
+      "story": {
+        "name": "Vuestra historia",
+        "hint": "Cómo os conocisteis, en capítulos"
+      },
+      "gallery": {
+        "name": "Fotos"
+      },
+      "schedule": {
+        "name": "Horario del día",
+        "hint": "Ceremonia, cóctel, cena, fiesta"
+      },
+      "gifts": {
+        "name": "Regalo",
+        "hint": "Número de cuenta, oculto hasta pulsar"
+      },
+      "rsvp": {
+        "name": "Confirmar asistencia",
+        "hint": "Formulario para los invitados"
+      }
+    }
+  },
   "generator": {
     "firstRunMs": 3000,
     "switchMs": 700,
