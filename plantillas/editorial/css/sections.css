@@ -155,3 +155,8 @@
   .schedule__head { position: static; }
   .schedule__item { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding-block: 36px; }
 }
+
+.iban-reveal { margin-top: 22px; }
+.iban-reveal > summary { cursor: pointer; list-style: none; width: fit-content; }
+.iban-reveal > summary::-webkit-details-marker { display: none; }
+.iban-reveal[open] > summary { display: none; }

@@ -1,6 +1,7 @@
 import { esc } from "../format.js";
 
-// El IBAN se muestra en grupos de 4 y se copia sin espacios.
+// El IBAN se muestra en grupos de 4 y se copia sin espacios. Va plegado tras un botón para que
+// no salga a la vista (ni en capturas) de cualquiera que abra la web.
 export function gifts({ gifts, copy = {} }) {
   if (!gifts?.iban) return "";
   const t = copy.gifts || {};
@@ -13,6 +14,8 @@ export function gifts({ gifts, copy = {} }) {
       <div class="gifts__body reveal">
         <h2 class="gifts__title" id="gifts-title">${esc(t.title)}</h2>
         ${t.text ? `<p class="gifts__text">${esc(t.text)}</p>` : ""}
+        <details class="iban-reveal">
+        <summary class="link">${esc(t.reveal || "Ver los datos de la cuenta")}</summary>
         <div class="iban">
           ${gifts.holder ? `<div class="iban__row"><p class="label">${esc(t.holderLabel)}</p><p>${esc(gifts.holder)}</p></div>` : ""}
           <div class="iban__row">
@@ -23,6 +26,7 @@ export function gifts({ gifts, copy = {} }) {
             <span data-label aria-live="polite">${esc(t.copy)}</span>
           </button>
         </div>
+        </details>
       </div>
     </div>
   </section>`;

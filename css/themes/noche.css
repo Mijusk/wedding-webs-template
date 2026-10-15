@@ -1,5 +1,5 @@
 /* Estilo "Noche": fondo azul noche con dorado, para bodas de tarde-noche. Sobrescribe css/theme.css. */
-@import url("https://fonts.googleapis.com/css2?family=Italiana&family=Mulish:wght@400;500;600&display=swap");
+@import url("../../fonts/noche.css");
 :root {
   color-scheme: dark;
   --paper: #141a2a;

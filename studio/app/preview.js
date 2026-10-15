@@ -5,7 +5,7 @@ const configs = new Map(); // iframe -> último config pedido
 const waiting = new Map(); // iframe -> resolve de la promesa de showInFrame
 
 addEventListener("message", (e) => {
-  if (e.data?.type !== "wedding:ready") return;
+  if (e.origin !== location.origin || e.data?.type !== "wedding:ready") return;
   for (const [frame, config] of configs) {
     if (frame.contentWindow !== e.source) continue;
     frame.dataset.ready = "1";
@@ -15,7 +15,7 @@ addEventListener("message", (e) => {
 });
 
 function send(frame, config) {
-  frame.contentWindow?.postMessage({ type: "wedding:config", config }, "*");
+  frame.contentWindow?.postMessage({ type: "wedding:config", config }, location.origin);
 }
 
 // Devuelve una promesa que se cumple cuando la plantilla ya tiene el config.

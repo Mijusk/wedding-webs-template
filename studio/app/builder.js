@@ -4,6 +4,7 @@ import { pickRandom } from "./demo.js";
 // Formulario "Contadnos lo mínimo": recoge los datos de la pareja (ver wedding.js).
 let photos = []; // data URLs ya reducidas
 let opener = null;
+export const SAMPLE_EMAIL = "ana.y.pablo@example.com"; // el del botón de ejemplo: nunca se guarda como contacto
 
 export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
   const sheet = $("#builder"), form = $("#builder-form"), err = $("#b-error");
@@ -26,7 +27,11 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
     $("#b-photos").classList.add("is-busy");
     for (const file of files) {
       try { photos.push(await shrink(file)); }
-      catch { err.textContent = `No se pudo leer «${file.name}». Prueba con una foto JPG o PNG.`; }
+      catch {
+        err.textContent = /\.hei[cf]$/i.test(file.name)
+          ? `«${file.name}» es una foto HEIC del iPhone y este navegador no la abre. Abridla en el móvil y compartidla como JPG, o elegid otra.`
+          : `No se pudo leer «${file.name}». Prueba con una foto JPG o PNG.`;
+      }
     }
     $("#b-photos").classList.remove("is-busy");
     renderPhotos(max);
@@ -39,7 +44,7 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
     f.nameA.value = "Ana"; f.nameB.value = "Pablo";
     f.date.value = d.toISOString().slice(0, 10); f.time.value = "18:30";
     f.venue.value = "Cortijo Los Almendros"; f.city.value = "Ronda, Málaga";
-    f.email.value = "ana.y.pablo@example.com"; f.consent.checked = true;
+    f.email.value = SAMPLE_EMAIL; f.consent.checked = true;
     err.textContent = "";
     photos = [];
     for (const url of pickRandom(demoPhotos, max)) {
@@ -55,8 +60,11 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
       ["date", "b-date", "Falta la fecha de la boda."], ["time", "b-time", "Falta la hora de la ceremonia."],
       ["venue", "b-venue", "Falta el lugar de la boda."]].find(([k]) => !String(d[k] || "").trim());
     if (missing) { err.textContent = missing[2]; return $(`#${missing[1]}`).focus(); }
+    if (d.date < today()) { err.textContent = "La fecha de la boda ya ha pasado. Revisadla."; return $("#b-date").focus(); }
+    if (d.date > inYears(4)) { err.textContent = "Revisad la fecha: ¿seguro que es tan lejos?"; return $("#b-date").focus(); }
     if (!/^\S+@\S+\.\S+$/.test(d.email || "")) { err.textContent = "Revisad el email: os enviamos ahí el enlace de vuestra web."; return $("#b-email").focus(); }
     if (!d.consent) { err.textContent = "Marcad la casilla para que podamos escribiros."; return $("#b-consent").focus(); }
+    if (d.website) return closeBuilder(); // campo trampa: lo rellena un bot, no una pareja
     err.textContent = "";
     const style = studio.styles.find((s) => s.id === d.style) || available[0];
     closeBuilder();
@@ -73,12 +81,16 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
   sheet.addEventListener("click", (e) => { if (e.target === sheet) closeBuilder(); });
 }
 
+const today = () => new Date().toLocaleDateString("sv-SE"); // AAAA-MM-DD en hora local
+const inYears = (n) => { const d = new Date(); d.setFullYear(d.getFullYear() + n); return d.toLocaleDateString("sv-SE"); };
+
 export function openBuilder(styleId) {
   opener = document.activeElement;
   const form = $("#builder-form");
   const radio = styleId && form.querySelector(`input[name="style"][value="${CSS.escape(styleId)}"]:not(:disabled)`);
   if (radio) radio.checked = true;
   $("#nudge").hidden = true;
+  $("#b-date").min = today();
   $("#builder").hidden = false;
   syncScrollLock();
   $("#b-name-a").focus();

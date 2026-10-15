@@ -1,11 +1,12 @@
 import { saveRsvp } from "./storage.js";
-import { esc } from "./format.js";
+import { esc, dayMonth, weddingPhase, rsvpClosed } from "./format.js";
 
 export function mountRsvp(root, config) {
   const { rsvp = {}, event } = config;
-  const deadline = rsvp.deadline
-    ? new Date(rsvp.deadline).toLocaleDateString("es-ES", { day: "numeric", month: "long" })
-    : null;
+  // Después de la boda no hay nada que confirmar.
+  if (weddingPhase(event) === "after") { root.innerHTML = ""; return; }
+  const closed = rsvpClosed(config);
+  const deadline = rsvp.deadline ? dayMonth(rsvp.deadline) : null;
 
   root.innerHTML = `
     <button class="rsvp-fab" id="rsvp-open" aria-expanded="false" aria-controls="rsvp-panel">${esc(rsvp.buttonLabel || "Confirmar asistencia")}</button>
@@ -13,8 +14,11 @@ export function mountRsvp(root, config) {
       <button class="close" id="rsvp-close" aria-label="Cerrar">×</button>
       <p class="eyebrow">RSVP</p>
       <h2 id="rsvp-title">¿Vienes?</h2>
-      ${deadline ? `<p class="note">Confírmanos antes del ${esc(deadline)}.</p>` : ""}
-      <form id="rsvp-form" novalidate>
+      ${closed
+        ? `<p class="note">${esc(rsvp.closedText || "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.")}</p>`
+        : deadline ? `<p class="note">Confírmanos antes del ${esc(deadline)}.</p>` : ""}
+      <form id="rsvp-form" novalidate${closed ? " hidden" : ""}>
+        <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <div class="field">
           <label for="rsvp-name">Nombre y apellidos</label>
           <input type="text" id="rsvp-name" name="name" autocomplete="name" required>
@@ -52,6 +56,7 @@ export function mountRsvp(root, config) {
     const data = Object.fromEntries(new FormData(form));
     const name = (data.name || "").trim();
     const err = $("rsvp-error");
+    if (data.website) { form.hidden = true; return; } // campo trampa: un bot
     if (name.length < 2) { err.textContent = "Escribe tu nombre para saber quién eres."; return $("rsvp-name").focus(); }
     if (!data.attending) { err.textContent = "Marca si vienes o no."; return; }
     err.textContent = "";
@@ -67,7 +72,7 @@ export function mountRsvp(root, config) {
         : `<h2>Te echaremos de menos</h2><p>Gracias por avisarnos, ${esc(name.split(" ")[0])}.</p>`;
       thanks.hidden = false;
     } catch {
-      err.textContent = "No se pudo enviar. Revisa tu conexión y vuelve a intentarlo.";
+      err.textContent = "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.";
       btn.disabled = false; btn.textContent = "Enviar respuesta";
     }
   });

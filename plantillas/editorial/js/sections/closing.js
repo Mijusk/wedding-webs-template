@@ -1,10 +1,11 @@
-import { dateParts, esc, fill } from "../format.js";
+import { dateParts, esc, fill, rsvpClosed } from "../format.js";
 
 // Cierre de noche: la invitación a confirmar y los nombres firmando la página a todo el ancho.
-export function closing({ event, venue = {}, rsvp = {}, sections, locale, copy = {} }) {
+export function closing(config) {
+  const { event, venue = {}, rsvp = {}, sections, locale, copy = {} } = config;
   const [a, b] = event.couple;
   const t = copy.closing || {};
-  const hasRsvp = sections.includes("rsvp");
+  const hasRsvp = sections.includes("rsvp") && !rsvpClosed(config);
   const deadline = rsvp.deadline ? dateParts(rsvp.deadline, locale).dayMonth : "";
   return `
   <section class="closing" data-tone="night" aria-labelledby="closing-title">

@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- artifact:start -->
 <title>WeddingWebs</title>
+<meta name="description" content="Vuestra web de boda con confirmación de asistencia. Probadla con vuestros nombres y fotos antes de pagar.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="WeddingWebs · Vuestra web de boda">
+<meta property="og:description" content="Probadla con vuestros nombres, la fecha y tres fotos, y vedla funcionando al momento.">
+<meta property="og:locale" content="es_ES">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="studio.css">
 </head>
 <body>
@@ -77,6 +80,7 @@
         <div class="chosen" id="chosen" hidden></div>
       </div>
       <form class="contact__form" id="contact-form" novalidate>
+        <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <div class="field">
           <label for="c-name">Vuestros nombres</label>
           <input type="text" id="c-name" name="name" autocomplete="name" required>
@@ -104,6 +108,7 @@
           <textarea id="c-message" name="message" rows="3"></textarea>
         </div>
         <p class="error" id="c-error" role="alert"></p>
+        <p class="fineprint">Al reservar no se cobra nada: os escribimos para cerrar detalles y pago. Ver <a href="legal.html#condiciones" target="_blank">condiciones</a>.</p>
         <button class="btn" type="submit" id="c-submit">Enviar reserva</button>
       </form>
       <div class="contact__thanks" id="contact-thanks" hidden></div>
@@ -113,6 +118,11 @@
 
 <footer class="foot wrap">
   <p><span id="foot-brand">WeddingWebs</span> · Webs para bodas, aniversarios y otras celebraciones.</p>
+  <nav class="foot__legal" aria-label="Información legal">
+    <a href="legal.html#aviso-legal">Aviso legal</a>
+    <a href="legal.html#privacidad">Privacidad</a>
+    <a href="legal.html#condiciones">Condiciones de contratación</a>
+  </nav>
 </footer>
 
 <!-- Aviso tras hacer scroll -->
@@ -133,6 +143,7 @@
     <h2 id="builder-title">Contadnos lo mínimo</h2>
     <button class="btn btn--small btn--ghost sample-fill" type="button" id="b-sample">Rellenar con un ejemplo</button>
     <form id="builder-form" novalidate>
+      <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
       <div class="field-row">
         <div class="field">
           <label for="b-name-a">Nombre</label>
@@ -183,7 +194,7 @@
       </div>
       <label class="consent" for="b-consent">
         <input type="checkbox" id="b-consent" name="consent" value="si" required>
-        <span>Acepto que me escribáis sobre mi web. Solo usaremos este email para eso, y podéis pedirnos que lo borremos cuando queráis.</span>
+        <span>Acepto que me escribáis sobre mi web. Solo usaremos este email para eso, y podéis pedirnos que lo borremos cuando queráis (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
       </label>
       <p class="error" id="b-error" role="alert"></p>
       <button class="btn btn--wide" type="submit">Crear nuestra web</button>

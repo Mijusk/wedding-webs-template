@@ -6,6 +6,7 @@ const arrow = `<span class="arrow" aria-hidden="true">→</span>`;
 
 function countdown(iso, t) {
   const days = daysUntil(iso);
+  if (days < 0) return ""; // la boda ya pasó
   const text = days === 0 ? t.countdownToday : days === 1 ? t.countdownOne : t.countdown;
   return text ? `<p class="details__countdown">${fill(text, { days })}</p>` : "";
 }

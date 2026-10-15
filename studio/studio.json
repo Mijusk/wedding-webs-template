@@ -71,7 +71,7 @@
       "Leyendo vuestros datos…",
       "Colocando vuestras fotos…",
       "Eligiendo tipografías…",
-      "Generando vuestra súper web…"
+      "Preparando vuestra web…"
     ]
   },
   "pricing": {
@@ -81,8 +81,8 @@
         "id": "tal-cual",
         "name": "Tal cual",
         "price": [
-          60,
-          80
+          79,
+          79
         ],
         "summary": "Os quedáis con el estilo que habéis probado, con vuestros datos y fotos.",
         "includes": [
@@ -95,8 +95,8 @@
         "id": "con-cambios",
         "name": "Con cambios",
         "price": [
-          120,
-          150
+          139,
+          139
         ],
         "summary": "Partimos de una plantilla y la ajustamos a vuestro gusto.",
         "includes": [
@@ -109,8 +109,8 @@
         "id": "a-medida",
         "name": "A medida",
         "price": [
-          200,
-          200
+          249,
+          null
         ],
         "summary": "Un diseño propio, hecho desde cero para vuestra boda.",
         "includes": [
@@ -119,7 +119,8 @@
           "Hasta 3 rondas de revisiones"
         ]
       }
-    ]
+    ],
+    "note": "Precio final, pago único: sin cuotas ni permanencia."
   },
   "contact": {
     "endpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"
@@ -138,5 +139,15 @@
       "foto-09.jpg",
       "foto-10.jpg"
     ]
+  },
+  "legal": {
+    "_nota": "Datos del titular para el aviso legal (obligatorios por la LSSI). Mientras estén vacíos, legal.html muestra 'pendiente'.",
+    "owner": "",
+    "nif": "",
+    "address": "",
+    "email": "",
+    "deliveryDays": 3,
+    "onlineMonths": 12,
+    "guestDataMonths": 6
   }
 }

@@ -9,12 +9,32 @@ const addMinutes = (hhmm, mins) => {
   return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 };
 
-// Fecha límite del RSVP: 6 semanas antes, si todavía no ha pasado.
+// Fecha límite del RSVP: 6 semanas antes; si eso ya pasó, una semana antes; si tampoco
+// da tiempo, sin fecha límite.
 function rsvpDeadline(date) {
-  const d = new Date(`${date}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 42);
-  return d > new Date() ? d.toISOString().slice(0, 10) : "";
+  const before = (days) => {
+    const d = new Date(`${date}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - days);
+    return d;
+  };
+  const soon = new Date(Date.now() + 2 * 864e5);
+  const d = [before(42), before(7)].find((x) => x > soon);
+  return d ? d.toISOString().slice(0, 10) : "";
 }
+
+// Desfase horario del lugar en esa fecha ("+02:00" en verano en España). Sin él, "Añadir al
+// calendario" y la cuenta atrás usarían la zona del invitado: a quien vive en México la boda
+// de las 18:00 le saldría a las 18:00 de México.
+export function utcOffset(date, time, timeZone = "Europe/Madrid") {
+  const guess = new Date(`${date}T${time}:00Z`);
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+  }).formatToParts(guess).map((x) => [x.type, x.value]));
+  const mins = Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - guess.getTime()) / 6e4);
+  const a = Math.abs(mins), pad = (n) => String(n).padStart(2, "0");
+  return `${mins < 0 ? "-" : "+"}${pad(Math.floor(a / 60))}:${pad(a % 60)}`;
+}
+const withZone = (local, tz) => `${local}${utcOffset(local.slice(0, 10), local.slice(11, 16), tz)}`;
 
 // Fin aproximado (para "Añadir al calendario"): 9 horas después, aunque pase de medianoche.
 function endOf(date, time) {
@@ -35,12 +55,14 @@ export function toConfig(base, w, style) {
 
   const [a, b] = w.couple;
   const photos = w.photos;
-  const start = `${w.date}T${w.time}:00`;
+  const canarias = /canari|tenerife|lanzarote|fuerteventura|la palma|gomera|el hierro|las palmas/i.test(`${w.venue} ${w.city}`);
+  const tz = canarias ? "Atlantic/Canary" : base.timeZone || "Europe/Madrid";
+  const start = withZone(`${w.date}T${w.time}:00`, tz);
   config.event = {
     ...base.event,
     couple: [a, b],
     date: start,
-    end: endOf(w.date, w.time),
+    end: withZone(endOf(w.date, w.time), tz),
     photo: photos[0] || base.event.photo,
     photoAlt: `${a} y ${b}`,
   };

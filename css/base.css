@@ -58,3 +58,4 @@ a { color: var(--accent); }
   .gallery__grid { gap: 10px; }
   .schedule li { grid-template-columns: 64px 1fr; gap: 16px; }
 }
+.countdown--today { font-family: var(--font-display); font-size: 28px; }

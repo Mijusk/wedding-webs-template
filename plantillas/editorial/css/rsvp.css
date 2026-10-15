@@ -67,3 +67,6 @@
   .rsvp-dialog[open] { animation-name: sheet-in; }
   @keyframes sheet-in { from { transform: translateY(100%); } }
 }
+
+/* Campo trampa para bots: invisible para personas y lectores de pantalla */
+.hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

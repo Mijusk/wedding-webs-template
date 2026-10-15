@@ -93,7 +93,8 @@
       "holderLabel": "Titular",
       "ibanLabel": "IBAN",
       "copy": "Copiar IBAN",
-      "copied": "IBAN copiado"
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
     },
     "closing": {
       "eyebrow": "{date} · {city}",
@@ -114,7 +115,8 @@
       "sending": "Enviando…",
       "errorName": "Escribe tu nombre para saber quién eres.",
       "errorAttending": "Marca si vienes o no.",
-      "errorNetwork": "No se pudo enviar. Revisa tu conexión y vuelve a intentarlo.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
       "thanksYesTitle": "¡Gracias, {name}!",
       "thanksYesText": "Te esperamos.",
       "thanksSong": "Tomamos nota de «{song}».",

@@ -29,12 +29,25 @@ No hay `npm run dev`: no hay paso de build.
 | `plantillas/editorial/` | Segunda plantilla (portada a pantalla completa, historia en capítulos, la página atardece). Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
+| `fonts/`, `plantillas/editorial/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
+| `studio/legal.html` | Aviso legal, privacidad y condiciones. Los datos del titular y los plazos salen de `studio.json > legal` |
+| `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas |
 
 ## Nueva boda
 
 1. Rama nueva desde `main`.
 2. Edita `config.json`, `css/theme.css` y cambia la foto en `assets/`.
 3. Para guardar respuestas en Sheets: pega `integrations/google-sheets.gs` en la hoja (Extensiones > Apps Script), despliega como aplicación web con acceso "Cualquiera" y pon la URL en `rsvp.endpoint`.
+4. Cambia a mano las etiquetas `og:` de `index.html` (título, texto y la URL completa de la foto): son la tarjeta que sale al compartir el enlace por WhatsApp, que no ejecuta JavaScript.
+
+Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "Añadir al calendario" y la cuenta atrás usan la zona del invitado.
+
+### Qué hace la web sola según la fecha
+
+- Hasta `rsvp.deadline` (incluido): formulario abierto.
+- Pasada la fecha límite: el formulario se cierra y sale `rsvp.closedText` (Clásica) o `copy.rsvp.closedText` (Editorial).
+- El día de la boda: "Es hoy". Después: sin cuenta atrás ni botón de confirmar.
+- Si la hoja no confirma que ha guardado la respuesta, el invitado ve un error y puede reintentar (nunca un "gracias" falso). Si alguien contesta dos veces con el mismo nombre, vale la última respuesta.
 
 ## Añadir una sección
 
@@ -46,6 +59,7 @@ La fecha y la hora se muestran tal cual están en el config (hora local del luga
 
 `http://localhost:8000/studio/` es la web comercial: estilos con ejemplos en vivo, un formulario mínimo que genera la web de la pareja con su nombre, fecha, lugar y fotos, tarifas y formulario de reserva.
 
+- Tras cambiar `integrations/leads.gs` o `google-sheets.gs`, vuelve a desplegar en Apps Script: Implementar > Gestionar implementaciones > editar > Versión nueva (la URL no cambia).
 - `studio/studio.json` manda: marca, estilos del selector (`status: "available"` o `"soon"`), tiempos de la carga, tarifas y `contact.endpoint` (Apps Script para guardar reservas; vacío = simulado en el navegador).
 - La plantilla se pinta en un iframe con `index.html#preview`: en ese modo no lee `config.json`, lo recibe del escaparate por `postMessage`. Cambiar de estilo es reenviar el config con otro `theme`, sin recargar.
 - Las fotos se reducen en el navegador y no se suben a ningún sitio.

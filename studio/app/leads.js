@@ -1,21 +1,19 @@
-// Guardado de reservas. Igual que el RSVP de la plantilla (js/storage.js): si
-// studio.json tiene contact.endpoint (un Apps Script), se envía ahí; si no, se simula.
+import { postToSheet } from "../../js/storage.js";
+
+// Guardado de contactos (pruebas del generador y reservas). Si studio.json tiene
+// contact.endpoint (un Apps Script, ver integrations/leads.gs), se envía ahí y se espera
+// a que la hoja confirme; si no, se simula en el navegador.
 const KEY = "studio-leads-demo";
 
 export async function saveLead(lead, contactConfig = {}) {
   const payload = { ...lead, sentAt: new Date().toISOString() };
 
   if (contactConfig.endpoint) {
-    await fetch(contactConfig.endpoint, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-    });
+    await postToSheet(contactConfig.endpoint, payload);
     return { payload, simulated: false };
   }
 
-  console.info("[Reserva simulada] guardada:", payload);
+  console.info("[Contacto simulado] guardado:", payload);
   try {
     const all = JSON.parse(localStorage.getItem(KEY) || "[]");
     all.push(payload);

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Información legal · WeddingWebs</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="studio.css">
+<style>
+  .legal { max-width: 760px; padding-block: 48px 80px; display: grid; gap: 40px; }
+  .legal section { display: grid; gap: 12px; scroll-margin-top: 24px; }
+  .legal h1 { font-size: clamp(34px, 5vw, 48px); }
+  .legal h2 { font-size: 28px; }
+  .legal ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  .legal p, .legal li { color: var(--muted); }
+  .pending { background: var(--accent-soft); color: var(--accent); padding: 0 4px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top__inner">
+    <a class="brand" href="./" data-brand>WeddingWebs</a>
+  </div>
+</header>
+
+<main class="wrap legal">
+  <h1>Información legal</h1>
+
+  <section id="aviso-legal">
+    <h2>Aviso legal</h2>
+    <p>En cumplimiento del artículo 10 de la Ley 34/2002 de Servicios de la Sociedad de la Información (LSSI), estos son los datos del titular de esta web:</p>
+    <ul>
+      <li>Titular: <span data-field="owner"></span></li>
+      <li>NIF: <span data-field="nif"></span></li>
+      <li>Domicilio: <span data-field="address"></span></li>
+      <li>Email: <span data-field="email"></span></li>
+    </ul>
+    <p>Los diseños, textos y código de <span data-brand>WeddingWebs</span> son del titular. Las fotos y textos que suben las parejas siguen siendo suyos.</p>
+  </section>
+
+  <section id="privacidad">
+    <h2>Privacidad</h2>
+    <p><strong>Quién trata vuestros datos.</strong> El titular indicado arriba. Podéis escribir a <span data-field="email"></span> para cualquier cosa sobre vuestros datos.</p>
+    <p><strong>Qué datos y para qué.</strong> Cuando probáis el generador o hacéis una reserva guardamos vuestros nombres, email, teléfono si lo dais, fecha y lugar de la boda y el estilo elegido, para escribiros sobre vuestra web y, si la contratáis, para prepararla. Las fotos de la prueba no salen de vuestro navegador.</p>
+    <p><strong>Base legal.</strong> Vuestro consentimiento al marcar la casilla del formulario y, si contratáis, el propio contrato.</p>
+    <p><strong>Cuánto tiempo.</strong> Los contactos que no contratan se borran a los 12 meses. Los de clientes se guardan mientras dure el servicio y después el tiempo que exija la ley fiscal.</p>
+    <p><strong>Quién más los ve.</strong> Nadie se los vende ni se los cede. Se guardan en Google Workspace (Google Sheets y Gmail), que actúa como encargado del tratamiento con las garantías del Marco de Privacidad de Datos UE-EE. UU.</p>
+    <p><strong>Datos de los invitados.</strong> Las respuestas de los invitados (nombre, asistencia, canción y lo que la pareja pregunte) van a una hoja de la pareja, que decide sobre ellas; nosotros solo las alojamos para la pareja y se borran a los <span data-field="guestDataMonths"></span> meses de la boda.</p>
+    <p><strong>Vuestros derechos.</strong> Podéis pedir ver, corregir o borrar vuestros datos, oponeros o retirar el consentimiento escribiendo al email de arriba. Si creéis que no lo hacemos bien, podéis reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
+    <p><strong>Cookies.</strong> Esta web no usa cookies de publicidad ni de analítica. Solo guarda en vuestro navegador si ya habéis visto el aviso de prueba, para no repetirlo. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
+  </section>
+
+  <section id="condiciones">
+    <h2>Condiciones de contratación</h2>
+    <ul>
+      <li><strong>Cómo se contrata.</strong> Reserváis desde el formulario sin pagar nada. Os escribimos para confirmar datos, tarifa y fecha de entrega, y la reserva queda cerrada cuando pagáis.</li>
+      <li><strong>Precio.</strong> El que aparece en la tarifa elegida, precio final y pago único. Pago por transferencia o Bizum.</li>
+      <li><strong>Entrega.</strong> En <span data-field="deliveryDays"></span> días laborables desde que tenemos vuestros datos y fotos en las tarifas con plantilla; en la tarifa a medida, la fecha que acordemos.</li>
+      <li><strong>Cambios.</strong> Corrección de erratas y datos siempre incluida. Cambios de diseño según la tarifa: ninguno en Tal cual, los acordados en Con cambios y hasta 3 rondas en A medida.</li>
+      <li><strong>Cuánto tiempo sigue online.</strong> Hasta <span data-field="onlineMonths"></span> meses después de la boda.</li>
+      <li><strong>Desistimiento.</strong> Tenéis 14 días naturales desde el pago para desistir sin dar motivos y os devolvemos el importe. Si nos pedís expresamente empezar antes de que acabe ese plazo y la web ya está entregada, se pierde ese derecho (artículo 103 del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios).</li>
+      <li><strong>Lo que ponéis vosotros.</strong> Necesitamos que las fotos y textos sean vuestros o tengáis permiso para usarlos.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p><a href="./">Volver a <span data-brand>WeddingWebs</span></a></p>
+</footer>
+
+<script type="module">
+  // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como pendiente.
+  const studio = await fetch("studio.json", { cache: "no-store" }).then((r) => r.json());
+  const legal = studio.legal || {};
+  document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = studio.brand.name; });
+  document.querySelectorAll("[data-field]").forEach((el) => {
+    const value = legal[el.dataset.field];
+    if (value === "" || value == null) { el.textContent = "pendiente"; el.className = "pending"; }
+    else el.textContent = value;
+  });
+</script>
+</body>
+</html>

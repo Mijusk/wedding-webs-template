@@ -11,11 +11,14 @@ export const session = {
   set(k, v) { try { sessionStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
 };
 
+// [79, 79] → "79 €" · [60, 80] → "60 – 80 €" · [249, null] → "desde 249 €"
 export const priceLabel = ([min, max], currency) =>
-  min === max ? `${min} ${currency}` : `${min} – ${max} ${currency}`;
+  max == null ? `desde ${min} ${currency}` : min === max ? `${min} ${currency}` : `${min} – ${max} ${currency}`;
 
-// Bloquea el scroll de la página mientras haya una capa abierta.
+// Mientras haya una capa abierta: sin scroll detrás, y la página de fondo inerte para que
+// el teclado y los lectores de pantalla se queden dentro de la capa.
 export function syncScrollLock() {
   const open = ["#builder", "#loading", "#stage"].some((id) => !$(id).hidden);
   document.body.classList.toggle("locked", open);
+  document.querySelectorAll("body > header, body > main, body > footer, #nudge").forEach((el) => { el.inert = open; });
 }

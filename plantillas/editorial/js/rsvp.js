@@ -1,5 +1,5 @@
 import { saveRsvp } from "./storage.js";
-import { dateParts, esc, fill } from "./format.js";
+import { dateParts, esc, fill, weddingPhase, rsvpClosed } from "./format.js";
 
 // Formulario de confirmación en un <dialog>. Lo abre cualquier [data-rsvp-open]:
 // el botón flotante (visible entre la portada y el cierre) y el del cierre.
@@ -9,7 +9,11 @@ let pillObserver = null;
 export function mountRsvp(root, config) {
   const { rsvp = {}, locale, copy = {} } = config;
   const t = copy.rsvp || {};
+  // Después de la boda no hay nada que confirmar.
+  if (weddingPhase(config.event) === "after") { root.innerHTML = ""; return; }
+  const closed = rsvpClosed(config);
   const deadline = rsvp.deadline ? dateParts(rsvp.deadline, locale).dayMonth : "";
+  const closedText = t.closedText || "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.";
 
   root.innerHTML = `
     <button class="button rsvp-pill" type="button" data-rsvp-open aria-haspopup="dialog" tabindex="-1" aria-hidden="true">${esc(rsvp.buttonLabel)}</button>
@@ -18,8 +22,10 @@ export function mountRsvp(root, config) {
         <button class="rsvp-close" type="button" id="rsvp-close" aria-label="${esc(t.close)}">×</button>
         <p class="eyebrow">${esc(t.eyebrow)}</p>
         <h2 class="rsvp-title" id="rsvp-title">${esc(t.title)}</h2>
-        ${deadline && t.deadlineNote ? `<p class="rsvp-note">${fill(t.deadlineNote, { deadline })}</p>` : ""}
-        <form class="rsvp-form" id="rsvp-form" novalidate>
+        ${closed ? `<p class="rsvp-note">${esc(closedText)}</p>`
+          : deadline && t.deadlineNote ? `<p class="rsvp-note">${fill(t.deadlineNote, { deadline })}</p>` : ""}
+        <form class="rsvp-form" id="rsvp-form" novalidate${closed ? " hidden" : ""}>
+          <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
           <div class="field">
             <label for="rsvp-name">${esc(t.name)}</label>
             <input type="text" id="rsvp-name" name="name" autocomplete="name" required>
@@ -69,6 +75,7 @@ export function mountRsvp(root, config) {
     const name = (data.name || "").trim();
     const song = (data.song || "").trim();
     const err = $("rsvp-error");
+    if (data.website) { form.hidden = true; return; } // campo trampa: un bot
     if (name.length < 2) { err.textContent = t.errorName; return $("rsvp-name").focus(); }
     if (!data.attending) { err.textContent = t.errorAttending; return; }
     err.textContent = "";

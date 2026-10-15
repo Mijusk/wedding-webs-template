@@ -1,6 +1,6 @@
 import { $, esc, session } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
-import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.js";
+import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
 import { setupStage, prepareStage, openStage, closeStage } from "./stage.js";
 import { setupPricing } from "./pricing.js";
 import { toConfig } from "./wedding.js";
@@ -82,8 +82,13 @@ async function start() {
   setupBuilder({
     studio, demoPhotos,
     onGenerate: async (wedding, style) => {
-      // Cada prueba es un contacto: se guarda en cuanto se genera (sin fotos).
-      saveLead(leadFromTrial(wedding, style), studio.contact).catch(() => {});
+      // Cada prueba es un contacto: se guarda en cuanto se genera (sin fotos). Una vez por
+      // email y visita, aunque editen los datos, y nunca el email del botón de ejemplo.
+      const key = `studio-lead:${wedding.email.toLowerCase()}`;
+      if (wedding.email !== SAMPLE_EMAIL && !session.get(key)) {
+        session.set(key, "1");
+        saveLead(leadFromTrial(wedding, style), studio.contact).catch(() => session.set(key, ""));
+      }
       setupPricing.prefill(wedding);
       const ready = prepareStage(wedding, style);
       await Promise.all([ready, playLoading(wedding, studio.generator)]);

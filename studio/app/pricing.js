@@ -13,6 +13,7 @@ export function setupPricing({ studio, templateUrl }) {
       <ul>${t.includes.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
       <button class="btn btn--ghost" type="button" data-pick="${esc(t.id)}">Elegir ${esc(t.name)}</button>
     </article>`).join("");
+  if (studio.pricing.note) $("#tiers").insertAdjacentHTML("afterend", `<p class="fineprint tiers__note">${esc(studio.pricing.note)}</p>`);
 
   const tierSel = $("#c-tier"), styleSel = $("#c-style");
   tierSel.innerHTML = tiers.map((t) => `<option value="${esc(t.id)}">${esc(t.name)} · ${esc(priceLabel(t.price, currency))}</option>`).join("");
@@ -41,6 +42,8 @@ export function setupPricing({ studio, templateUrl }) {
     if ((d.name || "").trim().length < 2) { err.textContent = "Escribid vuestros nombres."; return $("#c-name").focus(); }
     if (!/^\S+@\S+\.\S+$/.test(d.email || "")) { err.textContent = "Revisad el email: lo necesitamos para escribiros."; return $("#c-email").focus(); }
     err.textContent = "";
+    if (d.website) { form.hidden = true; return; } // campo trampa: un bot
+    delete d.website;
     const btn = $("#c-submit");
     btn.disabled = true; btn.textContent = "Enviando…";
     try {
@@ -53,7 +56,7 @@ export function setupPricing({ studio, templateUrl }) {
         ${simulated ? '<p class="note">Esto es una demo: la reserva se ha guardado solo en este navegador y no se ha cobrado nada.</p>' : ""}`;
       $("#contact-thanks").hidden = false;
     } catch {
-      err.textContent = "No se pudo enviar. Revisad la conexión y volved a intentarlo.";
+      err.textContent = "No se ha podido enviar la reserva. Revisad la conexión y volved a intentarlo; si sigue fallando, escribidnos y lo vemos.";
       btn.disabled = false; btn.textContent = "Enviar reserva";
     }
   });
