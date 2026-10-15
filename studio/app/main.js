@@ -6,6 +6,7 @@ import { setupPricing } from "./pricing.js";
 import { toConfig } from "./wedding.js";
 import { saveLead } from "./leads.js";
 import { findDemoPhotos, applyDemoPhotos } from "./demo.js";
+import { startEntrance, revealOnScroll } from "./entrance.js";
 
 async function getJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -31,6 +32,7 @@ async function start() {
   $("#brand-name").textContent = studio.brand.name;
   $("#foot-brand").textContent = studio.brand.name;
   $("#brand-tagline").textContent = studio.brand.tagline;
+  startEntrance();
 
   // Móvil de la portada
   fitScaled($(".phone .scaled"));
@@ -71,6 +73,8 @@ async function start() {
     prepareStage(null, styles.find((s) => s.id === t.dataset.demo));
     openStage();
   });
+
+  revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact, .foot");
 
   // Generador
   setupPricing({ studio, templateUrl: (style) => new URL(urlOf(style), location.href) });
@@ -135,5 +139,6 @@ function setupNudge() {
 }
 
 start().catch((e) => {
+  startEntrance();
   $("#styles-grid").innerHTML = `<p class="error">No se pudo cargar el escaparate: ${esc(e.message)}</p>`;
 });

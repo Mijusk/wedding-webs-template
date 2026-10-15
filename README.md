@@ -44,7 +44,7 @@ Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "A�
 
 ### Entrada
 
-`"intro": "firma"` en el config de la Editorial: los nombres se escriben solos y la foto se abre desde un arco hasta la portada (~4 s). Se salta con un toque, sale una vez por visita (siempre en la vista previa del escaparate) y no sale con las animaciones del sistema desactivadas. Quitando la clave, la web empieza directamente en la portada. Código en `plantillas/editorial/js/intro.js` y `css/intro.css`.
+`"intro": "firma"` en el config de la Editorial (ahora desactivada: la entrada vive en el escaparate; se retomará al revisar las plantillas): los nombres se escriben solos y la foto se abre desde un arco hasta la portada (~4 s). Se salta con un toque, sale una vez por visita (siempre en la vista previa del escaparate) y no sale con las animaciones del sistema desactivadas. Quitando la clave, la web empieza directamente en la portada. Código en `plantillas/editorial/js/intro.js` y `css/intro.css`.
 
 ### Qué hace la web sola según la fecha
 
@@ -63,6 +63,7 @@ La fecha y la hora se muestran tal cual están en el config (hora local del luga
 
 `http://localhost:8000/studio/` es la web comercial: estilos con ejemplos en vivo, un formulario mínimo que genera la web de la pareja con su nombre, fecha, lugar y fotos, tarifas y formulario de reserva.
 
+- Entrada: la primera vez en cada visita sale una cortina oscura con el monograma de las dos W dibujándose y un contador; la cortina sube y la portada aparece por capas (titular palabra a palabra, fotos que se abren alrededor de la web de ejemplo). Las fotos se mueven un poco con el ratón y al bajar, y cada bloque aparece al llegar a él. Código en `studio/app/entrance.js` y `studio/entrance.css`; sin animaciones si el sistema pide reducir movimiento.
 - Tras cambiar `integrations/leads.gs` o `google-sheets.gs`, vuelve a desplegar en Apps Script: Implementar > Gestionar implementaciones > editar > Versión nueva (la URL no cambia).
 - `studio/studio.json` manda: marca, estilos del selector (`status: "available"` o `"soon"`), tiempos de la carga, tarifas y `contact.endpoint` (Apps Script para guardar reservas; vacío = simulado en el navegador).
 - La plantilla se pinta en un iframe con `index.html#preview`: en ese modo no lee `config.json`, lo recibe del escaparate por `postMessage`. Cambiar de estilo es reenviar el config con otro `theme`, sin recargar.

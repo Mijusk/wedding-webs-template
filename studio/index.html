@@ -13,8 +13,35 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="studio.css">
+<link rel="stylesheet" href="entrance.css">
+<script>
+  // Antes de pintar nada: decide si hay entrada (primera visita y sin "reducir movimiento").
+  try {
+    const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const seen = sessionStorage.getItem("ww-entrance");
+    document.documentElement.classList.add(calm ? "no-motion" : seen ? "is-entering" : "is-loading");
+  } catch { document.documentElement.classList.add("is-entering"); }
+  // Por si el JavaScript de la página fallara: nunca dejar la cortina puesta.
+  setTimeout(() => {
+    const el = document.documentElement;
+    if (!el.classList.contains("is-ready")) { el.classList.add("is-ready"); document.getElementById("preloader")?.remove(); }
+  }, 6000);
+</script>
 </head>
 <body>
+<!-- Entrada: cortina oscura con el monograma de las dos W que se dibuja, un contador y la
+     cortina que sube. Una vez por visita (studio/app/entrance.js). -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader__center">
+    <svg class="monogram" viewBox="0 0 124 60" role="presentation">
+      <path class="monogram__w1" pathLength="1" d="M4 8 L22 52 L40 16 L58 52 L76 8"/>
+      <path class="monogram__w2" pathLength="1" d="M48 8 L66 52 L84 16 L102 52 L120 8"/>
+    </svg>
+    <p class="preloader__brand" data-brand-letters>WeddingWebs</p>
+  </div>
+  <p class="preloader__note">Webs de boda</p>
+  <p class="preloader__count"><span id="preloader-count">000</span></p>
+</div>
 <header class="top">
   <div class="wrap top__inner">
     <a class="brand" href="#inicio" id="brand-name">WeddingWebs</a>
@@ -27,22 +54,36 @@
 </header>
 
 <main id="inicio">
-  <section class="intro wrap">
-    <div class="intro__text">
-      <p class="eyebrow">Webs de boda con confirmación de asistencia</p>
-      <h1 id="brand-tagline">Vuestra web de boda, lista antes que las invitaciones.</h1>
-      <p class="lead">Elegid un estilo, poned vuestros nombres, la fecha y tres fotos, y vedla funcionando al momento. Los invitados confirman desde la web y las respuestas os llegan a una hoja de Google.</p>
-      <div class="intro__cta">
-        <button class="btn" type="button" data-open-builder>Probar con vuestra boda</button>
+  <section class="hero" aria-labelledby="brand-tagline">
+    <div class="wrap hero__head">
+      <p class="eyebrow hero__eyebrow" data-rise>Webs de boda con confirmación de asistencia</p>
+      <h1 class="hero__title" id="brand-tagline" data-words>Vuestra web de boda, lista antes que las invitaciones.</h1>
+      <div class="intro__cta" data-rise style="--i:0">
+        <button class="btn btn--magnetic" type="button" data-open-builder>Probar con vuestra boda</button>
         <a class="btn btn--ghost" href="#estilos">Ver estilos</a>
       </div>
     </div>
-    <figure class="phone" aria-label="Web de ejemplo funcionando">
-      <div class="scaled" data-base-width="390" data-base-height="780">
-        <iframe id="intro-frame" title="Web de ejemplo: Lucía y Martín" tabindex="-1"></iframe>
-      </div>
-      <figcaption>Web de ejemplo de Lucía y Martín, en estilo Olivar.</figcaption>
-    </figure>
+
+    <!-- Fotos alrededor de la web real funcionando. Se mueven un poco con el ratón y al bajar. -->
+    <div class="hero__gallery">
+      <figure class="hero__card" style="--i:4;--depth:1.6;--y:46px"><div class="hero__card-in"><img src="demo/foto-05.jpg" alt="" loading="eager"></div></figure>
+      <figure class="hero__card hero__card--wide" style="--i:2;--depth:-1;--y:-10px"><div class="hero__card-in"><img src="demo/foto-02.jpg" alt=""></div></figure>
+      <figure class="hero__card" style="--i:1;--depth:.8;--y:28px"><div class="hero__card-in"><img src="demo/foto-03.jpg" alt=""></div></figure>
+      <figure class="phone hero__phone" aria-label="Web de ejemplo funcionando" style="--i:0;--depth:.35;--y:0px">
+        <div class="hero__card-in">
+          <div class="scaled" data-base-width="390" data-base-height="780">
+            <iframe id="intro-frame" title="Web de ejemplo: Lucía y Martín" tabindex="-1"></iframe>
+          </div>
+        </div>
+      </figure>
+      <figure class="hero__card" style="--i:1;--depth:-.9;--y:34px"><div class="hero__card-in"><img src="demo/foto-07.jpg" alt=""></div></figure>
+      <figure class="hero__card hero__card--wide" style="--i:2;--depth:1.2;--y:-6px"><div class="hero__card-in"><img src="demo/foto-08.jpg" alt=""></div></figure>
+      <figure class="hero__card" style="--i:4;--depth:-1.5;--y:52px"><div class="hero__card-in"><img src="demo/foto-09.jpg" alt=""></div></figure>
+    </div>
+
+    <div class="wrap hero__foot">
+      <p class="lead">Elegid un estilo, poned vuestros nombres, la fecha y tres fotos, y vedla funcionando al momento. Los invitados confirman desde la web y las respuestas os llegan a una hoja de Google.</p>
+    </div>
   </section>
 
   <section class="styles wrap" id="estilos" aria-labelledby="styles-title">
