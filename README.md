@@ -40,6 +40,11 @@ No hay `npm run dev`: no hay paso de build.
 | `plantillas/palacio/` | Art Déco: puertas doradas de entrada, abanicos, esmeralda y negro, código de vestimenta años 20. Autocontenida |
 | `plantillas/jardin/` | Jardín Inglés: flores prensadas en SVG que caen y se mueven con el ratón. Autocontenida |
 | `plantillas/lino/` | Lino y Piedra: minimal cálido, fundidos lentos, mucho aire. Autocontenida |
+| `plantillas/azulejo/` | Azulejo cobalto generado en SVG con las iniciales, marco que se coloca pieza a pieza. Autocontenida |
+| `plantillas/carrete/` | Película de 35 mm: la portada se revela de negativo a positivo, fecha naranja de cámara, historia como hoja de contactos. Autocontenida |
+| `plantillas/carta/` | Carta manuscrita (`copy.letter`) que se escribe sola, con botón Saltar. Autocontenida |
+| `plantillas/vegetal/` | Hoja de papel vegetal translúcida sobre la foto que se levanta al bajar. Autocontenida |
+| `plantillas/capilla/` | Arcos, rosetón con iniciales, entrada de luz; sección opcional `liturgy` (lecturas y música). Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |

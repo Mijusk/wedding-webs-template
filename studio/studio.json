@@ -63,6 +63,26 @@
     "lino": {
       "name": "Lino y Piedra",
       "url": "../plantillas/lino/"
+    },
+    "azulejo": {
+      "name": "Azulejo",
+      "url": "../plantillas/azulejo/"
+    },
+    "carrete": {
+      "name": "Carrete",
+      "url": "../plantillas/carrete/"
+    },
+    "carta": {
+      "name": "Carta de amor",
+      "url": "../plantillas/carta/"
+    },
+    "vegetal": {
+      "name": "Papel vegetal",
+      "url": "../plantillas/vegetal/"
+    },
+    "capilla": {
+      "name": "Capilla",
+      "url": "../plantillas/capilla/"
     }
   },
   "styles": [
@@ -269,6 +289,66 @@
         "#6e5e4c"
       ],
       "description": "Minimal cálido: lino, piedra y mucho aire, como la web de un hotel boutique. Todo aparece despacio."
+    },
+    {
+      "id": "azulejo",
+      "name": "Azulejo",
+      "template": "azulejo",
+      "theme": "azulejo",
+      "status": "available",
+      "swatch": [
+        "#fbfaf6",
+        "#1f3f8f"
+      ],
+      "description": "Azulejo azul cobalto, cal y limones, con vuestras iniciales en un azulejo. Mediterráneo con clase, para bodas en el sur o en la costa."
+    },
+    {
+      "id": "carrete",
+      "name": "Carrete",
+      "template": "carrete",
+      "theme": "carrete",
+      "status": "available",
+      "swatch": [
+        "#f4f1ea",
+        "#d98b3a"
+      ],
+      "description": "Película de 35 mm: la foto se revela de negativo a color, fecha naranja de cámara antigua y vuestra historia en fotogramas."
+    },
+    {
+      "id": "carta",
+      "name": "Carta de amor",
+      "template": "carta",
+      "theme": "carta",
+      "status": "available",
+      "swatch": [
+        "#fbf7f0",
+        "#2c3e66"
+      ],
+      "description": "Una carta escrita a mano que se va escribiendo sola, con vuestra foto sujeta con un clip. Íntima y emotiva."
+    },
+    {
+      "id": "vegetal",
+      "name": "Papel vegetal",
+      "template": "vegetal",
+      "theme": "vegetal",
+      "status": "available",
+      "swatch": [
+        "#ececea",
+        "#a7a9ac"
+      ],
+      "description": "Una hoja translúcida con vuestros nombres sobre la foto que se levanta al bajar. Moderna y muy fina, en blanco y plata."
+    },
+    {
+      "id": "capilla",
+      "name": "Capilla",
+      "template": "capilla",
+      "theme": "capilla",
+      "status": "available",
+      "swatch": [
+        "#efe9df",
+        "#6b2737"
+      ],
+      "description": "Arcos, un rosetón con vuestras iniciales y luz cálida que entra por la ventana. Para bodas en iglesia, con lecturas y música."
     }
   ],
   "sections": {
@@ -289,6 +369,10 @@
       "story": {
         "name": "Vuestra historia",
         "hint": "Cómo os conocisteis, en capítulos"
+      },
+      "liturgy": {
+        "name": "Lecturas y música",
+        "hint": "Lecturas y canciones de la ceremonia"
       },
       "gallery": {
         "name": "Fotos"

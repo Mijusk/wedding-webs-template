@@ -22,6 +22,13 @@ export function setupStage(context) {
     if (!btn || btn.getAttribute("aria-disabled") === "true") return;
     switchStyle(btn.dataset.style);
   });
+  // Con ratón, la rueda vertical también desliza la fila de estilos.
+  $("#stage-styles").addEventListener("wheel", (e) => {
+    const row = e.currentTarget;
+    if (row.scrollWidth <= row.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    row.scrollLeft += e.deltaY;
+  }, { passive: false });
   $("#stage-next").addEventListener("click", () => {
     const i = available.findIndex((s) => s.id === state.style.id);
     switchStyle(available[(i + 1) % available.length].id);
@@ -118,6 +125,12 @@ export function closeStage() {
 function markStyle() {
   document.querySelectorAll("#stage-styles [data-style]").forEach((b) =>
     b.setAttribute("aria-checked", b.dataset.style === state.style.id));
+  // Los estilos van en una fila que se desliza: que el elegido quede a la vista.
+  const row = $("#stage-styles"), chip = row.querySelector('[aria-checked="true"]');
+  if (chip) requestAnimationFrame(() => {
+    const r = row.getBoundingClientRect(), c = chip.getBoundingClientRect();
+    if (r.width) row.scrollBy({ left: c.left - r.left - (r.width - c.width) / 2, behavior: "smooth" });
+  });
 }
 
 // Los datos ya están cargados: con la misma plantilla, cambiar de estilo es reenviar el config;

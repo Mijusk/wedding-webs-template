@@ -16,6 +16,11 @@ const WEBS = [
   ["../plantillas/palacio/", "Palacio"],
   ["../plantillas/jardin/", "Jardín Inglés"],
   ["../plantillas/lino/", "Lino y Piedra"],
+  ["../plantillas/azulejo/", "Azulejo"],
+  ["../plantillas/carrete/", "Carrete"],
+  ["../plantillas/carta/", "Carta de amor"],
+  ["../plantillas/vegetal/", "Papel vegetal"],
+  ["../plantillas/capilla/", "Capilla"],
 ];
 
 export async function fillWebSelect(select) {
