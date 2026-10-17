@@ -25,10 +25,13 @@ export async function startEntrance() {
     await sleep(Math.max(0, MIN_CURTAIN_MS - (performance.now() - t0)));
     counter.finish = true;
     await counter.done;
+    toStart();
     const curtain = $("#preloader");
     curtain.classList.add("is-leaving");
     curtain.addEventListener("transitionend", () => curtain.remove(), { once: true });
   }
+  else toStart();
+  sameTabAnchors();
   requestAnimationFrame(() => {
     root.classList.add("is-ready");
     // Al terminar, se quitan los estados de entrada para que nada quede a medias.
@@ -57,6 +60,37 @@ export function revealOnScroll(selector) {
 }
 
 // ── Piezas ───────────────────────────────────────────────
+
+// Justo antes de mostrar la página: arriba del todo, o en la sección si se llegó con un enlace
+// a ella (#tarifas). Así nunca aparece a medio bajar tras la cortina.
+function toStart() {
+  const target = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  let y = 0;
+  if (target && target.id !== "inicio") {
+    // offsetTop ignora el pequeño desplazamiento de la portada mientras la cortina está puesta.
+    for (let el = target; el; el = el.offsetParent) y += el.offsetTop;
+    y -= parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+  }
+  scrollTo(0, Math.max(0, y));
+}
+
+// Los enlaces del menú bajan suavemente sin dejar #seccion en la dirección, para que al
+// recargar se vuelva a empezar arriba.
+function sameTabAnchors() {
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const id = a.getAttribute("href").slice(1);
+    const target = id === "inicio" ? null : document.getElementById(id);
+    if (id && !target && id !== "inicio") return;
+    e.preventDefault();
+    const behavior = root.classList.contains("no-motion") ? "auto" : "smooth";
+    if (target) target.scrollIntoView({ behavior, block: "start" });
+    else scrollTo({ top: 0, behavior });
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  });
+}
+
 
 function runCounter() {
   const out = $("#preloader-count");

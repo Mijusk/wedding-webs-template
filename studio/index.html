@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- artifact:start -->
 <title>WeddingWebs</title>
@@ -15,6 +16,14 @@
 <link rel="stylesheet" href="studio.css">
 <link rel="stylesheet" href="entrance.css">
 <script>
+  // Al volver a abrir o recargar, empezar siempre arriba: el navegador no recuerda la posición
+  // y una #seccion que quedó en la dirección se quita. Solo se respeta si se llega por un enlace
+  // (por ejemplo "Tarifas" desde plantillas.html).
+  try {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    const how = performance.getEntriesByType("navigation")[0]?.type;
+    if (location.hash && how && how !== "navigate") history.replaceState(null, "", location.pathname + location.search);
+  } catch { /* navegador antiguo */ }
   // Antes de pintar nada: decide si hay entrada (primera visita y sin "reducir movimiento").
   try {
     const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;

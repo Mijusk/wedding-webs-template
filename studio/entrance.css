@@ -14,7 +14,7 @@
   background: #1a1520; color: #f3ede6;
 }
 .is-loading .preloader { display: grid; place-items: center; }
-.is-loading body { overflow: hidden; }
+.is-loading:not(.is-ready) body { overflow: hidden; }
 .preloader.is-leaving { transform: translateY(-100%); transition: transform 1.05s var(--ease-curtain); }
 .preloader__center { display: grid; justify-items: center; gap: 22px; }
 .monogram { width: clamp(120px, 15vw, 170px); overflow: visible; }
