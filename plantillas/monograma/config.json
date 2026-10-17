@@ -1,0 +1,147 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
+    "tagline": "Tenemos el gusto de invitarte a nuestra boda",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Septiembre, orilla del Tajo",
+        "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas."
+      },
+      {
+        "meta": "Aranjuez",
+        "text": "Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez"
+  },
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "Jardín de los olivos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "Patio central"
+    },
+    {
+      "time": "21:00",
+      "label": "Cena",
+      "place": "Salón de la bodega"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Hasta que el cuerpo aguante"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos"
+    },
+    "details": {
+      "eyebrow": "Los detalles",
+      "when": "El día",
+      "where": "El lugar",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Cómo llegar",
+      "title": "Cuándo y dónde",
+      "time": "La hora"
+    },
+    "story": {
+      "eyebrow": "Nosotros",
+      "title": "Nuestra historia"
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "Programa"
+    },
+    "gallery": {
+      "eyebrow": "Recuerdos",
+      "title": "Algunas fotos"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu compañía es nuestro mejor regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "text": "Te rogamos que nos confirmes tu asistencia antes del {deadline}."
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Te rogamos respuesta antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-3.jpg"
+  ]
+}

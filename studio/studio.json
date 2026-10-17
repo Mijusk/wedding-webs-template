@@ -1,0 +1,569 @@
+{
+  "brand": {
+    "name": "WeddingWebs",
+    "tagline": "Vuestra web de boda, lista antes que las invitaciones."
+  },
+  "templates": {
+    "clasica": {
+      "name": "Clásica",
+      "url": "../"
+    },
+    "editorial": {
+      "name": "Editorial",
+      "url": "../plantillas/editorial/"
+    },
+    "minimal": {
+      "name": "Minimal",
+      "url": "../plantillas/minimal/"
+    },
+    "verbena": {
+      "name": "Verbena",
+      "url": "../plantillas/verbena/"
+    },
+    "postal": {
+      "name": "Postal",
+      "url": "../plantillas/postal/"
+    },
+    "villa": {
+      "name": "Villa",
+      "url": "../plantillas/villa/"
+    },
+    "etiqueta": {
+      "name": "Etiqueta",
+      "url": "../plantillas/etiqueta/"
+    },
+    "lacre": {
+      "name": "Lacre",
+      "url": "../plantillas/lacre/"
+    },
+    "acuarela": {
+      "name": "Acuarela",
+      "url": "../plantillas/acuarela/"
+    },
+    "monograma": {
+      "name": "Monograma",
+      "url": "../plantillas/monograma/"
+    },
+    "negro": {
+      "name": "Editorial Negro",
+      "url": "../plantillas/negro/"
+    },
+    "toile": {
+      "name": "Toile",
+      "url": "../plantillas/toile/"
+    },
+    "palacio": {
+      "name": "Palacio",
+      "url": "../plantillas/palacio/"
+    },
+    "jardin": {
+      "name": "Jardín Inglés",
+      "url": "../plantillas/jardin/"
+    },
+    "lino": {
+      "name": "Lino y Piedra",
+      "url": "../plantillas/lino/"
+    },
+    "azulejo": {
+      "name": "Azulejo",
+      "url": "../plantillas/azulejo/"
+    },
+    "carrete": {
+      "name": "Carrete",
+      "url": "../plantillas/carrete/"
+    },
+    "carta": {
+      "name": "Carta de amor",
+      "url": "../plantillas/carta/"
+    },
+    "vegetal": {
+      "name": "Papel vegetal",
+      "url": "../plantillas/vegetal/"
+    },
+    "capilla": {
+      "name": "Capilla",
+      "url": "../plantillas/capilla/"
+    },
+    "botanica": {
+      "name": "Botánica",
+      "url": "../plantillas/botanica/"
+    },
+    "costa": {
+      "name": "Costa",
+      "url": "../plantillas/costa/"
+    },
+    "estrellas": {
+      "name": "Noche estrellada",
+      "url": "../plantillas/estrellas/"
+    },
+    "galeria": {
+      "name": "Galería de arte",
+      "url": "../plantillas/galeria/"
+    },
+    "ciudades": {
+      "name": "Dos ciudades",
+      "url": "../plantillas/ciudades/"
+    }
+  },
+  "styles": [
+    {
+      "id": "olivar",
+      "name": "Olivar",
+      "template": "clasica",
+      "theme": "olivar",
+      "status": "available",
+      "swatch": [
+        "#eef0ea",
+        "#8f6f43"
+      ],
+      "description": "Verde salvia y dorado, con una serif de alto contraste. Para bodas de campo y fincas."
+    },
+    {
+      "id": "atardecer",
+      "name": "Atardecer",
+      "template": "clasica",
+      "theme": "atardecer",
+      "status": "available",
+      "swatch": [
+        "#f4ece2",
+        "#b0532c"
+      ],
+      "description": "Arena y teja, cálida y luminosa. Para bodas de verano, costa o cortijo."
+    },
+    {
+      "id": "noche",
+      "name": "Noche",
+      "template": "clasica",
+      "theme": "noche",
+      "status": "available",
+      "swatch": [
+        "#141a2a",
+        "#d1b06a"
+      ],
+      "description": "Azul noche con detalles dorados. Para bodas de tarde que acaban de madrugada."
+    },
+    {
+      "id": "editorial",
+      "name": "Editorial",
+      "template": "editorial",
+      "status": "available",
+      "swatch": [
+        "#e6d6d0",
+        "#12181e"
+      ],
+      "description": "Foto a pantalla completa, vuestra historia en capítulos y una página que pasa de la tarde a la noche al bajar.",
+      "theme": "editorial"
+    },
+    {
+      "id": "minimal",
+      "name": "Minimal",
+      "template": "minimal",
+      "theme": "minimal",
+      "status": "available",
+      "swatch": [
+        "#fafaf7",
+        "#141414"
+      ],
+      "description": "Blanco, negro y mucho aire. Nombres enormes, líneas finas y fotos en blanco y negro. Para parejas de pocas palabras."
+    },
+    {
+      "id": "verbena",
+      "name": "Verbena",
+      "template": "verbena",
+      "theme": "verbena",
+      "status": "available",
+      "swatch": [
+        "#f5d547",
+        "#e2412b"
+      ],
+      "description": "Banderines, pegatinas y colores a tope. Para bodas que son, sobre todo, un fiestón."
+    },
+    {
+      "id": "postal",
+      "name": "Postal",
+      "template": "postal",
+      "theme": "postal",
+      "status": "available",
+      "swatch": [
+        "#e9e3d6",
+        "#6f7d5c"
+      ],
+      "description": "La invitación de papel de siempre, en una sola tarjeta. Lo justo y nada más."
+    },
+    {
+      "id": "villa",
+      "name": "Villa",
+      "template": "villa",
+      "theme": "villa",
+      "status": "available",
+      "swatch": [
+        "#f6f2ea",
+        "#5e6b3c"
+      ],
+      "description": "Escudo de olivo con vuestras iniciales y una foto que se abre como una ventana. Lujo tranquilo para fincas y villas."
+    },
+    {
+      "id": "etiqueta",
+      "name": "Etiqueta",
+      "template": "etiqueta",
+      "theme": "etiqueta",
+      "status": "available",
+      "swatch": [
+        "#0f1b2d",
+        "#c6a15b"
+      ],
+      "description": "Azul marino y oro, como una invitación grabada. Con código de vestimenta, para bodas de gala."
+    },
+    {
+      "id": "lacre",
+      "name": "Lacre",
+      "template": "lacre",
+      "theme": "lacre",
+      "status": "available",
+      "swatch": [
+        "#f4efe6",
+        "#7a1f2b"
+      ],
+      "description": "Un sobre cerrado con sello de lacre que se abre al tocarlo. Dentro, la invitación de papel."
+    },
+    {
+      "id": "acuarela",
+      "name": "Acuarela",
+      "template": "acuarela",
+      "theme": "acuarela",
+      "status": "available",
+      "swatch": [
+        "#fbfaf7",
+        "#9daa92"
+      ],
+      "description": "Manchas de acuarela suaves, fotos con borde pintado e iconos dibujados a mano. Romántica y luminosa, para primavera y jardín."
+    },
+    {
+      "id": "monograma",
+      "name": "Monograma",
+      "template": "monograma",
+      "theme": "monograma",
+      "status": "available",
+      "swatch": [
+        "#f5efe4",
+        "#6e1f2f"
+      ],
+      "description": "Vuestras iniciales entrelazadas, sin foto de portada. Papel, tinta burdeos y mucha calma."
+    },
+    {
+      "id": "negro",
+      "name": "Editorial Negro",
+      "template": "negro",
+      "theme": "negro",
+      "status": "available",
+      "swatch": [
+        "#0e0e0e",
+        "#9e1b22"
+      ],
+      "description": "Portada de revista de moda: foto en blanco y negro que gana color al bajar, nombres enormes y vuestra historia como entrevista."
+    },
+    {
+      "id": "toile",
+      "name": "Toile",
+      "template": "toile",
+      "theme": "toile",
+      "status": "available",
+      "swatch": [
+        "#f7f1e6",
+        "#4f6d8f"
+      ],
+      "description": "Estampado francés de escenas campestres en azul y un lazo de seda que se deshace al entrar. Romántica, para jardín o château."
+    },
+    {
+      "id": "palacio",
+      "name": "Palacio",
+      "template": "palacio",
+      "theme": "palacio",
+      "status": "available",
+      "swatch": [
+        "#0f4c3a",
+        "#c9a55c"
+      ],
+      "description": "Art Déco de los años 20: puertas doradas que se abren, abanicos y esmeralda. Para bodas de noche con mucho baile."
+    },
+    {
+      "id": "jardin",
+      "name": "Jardín Inglés",
+      "template": "jardin",
+      "theme": "jardin",
+      "status": "available",
+      "swatch": [
+        "#faf6ef",
+        "#7c8b5e"
+      ],
+      "description": "Flores prensadas que caen y se posan alrededor de vuestra foto. Delicada y natural, para bodas de primavera."
+    },
+    {
+      "id": "lino",
+      "name": "Lino y Piedra",
+      "template": "lino",
+      "theme": "lino",
+      "status": "available",
+      "swatch": [
+        "#ede6db",
+        "#6e5e4c"
+      ],
+      "description": "Minimal cálido: lino, piedra y mucho aire, como la web de un hotel boutique. Todo aparece despacio."
+    },
+    {
+      "id": "azulejo",
+      "name": "Azulejo",
+      "template": "azulejo",
+      "theme": "azulejo",
+      "status": "available",
+      "swatch": [
+        "#fbfaf6",
+        "#1f3f8f"
+      ],
+      "description": "Azulejo azul cobalto, cal y limones, con vuestras iniciales en un azulejo. Mediterráneo con clase, para bodas en el sur o en la costa."
+    },
+    {
+      "id": "carrete",
+      "name": "Carrete",
+      "template": "carrete",
+      "theme": "carrete",
+      "status": "available",
+      "swatch": [
+        "#f4f1ea",
+        "#d98b3a"
+      ],
+      "description": "Película de 35 mm: la foto se revela de negativo a color, fecha naranja de cámara antigua y vuestra historia en fotogramas."
+    },
+    {
+      "id": "carta",
+      "name": "Carta de amor",
+      "template": "carta",
+      "theme": "carta",
+      "status": "available",
+      "swatch": [
+        "#fbf7f0",
+        "#2c3e66"
+      ],
+      "description": "Una carta escrita a mano que se va escribiendo sola, con vuestra foto sujeta con un clip. Íntima y emotiva."
+    },
+    {
+      "id": "vegetal",
+      "name": "Papel vegetal",
+      "template": "vegetal",
+      "theme": "vegetal",
+      "status": "available",
+      "swatch": [
+        "#ececea",
+        "#a7a9ac"
+      ],
+      "description": "Una hoja translúcida con vuestros nombres sobre la foto que se levanta al bajar. Moderna y muy fina, en blanco y plata."
+    },
+    {
+      "id": "capilla",
+      "name": "Capilla",
+      "template": "capilla",
+      "theme": "capilla",
+      "status": "available",
+      "swatch": [
+        "#efe9df",
+        "#6b2737"
+      ],
+      "description": "Arcos, un rosetón con vuestras iniciales y luz cálida que entra por la ventana. Para bodas en iglesia, con lecturas y música."
+    },
+    {
+      "id": "botanica",
+      "name": "Botánica",
+      "template": "botanica",
+      "theme": "botanica",
+      "status": "available",
+      "swatch": [
+        "#f3ecdd",
+        "#536b4e"
+      ],
+      "description": "Láminas de herbario antiguo con nombre en latín que se dibujan y se colorean. La planta cambia según la estación de vuestra boda."
+    },
+    {
+      "id": "costa",
+      "name": "Costa",
+      "template": "costa",
+      "theme": "costa",
+      "status": "available",
+      "swatch": [
+        "#f7f5f0",
+        "#1e4a6b"
+      ],
+      "description": "Azul mar, arena y una línea de horizonte. Calcula la hora exacta de la puesta de sol de vuestro día. Para bodas junto al mar."
+    },
+    {
+      "id": "estrellas",
+      "name": "Noche estrellada",
+      "template": "estrellas",
+      "theme": "estrellas",
+      "status": "available",
+      "swatch": [
+        "#0d1424",
+        "#d8b46a"
+      ],
+      "description": "El cielo real de la noche de vuestra boda, calculado para ese lugar, con sus constelaciones en dorado."
+    },
+    {
+      "id": "galeria",
+      "name": "Galería de arte",
+      "template": "galeria",
+      "theme": "galeria",
+      "status": "available",
+      "swatch": [
+        "#e9e4da",
+        "#b38e4a"
+      ],
+      "description": "Vuestras fotos colgadas como cuadros de museo, con marco dorado, foco y cartelas con humor fino."
+    },
+    {
+      "id": "ciudades",
+      "name": "Dos ciudades",
+      "template": "ciudades",
+      "theme": "ciudades",
+      "status": "available",
+      "swatch": [
+        "#f5f2ec",
+        "#b23a2e"
+      ],
+      "description": "Pasaporte, sello y dos relojes con la hora de vuestras ciudades. En español e inglés, para bodas de destino."
+    }
+  ],
+  "sections": {
+    "note": "Podéis cambiarlo cuando queráis, también después de contratarla. Entra en todas las tarifas.",
+    "list": {
+      "hero": {
+        "name": "Portada",
+        "fixed": true
+      },
+      "card": {
+        "name": "Invitación",
+        "fixed": true
+      },
+      "details": {
+        "name": "Fecha y lugar",
+        "fixed": true
+      },
+      "travel": {
+        "name": "Viaje y cómo llegar",
+        "hint": "Vuelos, traslados y alojamiento"
+      },
+      "story": {
+        "name": "Vuestra historia",
+        "hint": "Cómo os conocisteis, en capítulos"
+      },
+      "liturgy": {
+        "name": "Lecturas y música",
+        "hint": "Lecturas y canciones de la ceremonia"
+      },
+      "gallery": {
+        "name": "Fotos"
+      },
+      "schedule": {
+        "name": "Horario del día",
+        "hint": "Ceremonia, cóctel, cena, fiesta"
+      },
+      "dresscode": {
+        "name": "Código de vestimenta",
+        "hint": "Cómo ir vestidos, con paleta de colores"
+      },
+      "gifts": {
+        "name": "Regalo",
+        "hint": "Número de cuenta, oculto hasta pulsar"
+      },
+      "rsvp": {
+        "name": "Confirmar asistencia",
+        "hint": "Formulario para los invitados"
+      }
+    }
+  },
+  "generator": {
+    "firstRunMs": 3000,
+    "switchMs": 700,
+    "maxPhotos": 3,
+    "messages": [
+      "Leyendo vuestros datos…",
+      "Colocando vuestras fotos…",
+      "Eligiendo tipografías…",
+      "Preparando vuestra web…"
+    ]
+  },
+  "pricing": {
+    "currency": "€",
+    "tiers": [
+      {
+        "id": "tal-cual",
+        "name": "Tal cual",
+        "price": [
+          79,
+          79
+        ],
+        "summary": "Os quedáis con el estilo que habéis probado, con vuestros datos y fotos.",
+        "includes": [
+          "Vuestros datos, fotos y programa del día",
+          "Confirmaciones de asistencia en vuestra hoja de Google",
+          "Publicada y lista para compartir"
+        ]
+      },
+      {
+        "id": "con-cambios",
+        "name": "Con cambios",
+        "price": [
+          139,
+          139
+        ],
+        "summary": "Partimos de una plantilla y la ajustamos a vuestro gusto.",
+        "includes": [
+          "Todo lo de Tal cual",
+          "Colores, tipografías y textos a medida",
+          "Secciones extra: galería, regalos, alojamiento"
+        ]
+      },
+      {
+        "id": "a-medida",
+        "name": "A medida",
+        "price": [
+          249,
+          null
+        ],
+        "summary": "Un diseño propio, hecho desde cero para vuestra boda.",
+        "includes": [
+          "Todo lo de Con cambios",
+          "Diseño único, sin plantilla de partida",
+          "Hasta 3 rondas de revisiones"
+        ]
+      }
+    ],
+    "note": "Precio final, pago único: sin cuotas ni permanencia."
+  },
+  "contact": {
+    "endpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"
+  },
+  "demoPhotos": {
+    "folder": "demo/",
+    "files": [
+      "foto-01.jpg",
+      "foto-02.jpg",
+      "foto-03.jpg",
+      "foto-04.jpg",
+      "foto-05.jpg",
+      "foto-06.jpg",
+      "foto-07.jpg",
+      "foto-08.jpg",
+      "foto-09.jpg",
+      "foto-10.jpg"
+    ]
+  },
+  "legal": {
+    "_nota": "Datos del titular para el aviso legal (obligatorios por la LSSI). Mientras estén vacíos, legal.html muestra 'pendiente'.",
+    "owner": "",
+    "nif": "",
+    "address": "",
+    "email": "",
+    "deliveryDays": 3,
+    "onlineMonths": 12,
+    "guestDataMonths": 6
+  }
+}

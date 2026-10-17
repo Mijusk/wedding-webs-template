@@ -1,0 +1,300 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
+    "tagline": "Dos ciudades, un mismo viaje. Nos casamos y queremos que vengas",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Septiembre, orilla del Tajo",
+        "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas."
+      },
+      {
+        "meta": "Aranjuez",
+        "text": "Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez"
+  },
+  "cities": [
+    {
+      "name": "Madrid",
+      "country": "España",
+      "tz": "Europe/Madrid",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "name_en": "Madrid",
+      "country_en": "Spain"
+    },
+    {
+      "name": "Londres",
+      "country": "Reino Unido",
+      "tz": "Europe/London",
+      "lat": 51.5074,
+      "lon": -0.1278,
+      "name_en": "London",
+      "country_en": "United Kingdom"
+    }
+  ],
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "Jardín de los olivos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "Patio central"
+    },
+    {
+      "time": "21:00",
+      "label": "Cena",
+      "place": "Salón de la bodega"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Hasta que el cuerpo aguante"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "lang": {
+      "label": "Idioma"
+    },
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "document": "Pase de boda",
+      "holders": "Titulares",
+      "date": "Fecha",
+      "time": "Hora",
+      "destination": "Destino",
+      "place": "Lugar",
+      "from": "Procedencia",
+      "stamp": "Boda",
+      "photoPage": "Página con la foto de los novios"
+    },
+    "cities": {
+      "eyebrow": "Dos ciudades",
+      "title": "De {cityA} a {cityB}",
+      "text": "{a} es de {cityA} y {b}, de {cityB}. Así marcan ahora mismo los relojes en casa de cada uno.",
+      "clock": "Hora local en {city}",
+      "distance": "{km} km entre las dos",
+      "diff": "{hours} h de diferencia",
+      "diffOne": "1 h de diferencia",
+      "diffSame": "Misma hora en las dos",
+      "map": "Mapa esquemático con el vuelo entre {cityA} y {cityB}"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "title": "Cuándo y dónde",
+      "when": "Fecha",
+      "time": "Hora",
+      "where": "Lugar",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Cómo llegar"
+    },
+    "travel": {
+      "eyebrow": "El viaje",
+      "title": "Cómo llegar hasta allí",
+      "items": [
+        {
+          "label": "Vuelos",
+          "text": "El aeropuerto más cercano es Madrid-Barajas (MAD). Desde Londres hay vuelos directos cada hora desde Heathrow y Gatwick; junio es temporada alta, así que mejor reservar pronto."
+        },
+        {
+          "label": "Traslados",
+          "text": "Saldrá un autobús desde la estación de Atocha a las 16:45 y habrá viajes de vuelta a partir de la 1:00. Si vienes en coche, la finca tiene aparcamiento."
+        },
+        {
+          "label": "Alojamiento",
+          "text": "Hemos reservado habitaciones en el Hotel Real de Aranjuez a precio especial con el código LUCIAYMARTIN, disponible hasta el 1 de mayo."
+        }
+      ]
+    },
+    "story": {
+      "eyebrow": "Nosotros",
+      "title": "Cómo empezó todo"
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "Itinerario"
+    },
+    "gallery": {
+      "eyebrow": "Postales",
+      "title": "Recuerdos de viaje",
+      "alt": "{a} y {b}"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es el regalo",
+      "text": "Sabemos que muchos venís de lejos. Si además quieres tener un detalle con nosotros, te dejamos nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "text": "Confírmanos antes del {deadline} para ir preparando el viaje."
+    },
+    "rsvp": {
+      "eyebrow": "RSVP",
+      "title": "¿Vienes?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "travel",
+    "story",
+    "schedule",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-3.jpg"
+  ],
+  "copy_en": {
+    "lang": {
+      "label": "Language"
+    },
+    "hero": {
+      "eyebrow": "We're getting married",
+      "tagline": "Two cities, one journey. We're getting married and we'd love you to come",
+      "document": "Wedding pass",
+      "holders": "Holders",
+      "date": "Date",
+      "time": "Time",
+      "destination": "Destination",
+      "place": "Venue",
+      "from": "From",
+      "stamp": "Wedding",
+      "photoPage": "Page with the couple's photo"
+    },
+    "cities": {
+      "eyebrow": "Two cities",
+      "title": "From {cityA} to {cityB}",
+      "text": "{a} is from {cityA} and {b} from {cityB}. This is the time right now back home for each of us.",
+      "clock": "Local time in {city}",
+      "distance": "{km} km apart",
+      "diff": "{hours} h time difference",
+      "diffOne": "1 h time difference",
+      "diffSame": "Same time in both",
+      "map": "Schematic map with the flight between {cityA} and {cityB}"
+    },
+    "details": {
+      "eyebrow": "The essentials",
+      "title": "When and where",
+      "when": "Date",
+      "time": "Time",
+      "where": "Venue",
+      "timeSuffix": "",
+      "countdown": "{days} days to go",
+      "countdownOne": "One day to go",
+      "countdownToday": "It's today",
+      "calendar": "Add to calendar",
+      "calendarTitle": "{a} & {b}'s wedding",
+      "map": "Get directions"
+    },
+    "travel": {
+      "eyebrow": "The journey",
+      "title": "Getting there",
+      "items": [
+        {
+          "label": "Flights",
+          "text": "The nearest airport is Madrid-Barajas (MAD). There are direct flights from London every hour from Heathrow and Gatwick; June is high season, so it's worth booking early."
+        },
+        {
+          "label": "Transfers",
+          "text": "A coach will leave Atocha station at 16:45, with return trips from 1:00 am. If you're driving, the venue has its own car park."
+        },
+        {
+          "label": "Where to stay",
+          "text": "We've reserved rooms at Hotel Real de Aranjuez at a special rate with the code LUCIAYMARTIN, available until 1 May."
+        }
+      ]
+    },
+    "story": {
+      "eyebrow": "About us",
+      "title": "How it all began"
+    },
+    "schedule": {
+      "eyebrow": "The day",
+      "title": "Itinerary"
+    },
+    "gallery": {
+      "eyebrow": "Postcards",
+      "title": "Travel memories",
+      "alt": "{a} and {b}"
+    },
+    "gifts": {
+      "eyebrow": "Gifts",
+      "title": "Your presence is the gift",
+      "text": "We know many of you are travelling a long way. If you'd still like to give us something, here are our bank details.",
+      "holderLabel": "Account holder",
+      "ibanLabel": "IBAN",
+      "copy": "Copy IBAN",
+      "copied": "IBAN copied",
+      "reveal": "Show bank details"
+    },
+    "closing": {
+      "eyebrow": "RSVP",
+      "title": "Will you join us?",
+      "text": "Please let us know by {deadline} so we can start planning the trip.",
+      "button": "RSVP"
+    }
+  }
+}

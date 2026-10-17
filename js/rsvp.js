@@ -1,57 +1,57 @@
 import { saveRsvp } from "./storage.js";
-import { dateParts, esc, fill } from "./format.js";
+import { esc, dayMonth, weddingPhase, rsvpClosed } from "./format.js";
 
 // Formulario de confirmación en un <dialog>. Lo abre cualquier [data-rsvp-open]:
 // el botón flotante (visible entre la portada y el cierre) y el del cierre.
 export function mountRsvp(root, config) {
-  const { rsvp = {}, locale, copy = {} } = config;
-  const t = copy.rsvp || {};
-  const deadline = rsvp.deadline ? dateParts(rsvp.deadline, locale).dayMonth : "";
+  const { rsvp = {}, event } = config;
+  // Después de la boda no hay nada que confirmar.
+  if (weddingPhase(event) === "after") { root.innerHTML = ""; return; }
+  const closed = rsvpClosed(config);
+  const deadline = rsvp.deadline ? dayMonth(rsvp.deadline) : null;
 
   root.innerHTML = `
-    <button class="button rsvp-pill" type="button" data-rsvp-open aria-haspopup="dialog" tabindex="-1" aria-hidden="true">${esc(rsvp.buttonLabel)}</button>
-    <dialog class="rsvp-dialog" id="rsvp-dialog" aria-labelledby="rsvp-title">
-      <div class="rsvp-dialog__inner">
-        <button class="rsvp-close" type="button" id="rsvp-close" aria-label="${esc(t.close)}">×</button>
-        <p class="eyebrow">${esc(t.eyebrow)}</p>
-        <h2 class="rsvp-title" id="rsvp-title">${esc(t.title)}</h2>
-        ${deadline && t.deadlineNote ? `<p class="rsvp-note">${fill(t.deadlineNote, { deadline })}</p>` : ""}
-        <form class="rsvp-form" id="rsvp-form" novalidate>
-          <div class="field">
-            <label for="rsvp-name">${esc(t.name)}</label>
-            <input type="text" id="rsvp-name" name="name" autocomplete="name" required>
+    <button class="rsvp-fab" id="rsvp-open" aria-expanded="false" aria-controls="rsvp-panel">${esc(rsvp.buttonLabel || "Confirmar asistencia")}</button>
+    <div class="rsvp-panel" id="rsvp-panel" role="dialog" aria-labelledby="rsvp-title" hidden>
+      <button class="close" id="rsvp-close" aria-label="Cerrar">×</button>
+      <p class="eyebrow">RSVP</p>
+      <h2 id="rsvp-title">¿Vienes?</h2>
+      ${closed
+        ? `<p class="note">${esc(rsvp.closedText || "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.")}</p>`
+        : deadline ? `<p class="note">Confírmanos antes del ${esc(deadline)}.</p>` : ""}
+      <form id="rsvp-form" novalidate${closed ? " hidden" : ""}>
+        <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div class="field">
+          <label for="rsvp-name">Nombre y apellidos</label>
+          <input type="text" id="rsvp-name" name="name" autocomplete="name" required>
+        </div>
+        <fieldset class="field">
+          <legend>Asistencia</legend>
+          <div class="choice">
+            <label><input type="radio" id="rsvp-yes" name="attending" value="si"><span>Sí, allí estaré</span></label>
+            <label><input type="radio" id="rsvp-no" name="attending" value="no"><span>No podré ir</span></label>
           </div>
-          <fieldset class="field">
-            <legend>${esc(t.attending)}</legend>
-            <div class="choice">
-              <label><input type="radio" id="rsvp-yes" name="attending" value="si"><span>${esc(t.yes)}</span></label>
-              <label><input type="radio" id="rsvp-no" name="attending" value="no"><span>${esc(t.no)}</span></label>
-            </div>
-          </fieldset>
-          <div class="field">
-            <label for="rsvp-song">${esc(t.song)}</label>
-            <input type="text" id="rsvp-song" name="song" placeholder="${esc(t.songPlaceholder)}">
-          </div>
-          <p class="rsvp-error" id="rsvp-error" role="alert"></p>
-          <button class="button" type="submit" id="rsvp-submit">${esc(t.submit)}</button>
-        </form>
-        <div class="rsvp-thanks" id="rsvp-thanks" hidden></div>
-      </div>
-    </dialog>`;
+        </fieldset>
+        <div class="field">
+          <label for="rsvp-song">Una canción que no puede faltar</label>
+          <input type="text" id="rsvp-song" name="song" placeholder="Opcional">
+        </div>
+        <p class="error" id="rsvp-error" role="alert"></p>
+        <button class="submit" type="submit" id="rsvp-submit">Enviar respuesta</button>
+      </form>
+      <div class="thanks" id="rsvp-thanks" hidden></div>
+    </div>`;
 
   const $ = (id) => root.querySelector(`#${id}`);
-  const dialog = $("rsvp-dialog"), form = $("rsvp-form");
+  const panel = $("rsvp-panel"), fab = $("rsvp-open"), form = $("rsvp-form");
+  const toggle = (open) => { panel.hidden = !open; fab.setAttribute("aria-expanded", open); if (open) $("rsvp-name").focus(); };
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("[data-rsvp-open]")) return;
-    dialog.showModal();
-    if (!form.hidden) $("rsvp-name").focus();
-  });
-  $("rsvp-close").addEventListener("click", () => dialog.close());
-  // Clic en el fondo oscuro: el contenido ocupa todo el <dialog>, así que solo el backdrop es el propio dialog.
-  dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
-
-  watchPill(root.querySelector(".rsvp-pill"));
+  fab.addEventListener("click", () => toggle(panel.hidden));
+  $("rsvp-close").addEventListener("click", () => toggle(false));
+  // Se puede montar varias veces (vista previa): quita el listener del montaje anterior.
+  document.removeEventListener("keydown", root._onKey);
+  root._onKey = (e) => { if (e.key === "Escape") toggle(false); };
+  document.addEventListener("keydown", root._onKey);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -59,8 +59,9 @@ export function mountRsvp(root, config) {
     const name = (data.name || "").trim();
     const song = (data.song || "").trim();
     const err = $("rsvp-error");
-    if (name.length < 2) { err.textContent = t.errorName; return $("rsvp-name").focus(); }
-    if (!data.attending) { err.textContent = t.errorAttending; return; }
+    if (data.website) { form.hidden = true; return; } // campo trampa: un bot
+    if (name.length < 2) { err.textContent = "Escribe tu nombre para saber quién eres."; return $("rsvp-name").focus(); }
+    if (!data.attending) { err.textContent = "Marca si vienes o no."; return; }
     err.textContent = "";
 
     const btn = $("rsvp-submit");
@@ -76,8 +77,8 @@ export function mountRsvp(root, config) {
       thanks.hidden = false;
       $("rsvp-close").focus();
     } catch {
-      err.textContent = t.errorNetwork;
-      btn.disabled = false; btn.textContent = t.submit;
+      err.textContent = "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.";
+      btn.disabled = false; btn.textContent = "Enviar respuesta";
     }
   });
 }

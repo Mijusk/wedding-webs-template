@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- artifact:start -->
+<title>WeddingWebs</title>
+<meta name="description" content="Vuestra web de boda con confirmación de asistencia. Probadla con vuestros nombres y fotos antes de pagar.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="WeddingWebs · Vuestra web de boda">
+<meta property="og:description" content="Probadla con vuestros nombres, la fecha y tres fotos, y vedla funcionando al momento.">
+<meta property="og:locale" content="es_ES">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="studio.css">
+<link rel="stylesheet" href="entrance.css">
+<script>
+  // Antes de pintar nada: decide si hay entrada (primera visita y sin "reducir movimiento").
+  try {
+    const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const seen = sessionStorage.getItem("ww-entrance");
+    document.documentElement.classList.add(calm ? "no-motion" : seen ? "is-entering" : "is-loading");
+  } catch { document.documentElement.classList.add("is-entering"); }
+  // Por si el JavaScript de la página fallara: nunca dejar la cortina puesta.
+  setTimeout(() => {
+    const el = document.documentElement;
+    if (!el.classList.contains("is-ready")) { el.classList.add("is-ready"); document.getElementById("preloader")?.remove(); }
+  }, 6000);
+</script>
+</head>
+<body>
+<!-- Entrada: cortina oscura con el monograma de las dos W que se dibuja, un contador y la
+     cortina que sube. Una vez por visita (studio/app/entrance.js). -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader__center">
+    <svg class="monogram" viewBox="0 0 124 60" role="presentation">
+      <path class="monogram__w1" pathLength="1" d="M4 8 L22 52 L40 16 L58 52 L76 8"/>
+      <path class="monogram__w2" pathLength="1" d="M48 8 L66 52 L84 16 L102 52 L120 8"/>
+    </svg>
+    <p class="preloader__brand" data-brand-letters>WeddingWebs</p>
+  </div>
+  <p class="preloader__note">Webs de boda</p>
+  <p class="preloader__count"><span id="preloader-count">000</span></p>
+</div>
+<header class="top">
+  <div class="wrap top__inner">
+    <a class="brand" href="#inicio" id="brand-name">WeddingWebs</a>
+    <nav class="top__nav" aria-label="Secciones">
+      <a href="#estilos">Estilos</a>
+      <a href="#tarifas">Tarifas</a>
+      <button class="btn btn--small" type="button" data-open-builder>Probar con vuestra boda</button>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero" aria-labelledby="brand-tagline">
+    <div class="wrap hero__head">
+      <p class="eyebrow hero__eyebrow" data-rise>Webs de boda con confirmación de asistencia</p>
+      <h1 class="hero__title" id="brand-tagline" data-words>Vuestra web de boda, lista antes que las invitaciones.</h1>
+      <div class="intro__cta" data-rise style="--i:0">
+        <button class="btn btn--magnetic" type="button" data-open-builder>Probar con vuestra boda</button>
+        <a class="btn btn--ghost" href="#estilos">Ver estilos</a>
+      </div>
+    </div>
+
+    <!-- Fotos alrededor de la web real funcionando. Se mueven un poco con el ratón y al bajar. -->
+    <div class="hero__gallery">
+      <figure class="hero__card" style="--i:4;--depth:1.6;--y:46px"><div class="hero__card-in"><img src="demo/foto-05.jpg" alt="" loading="eager"></div></figure>
+      <figure class="hero__card hero__card--wide" style="--i:2;--depth:-1;--y:-10px"><div class="hero__card-in"><img src="demo/foto-02.jpg" alt=""></div></figure>
+      <figure class="hero__card" style="--i:1;--depth:.8;--y:28px"><div class="hero__card-in"><img src="demo/foto-03.jpg" alt=""></div></figure>
+      <figure class="phone hero__phone" aria-label="Web de ejemplo funcionando" style="--i:0;--depth:.35;--y:0px">
+        <div class="hero__card-in">
+          <div class="scaled" data-base-width="390" data-base-height="780">
+            <iframe id="intro-frame" title="Web de ejemplo: Lucía y Martín" tabindex="-1"></iframe>
+          </div>
+        </div>
+      </figure>
+      <figure class="hero__card" style="--i:1;--depth:-.9;--y:34px"><div class="hero__card-in"><img src="demo/foto-07.jpg" alt=""></div></figure>
+      <figure class="hero__card hero__card--wide" style="--i:2;--depth:1.2;--y:-6px"><div class="hero__card-in"><img src="demo/foto-08.jpg" alt=""></div></figure>
+      <figure class="hero__card" style="--i:4;--depth:-1.5;--y:52px"><div class="hero__card-in"><img src="demo/foto-09.jpg" alt=""></div></figure>
+    </div>
+
+    <div class="wrap hero__foot">
+      <p class="lead">Elegid un estilo, poned vuestros nombres, la fecha y tres fotos, y vedla funcionando al momento. Los invitados confirman desde la web y las respuestas os llegan a una hoja de Google.</p>
+    </div>
+  </section>
+
+  <section class="styles wrap" id="estilos" aria-labelledby="styles-title">
+    <div class="section-head">
+      <p class="eyebrow">Estilos</p>
+      <h2 id="styles-title">Elegid cómo se ve</h2>
+      <p class="section-note" id="styles-note"></p>
+    </div>
+    <div class="styles__grid" id="styles-grid"></div>
+    <p class="styles__more" id="styles-more" hidden><a class="btn btn--ghost" href="plantillas.html" data-count>Ver todas las plantillas</a></p>
+  </section>
+
+  <section class="steps wrap" aria-labelledby="steps-title">
+    <div class="section-head">
+      <p class="eyebrow">Cómo funciona</p>
+      <h2 id="steps-title">De la idea al enlace en tres pasos</h2>
+    </div>
+    <ol class="steps__list">
+      <li><strong>Probad un estilo</strong><span>Con vuestros datos y fotos, antes de pagar nada.</span></li>
+      <li><strong>Elegid una tarifa</strong><span>Tal cual, con cambios o hecha a medida.</span></li>
+      <li><strong>Compartid el enlace</strong><span>Por WhatsApp o en la invitación. Las confirmaciones llegan solas a vuestra hoja.</span></li>
+    </ol>
+  </section>
+
+  <section class="pricing wrap" id="tarifas" aria-labelledby="pricing-title">
+    <div class="section-head">
+      <p class="eyebrow">Tarifas</p>
+      <h2 id="pricing-title">Un pago, sin cuotas</h2>
+    </div>
+    <div class="tiers" id="tiers"></div>
+
+    <div class="contact" id="contacto">
+      <div class="contact__intro">
+        <h3>Reservad vuestra web</h3>
+        <p>Contadnos qué tarifa queréis y os escribimos para cerrar los detalles y el pago.</p>
+        <div class="chosen" id="chosen" hidden></div>
+      </div>
+      <form class="contact__form" id="contact-form" novalidate>
+        <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div class="field">
+          <label for="c-name">Vuestros nombres</label>
+          <input type="text" id="c-name" name="name" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="c-email">Email</label>
+          <input type="email" id="c-email" name="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="c-phone">Teléfono <span class="opt">opcional</span></label>
+          <input type="tel" id="c-phone" name="phone" autocomplete="tel">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="c-tier">Tarifa</label>
+            <select id="c-tier" name="tier"></select>
+          </div>
+          <div class="field">
+            <label for="c-style">Estilo</label>
+            <select id="c-style" name="style"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="c-message">Algo más que debamos saber <span class="opt">opcional</span></label>
+          <textarea id="c-message" name="message" rows="3"></textarea>
+        </div>
+        <p class="error" id="c-error" role="alert"></p>
+        <p class="fineprint">Al reservar no se cobra nada: os escribimos para cerrar detalles y pago. Ver <a href="legal.html#condiciones" target="_blank">condiciones</a>.</p>
+        <button class="btn" type="submit" id="c-submit">Enviar reserva</button>
+      </form>
+      <div class="contact__thanks" id="contact-thanks" hidden></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p><span id="foot-brand">WeddingWebs</span> · Webs para bodas, aniversarios y otras celebraciones.</p>
+  <nav class="foot__legal" aria-label="Información legal">
+    <a href="legal.html#aviso-legal">Aviso legal</a>
+    <a href="legal.html#privacidad">Privacidad</a>
+    <a href="legal.html#condiciones">Condiciones de contratación</a>
+  </nav>
+</footer>
+
+<!-- Aviso tras hacer scroll -->
+<aside class="nudge" id="nudge" aria-labelledby="nudge-title" hidden>
+  <p class="nudge__title" id="nudge-title">¿Probamos con vuestra boda?</p>
+  <p>Poned vuestros nombres, la fecha y tres fotos, y en unos segundos veis vuestra web.</p>
+  <div class="nudge__actions">
+    <button class="btn btn--small" type="button" id="nudge-yes">Sí, probar</button>
+    <button class="btn btn--small btn--ghost" type="button" id="nudge-no">Ahora no</button>
+  </div>
+</aside>
+
+<!-- Formulario del generador -->
+<div class="overlay" id="builder" role="dialog" aria-modal="true" aria-labelledby="builder-title" hidden>
+  <div class="sheet">
+    <button class="close" type="button" data-close aria-label="Cerrar">×</button>
+    <p class="eyebrow">Vuestra web</p>
+    <h2 id="builder-title">Contadnos lo mínimo</h2>
+    <button class="btn btn--small btn--ghost sample-fill" type="button" id="b-sample">Rellenar con un ejemplo</button>
+    <form id="builder-form" novalidate>
+      <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div class="field-row">
+        <div class="field">
+          <label for="b-name-a">Nombre</label>
+          <input type="text" id="b-name-a" name="nameA" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label for="b-name-b">y nombre</label>
+          <input type="text" id="b-name-b" name="nameB" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="b-date">Fecha de la boda</label>
+          <input type="date" id="b-date" name="date" required>
+        </div>
+        <div class="field">
+          <label for="b-time">Hora de la ceremonia</label>
+          <input type="time" id="b-time" name="time" value="18:00" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="b-venue">Lugar</label>
+          <input type="text" id="b-venue" name="venue" placeholder="Finca, iglesia, restaurante…" required>
+        </div>
+        <div class="field">
+          <label for="b-city">Ciudad <span class="opt">opcional</span></label>
+          <input type="text" id="b-city" name="city">
+        </div>
+      </div>
+      <div class="field">
+        <span class="label" id="b-photos-label">Fotos <span class="opt">hasta 3, opcional</span></span>
+        <div class="photos" id="b-photos" aria-labelledby="b-photos-label">
+          <label class="photos__add" for="b-photo-input" id="b-photo-add">
+            <span aria-hidden="true">+</span> Añadir fotos
+            <input type="file" id="b-photo-input" accept="image/*" multiple>
+          </label>
+        </div>
+        <p class="hint">La primera será la portada. Las fotos no salen de vuestro navegador.</p>
+      </div>
+      <fieldset class="field">
+        <legend class="label">Estilo</legend>
+        <div class="style-pick" id="b-styles"></div>
+      </fieldset>
+      <div class="field">
+        <label for="b-email">Vuestro email</label>
+        <input type="email" id="b-email" name="email" autocomplete="email" placeholder="Para enviaros el enlace de vuestra web" required>
+      </div>
+      <label class="consent" for="b-consent">
+        <input type="checkbox" id="b-consent" name="consent" value="si" required>
+        <span>Acepto que me escribáis sobre mi web. Solo usaremos este email para eso, y podéis pedirnos que lo borremos cuando queráis (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
+      </label>
+      <p class="error" id="b-error" role="alert"></p>
+      <button class="btn btn--wide" type="submit">Crear nuestra web</button>
+    </form>
+  </div>
+</div>
+
+<!-- Pantalla de generación -->
+<div class="overlay overlay--solid" id="loading" role="status" aria-live="polite" hidden>
+  <div class="loading">
+    <p class="loading__names" id="loading-names"></p>
+    <div class="bar" aria-hidden="true"><span id="loading-bar"></span></div>
+    <p class="loading__msg" id="loading-msg"></p>
+  </div>
+</div>
+
+<!-- Resultado -->
+<div class="stage" id="stage" role="dialog" aria-modal="true" aria-labelledby="stage-title" hidden>
+  <div class="stage__bar">
+    <div class="stage__title">
+      <p class="eyebrow" id="stage-kind">Vuestra web</p>
+      <p class="stage__names" id="stage-title"></p>
+    </div>
+    <div class="stage__styles" id="stage-styles" role="radiogroup" aria-label="Estilo"></div>
+    <div class="stage__actions">
+      <div class="seg" role="group" aria-label="Vista">
+        <button type="button" id="view-desktop" aria-pressed="true">Escritorio</button>
+        <button type="button" id="view-mobile" aria-pressed="false">Móvil</button>
+      </div>
+      <button class="btn btn--small btn--ghost" type="button" id="stage-sections" aria-expanded="false" aria-controls="sections-panel">Secciones</button>
+      <button class="btn btn--small btn--ghost" type="button" id="stage-next">Otro estilo</button>
+      <button class="btn btn--small btn--ghost" type="button" id="stage-edit">Editar datos</button>
+      <button class="btn btn--small" type="button" id="stage-keep">Me la quedo</button>
+      <button class="btn btn--small" type="button" id="stage-try" hidden>Probar con vuestra boda</button>
+      <button class="close" type="button" data-close aria-label="Cerrar">×</button>
+    </div>
+  </div>
+  <div class="stage__view">
+    <div class="sections-panel" id="sections-panel" role="group" aria-labelledby="sections-title" hidden>
+      <div class="sections-panel__head">
+        <p class="sections-panel__title" id="sections-title">Qué sale en vuestra web</p>
+        <button class="close" type="button" id="sections-close" aria-label="Cerrar secciones">×</button>
+      </div>
+      <ul class="sections-panel__list" id="sections-list"></ul>
+      <p class="sections-panel__note" id="sections-note"></p>
+    </div>
+    <div class="stage__frame" id="stage-frame-wrap">
+      <iframe id="stage-frame" title="Vista previa de la web"></iframe>
+      <div class="switching" id="switching" hidden><p id="switching-msg"></p></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app/main.js"></script>
+<!-- artifact:end -->
+</body>
+</html>

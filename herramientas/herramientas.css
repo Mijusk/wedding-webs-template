@@ -1,0 +1,64 @@
+/* Estilos comunes de las herramientas internas (compartir.html, fotos.html). */
+:root { color-scheme: light; --ink: #1f1a24; --muted: #6d6574; --line: #e2dde4; --bg: #f7f5f2; --accent: #7a2f4d; --ok: #2f6b3b; --error: #a8322a; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 980px; margin: 0 auto; padding: 40px 16px 80px; display: grid; gap: 28px; }
+h1 { margin: 0; font-size: 30px; line-height: 1.15; }
+h2 { margin: 0 0 6px; font-size: 18px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+label { font-weight: 600; font-size: 14px; }
+input[type="text"], input[type="url"], select { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; min-width: 0; width: 100%; background: #fff; }
+.field { display: grid; gap: 6px; flex: 1 1 280px; }
+button, .btn { font: 600 15px/1 system-ui, sans-serif; padding: 13px 18px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; text-decoration: none; }
+button.ghost, .btn.ghost { background: #fff; color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
+.shot img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; }
+.icon { display: flex; gap: 14px; align-items: center; }
+.icon img { width: 64px; height: 64px; border-radius: 14px; border: 1px solid var(--line); }
+/* Burbuja con la tarjeta tal y como sale en WhatsApp */
+.wa { background: #e5ddd5; border-radius: 14px; padding: 18px; }
+.wa__bubble { margin-left: auto; max-width: 300px; background: #d9fdd3; border-radius: 10px; padding: 4px; box-shadow: 0 1px 1px rgb(0 0 0 / .1); font-size: 14px; }
+.wa__card { background: #cfeec9; border-radius: 8px; overflow: hidden; }
+.wa__card img { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; }
+.wa__text { padding: 8px 10px 10px; display: grid; gap: 2px; }
+.wa__title { font-weight: 600; }
+.wa__desc { color: #4a5a48; font-size: 13px; }
+.wa__host { color: #6b7a69; font-size: 12px; }
+.wa__msg { padding: 6px 6px 2px; color: #1f6aa5; word-break: break-all; }
+.status { min-height: 1.5em; font-weight: 600; }
+.status.ok { color: var(--ok); } .status.error { color: var(--error); }
+textarea { width: 100%; min-height: 220px; font: 12px/1.5 ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+details summary { cursor: pointer; font-weight: 600; }
+iframe.offstage { position: fixed; left: -10000px; top: 0; width: 1200px; height: 900px; border: 0; visibility: hidden; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Navegación entre herramientas */
+.tools-nav { display: flex; gap: 16px; font-size: 14px; }
+.tools-nav a { color: var(--muted); }
+.tools-nav a[aria-current] { color: var(--ink); font-weight: 600; text-decoration: none; }
+
+/* fotos.html */
+.drop { display: grid; place-items: center; gap: 8px; padding: 34px 16px; border: 2px dashed var(--line); border-radius: 12px; text-align: center; cursor: pointer; }
+.drop.is-over { border-color: var(--accent); background: #fbf4f7; }
+.photo-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.photo-item { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
+.photo-item img { width: 84px; height: 84px; object-fit: cover; border-radius: 6px; }
+.photo-item h3 { margin: 0; font-size: 15px; }
+.photo-item p { font-size: 13px; }
+.photo-item .warn { color: #8a5a00; }
+.photo-item .bad { color: var(--error); }
+.photo-item .good { color: var(--ok); }
+.photo-actions { display: flex; gap: 6px; }
+.photo-actions button { padding: 8px 11px; font-size: 13px; }
+.tag-cover { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11px; vertical-align: 2px; }
+.focus { position: relative; display: inline-block; max-width: 100%; cursor: crosshair; touch-action: none; user-select: none; }
+.focus img { display: block; max-width: 100%; max-height: 520px; border-radius: 8px; }
+.focus__dot { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 2px rgb(0 0 0 / .45), inset 0 0 0 2px rgb(0 0 0 / .25); pointer-events: none; }
+.previews { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+.preview { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+.preview__box { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.preview__box iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; }

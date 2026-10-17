@@ -1,0 +1,178 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
+    "tagline": "Tenemos el placer de invitarte a celebrar nuestra boda",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Septiembre, orilla del Tajo",
+        "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas."
+      },
+      {
+        "meta": "Aranjuez",
+        "text": "Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez"
+  },
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "Jardín de los olivos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "Patio central"
+    },
+    {
+      "time": "21:00",
+      "label": "Cena",
+      "place": "Salón de la bodega"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Hasta que el cuerpo aguante"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos"
+    },
+    "details": {
+      "eyebrow": "La finca",
+      "when": "Fecha",
+      "where": "Lugar",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Cómo llegar",
+      "intro": "Una tarde de verano entre olivos, con las personas que más queremos.",
+      "time": "Hora"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "Cómo empezó todo",
+      "dropCap": true
+    },
+    "schedule": {
+      "eyebrow": "Programa",
+      "title": "El día de la boda"
+    },
+    "gallery": {
+      "eyebrow": "Álbum",
+      "title": "Nosotros"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es nuestro mejor regalo",
+      "text": "Si además deseas tener un detalle con nosotros, aquí tienes nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "R. S. V. P.",
+      "title": "¿Nos acompañarás?",
+      "text": "Te rogamos que confirmes tu asistencia antes del {deadline}."
+    },
+    "rsvp": {
+      "eyebrow": "R. S. V. P.",
+      "title": "¿Nos acompañarás?",
+      "deadlineNote": "Te rogamos que confirmes antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Allí estaré",
+      "no": "No podré asistir",
+      "song": "Una canción para el baile",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos en la finca.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    },
+    "dresscode": {
+      "eyebrow": "Etiqueta",
+      "title": "Código de vestimenta",
+      "text": "Cóctel elegante. Tonos tierra, oliva y crema; evitad el blanco.",
+      "paletteLabel": "Paleta sugerida",
+      "palette": [
+        {
+          "color": "#5E6B3C",
+          "name": "Oliva"
+        },
+        {
+          "color": "#A88A4F",
+          "name": "Oro viejo"
+        },
+        {
+          "color": "#CFC6B4",
+          "name": "Piedra"
+        },
+        {
+          "color": "#B5764F",
+          "name": "Terracota"
+        },
+        {
+          "color": "#ECE3D0",
+          "name": "Crema"
+        }
+      ]
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "dresscode",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-3.jpg",
+    "assets/portada.jpg"
+  ]
+}

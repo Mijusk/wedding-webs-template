@@ -1,0 +1,204 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
+    "tagline": "Nos casamos y queremos celebrarlo contigo",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Septiembre, orilla del Tajo",
+        "text": "Nos conocimos una tarde de septiembre a la orilla del Tajo, y desde entonces todas las tardes nos han parecido cortas."
+      },
+      {
+        "meta": "Aranjuez",
+        "text": "Ahora queremos que una de ellas dure hasta el amanecer, y que tú estés allí."
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez"
+  },
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "Jardín de los olivos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "Patio central"
+    },
+    {
+      "time": "21:00",
+      "label": "Cena",
+      "place": "Salón de la bodega"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Hasta que el cuerpo aguante"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "museum": {
+      "room": "Sala {n}",
+      "number": "Nº {n}",
+      "and": "y",
+      "notice": "Se ruega no tocar las obras. Los abrazos, en cambio, están permitidos."
+    },
+    "hero": {
+      "eyebrow": "Exposición temporal · {date}",
+      "medium": "Óleo sobre amor",
+      "dateLabel": "Inauguración",
+      "placeLabel": "Sede",
+      "credit": "Colección particular. Cedida por sus familias para la ocasión"
+    },
+    "story": {
+      "eyebrow": "Textos de sala",
+      "title": "Sobre los artistas"
+    },
+    "gallery": {
+      "eyebrow": "La exposición",
+      "title": "Obras escogidas",
+      "intro": "Una selección de la colección permanente. Mirar con cariño está permitido; usar flash, también.",
+      "labels": [
+        {
+          "title": "Retrato a dos tiempos, {year}",
+          "medium": "Técnica mixta: risas y paciencia",
+          "credit": "Colección particular"
+        },
+        {
+          "title": "Domingo sin despertador, s. f.",
+          "medium": "Óleo sobre sobremesa larga",
+          "credit": "Préstamo de sus madres"
+        },
+        {
+          "title": "Estudio de una mirada",
+          "medium": "Acuarela de primavera sobre papel de cartas",
+          "credit": "Adquisición reciente"
+        },
+        {
+          "title": "El sí, en boceto",
+          "medium": "Carboncillo y algún nervio",
+          "credit": "Obra en proceso"
+        },
+        {
+          "title": "Naturaleza viva",
+          "medium": "Temple de café y paseos largos",
+          "credit": "Colección particular"
+        },
+        {
+          "title": "Paisaje con maleta",
+          "medium": "Collage de billetes de tren",
+          "credit": "Fondo de viajes pendientes"
+        },
+        {
+          "title": "Composición para dos voces",
+          "medium": "Óleo sobre lienzo de sofá",
+          "credit": "Cesión indefinida"
+        },
+        {
+          "title": "Un jueves cualquiera, {year}",
+          "medium": "Tinta y complicidad",
+          "credit": "Atribuida a {a}, con permiso de {b}"
+        }
+      ]
+    },
+    "schedule": {
+      "eyebrow": "Horario del museo",
+      "title": "Apertura extraordinaria",
+      "note": "El cierre de puertas queda a criterio de la pista de baile."
+    },
+    "details": {
+      "eyebrow": "Información para el visitante",
+      "title": "Cómo visitarnos",
+      "when": "Fecha",
+      "time": "Apertura",
+      "where": "Sede",
+      "timeSuffix": "h",
+      "timeNote": "Se ruega puntualidad: la obra no espera",
+      "countdown": "Faltan {days} días para la inauguración",
+      "countdownOne": "Inauguramos mañana",
+      "countdownToday": "Hoy inauguramos",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Cómo llegar"
+    },
+    "gifts": {
+      "eyebrow": "Tienda del museo",
+      "title": "Tu visita es la mejor adquisición",
+      "text": "Si además quieres contribuir a la colección, aquí tienes los datos de la cuenta. Sin envoltorio y sin colas en caja.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Taquilla",
+      "title": "Reserva tu entrada",
+      "text": "Aforo limitado: confírmanos antes del {deadline}.",
+      "eyebrowAfter": "Gracias por su visita",
+      "admit": "Entrada · 1 persona"
+    },
+    "rsvp": {
+      "eyebrow": "Taquilla",
+      "title": "Tu entrada",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "story",
+    "gallery",
+    "schedule",
+    "details",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-3.jpg"
+  ]
+}

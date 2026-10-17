@@ -1,0 +1,4 @@
+# Netlify: ninguna otra web puede incrustar estas páginas (solo el propio escaparate).
+/*
+  Content-Security-Policy: frame-ancestors 'self'
+  Referrer-Policy: strict-origin-when-cross-origin
