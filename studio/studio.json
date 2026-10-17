@@ -6,7 +6,7 @@
   "templates": {
     "clasica": {
       "name": "Clásica",
-      "url": "../"
+      "url": "../index.html"
     },
     "editorial": {
       "name": "Editorial",
@@ -106,42 +106,6 @@
     }
   },
   "styles": [
-    {
-      "id": "olivar",
-      "name": "Olivar",
-      "template": "clasica",
-      "theme": "olivar",
-      "status": "available",
-      "swatch": [
-        "#eef0ea",
-        "#8f6f43"
-      ],
-      "description": "Verde salvia y dorado, con una serif de alto contraste. Para bodas de campo y fincas."
-    },
-    {
-      "id": "atardecer",
-      "name": "Atardecer",
-      "template": "clasica",
-      "theme": "atardecer",
-      "status": "available",
-      "swatch": [
-        "#f4ece2",
-        "#b0532c"
-      ],
-      "description": "Arena y teja, cálida y luminosa. Para bodas de verano, costa o cortijo."
-    },
-    {
-      "id": "noche",
-      "name": "Noche",
-      "template": "clasica",
-      "theme": "noche",
-      "status": "available",
-      "swatch": [
-        "#141a2a",
-        "#d1b06a"
-      ],
-      "description": "Azul noche con detalles dorados. Para bodas de tarde que acaban de madrugada."
-    },
     {
       "id": "editorial",
       "name": "Editorial",
@@ -429,6 +393,42 @@
         "#b23a2e"
       ],
       "description": "Pasaporte, sello y dos relojes con la hora de vuestras ciudades. En español e inglés, para bodas de destino."
+    },
+    {
+      "id": "olivar",
+      "name": "Olivar",
+      "template": "clasica",
+      "theme": "olivar",
+      "status": "available",
+      "swatch": [
+        "#eef0ea",
+        "#8f6f43"
+      ],
+      "description": "Verde salvia y dorado, con una serif de alto contraste. Para bodas de campo y fincas."
+    },
+    {
+      "id": "atardecer",
+      "name": "Atardecer",
+      "template": "clasica",
+      "theme": "atardecer",
+      "status": "available",
+      "swatch": [
+        "#f4ece2",
+        "#b0532c"
+      ],
+      "description": "Arena y teja, cálida y luminosa. Para bodas de verano, costa o cortijo."
+    },
+    {
+      "id": "noche",
+      "name": "Noche",
+      "template": "clasica",
+      "theme": "noche",
+      "status": "available",
+      "swatch": [
+        "#141a2a",
+        "#d1b06a"
+      ],
+      "description": "Azul noche con detalles dorados. Para bodas de tarde que acaban de madrugada."
     }
   ],
   "sections": {
@@ -557,11 +557,11 @@
     ]
   },
   "legal": {
-    "_nota": "Datos del titular para el aviso legal (obligatorios por la LSSI). Mientras estén vacíos, legal.html muestra 'pendiente'.",
-    "owner": "",
+    "_nota": "Datos del titular para el aviso legal (obligatorios por la LSSI). Lo vacío sale como 'pendiente', salvo NIF y domicilio, que si están vacíos no se muestran.",
+    "owner": "Luis Ochoteco",
     "nif": "",
     "address": "",
-    "email": "",
+    "email": "luis8tk@gmail.com",
     "deliveryDays": 3,
     "onlineMonths": 12,
     "guestDataMonths": 6
