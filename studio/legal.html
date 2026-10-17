@@ -32,8 +32,8 @@
     <p>En cumplimiento del artículo 10 de la Ley 34/2002 de Servicios de la Sociedad de la Información (LSSI), estos son los datos del titular de esta web:</p>
     <ul>
       <li>Titular: <span data-field="owner"></span></li>
-      <li>NIF: <span data-field="nif"></span></li>
-      <li>Domicilio: <span data-field="address"></span></li>
+      <li data-optional>NIF: <span data-field="nif"></span></li>
+      <li data-optional>Domicilio: <span data-field="address"></span></li>
       <li>Email: <span data-field="email"></span></li>
     </ul>
     <p>Los diseños, textos y código de <span data-brand>WeddingWebs</span> son del titular. Las fotos y textos que suben las parejas siguen siendo suyos.</p>
@@ -70,13 +70,15 @@
 </footer>
 
 <script type="module">
-  // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como pendiente.
+  // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como
+  // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
   const studio = await fetch("studio.json", { cache: "no-store" }).then((r) => r.json());
   const legal = studio.legal || {};
   document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = studio.brand.name; });
   document.querySelectorAll("[data-field]").forEach((el) => {
     const value = legal[el.dataset.field];
-    if (value === "" || value == null) { el.textContent = "pendiente"; el.className = "pending"; }
+    if ((value === "" || value == null) && el.closest("[data-optional]")) el.closest("[data-optional]").remove();
+    else if (value === "" || value == null) { el.textContent = "pendiente"; el.className = "pending"; }
     else el.textContent = value;
   });
 </script>
