@@ -1,0 +1,318 @@
+/* Plantilla Botánica. Concepto: lámina de herbario en un libro antiguo de grabados.
+   Pergamino, tinta parda, verde hoja y el rojo de la numeración de las láminas. Las plantas se
+   dibujan a línea fina con rayado de sombra y se iluminan con aguadas planas (js/plates.js).
+   IM Fell English para títulos, su versión de versalitas para etiquetas y EB Garamond para leer.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  color-scheme: light;
+  --paper: #f3ecdd;          /* pergamino */
+  --paper-2: #ebe2cd;
+  --paper-3: #f8f3e7;        /* papel de las etiquetas y del formulario */
+  --ink: #2f2b24;            /* tinta */
+  --ink-soft: rgb(47 43 36 / .55);
+  --muted: #5f574a;
+  --line: #cdbfa3;
+  --green: #536b4e;
+  --green-dark: #3f5340;
+  --red: #9a3b2e;            /* rojo de lámina: numeración y detalles */
+  --accent: #536b4e;
+  --error: #9a3b2e;
+  --font-display: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --font-sc: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --font-body: "EB Garamond", "Garamond", Georgia, serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --draw: 1.05s;             /* reparto de los trazos de una lámina */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--ink);
+  background-color: var(--paper);
+  /* Papel antiguo: grano muy fino y algo de mancha, todo generado aquí (nada externo). */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .33 0 0 0 0 .27 0 0 0 0 .17 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .44 0 0 0 0 .25 0 0 0 .16 -.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  font: 400 19px/1.65 var(--font-body); font-kerning: normal;
+  font-variant-numeric: oldstyle-nums;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+h1, h2, h3, p, dl, dd, ol, ul, figure { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+h1, h2 { font-family: var(--font-display); font-weight: 400; }
+::selection { background: var(--green); color: var(--paper); }
+:focus-visible { outline: 1px solid var(--red); outline-offset: 5px; }
+
+.wrap { width: 100%; max-width: 1140px; margin-inline: auto; padding-inline: clamp(20px, 5vw, 64px); }
+.cap { text-transform: capitalize; }
+
+.eyebrow {
+  font: 400 15px/1.4 var(--font-sc); letter-spacing: .14em; color: var(--red);
+}
+
+.link {
+  display: inline-flex; align-items: center; gap: .55em; margin-top: 12px; padding: 0 0 3px;
+  border: 0; border-bottom: 1px solid rgb(83 107 78 / .45); background: none; cursor: pointer; border-radius: 0;
+  font: 400 16px/1.3 var(--font-sc); letter-spacing: .08em;
+  color: var(--green-dark); text-decoration: none; transition: color .35s ease, border-color .35s ease;
+}
+.link:hover { color: var(--red); border-bottom-color: var(--red); }
+.link__arrow { display: inline-block; font-family: var(--font-body); transition: transform .45s var(--ease-out); }
+.link:hover .link__arrow { transform: translateX(4px); }
+
+.button {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 16px 40px;
+  cursor: pointer; border: 1px solid var(--green); border-radius: 0; background: var(--green); color: var(--paper-3);
+  box-shadow: inset 0 0 0 3px var(--green), inset 0 0 0 4px rgb(248 243 231 / .45);
+  font: 400 18px/1.2 var(--font-sc); letter-spacing: .1em; text-align: center;
+  transition: background-color .4s ease, border-color .4s ease, box-shadow .4s ease;
+}
+.button:hover { background: var(--green-dark); border-color: var(--green-dark); box-shadow: inset 0 0 0 3px var(--green-dark), inset 0 0 0 4px rgb(248 243 231 / .45); }
+
+/* ============ Láminas (SVG de js/plates.js) ============ */
+.plate { display: block; width: 100%; height: auto; overflow: visible; }
+.plate__ink path { fill: none; stroke: var(--ink); stroke-width: .8; stroke-linecap: round; stroke-linejoin: round; }
+.plate__ink .v { stroke-width: .42; }
+.plate__ink .h { stroke-width: .36; }
+.plate__wash { mix-blend-mode: multiply; }
+.plate__dots { fill: var(--ink); opacity: .7; }
+
+.specimen { display: grid; justify-items: center; text-align: center; }
+.specimen__no { font: 400 17px/1 var(--font-sc); letter-spacing: .16em; color: var(--red); margin-bottom: 14px; }
+/* La huella de la plancha: el papel algo hundido y un filete doble alrededor del grabado. */
+.specimen__plate {
+  position: relative; width: 100%; padding: 6% 7% 5%;
+  background: rgb(255 251 240 / .32);
+  box-shadow: inset 1px 1px 0 rgb(47 43 36 / .1), inset -1px -1px 0 rgb(255 255 255 / .55), 0 1px 0 rgb(255 255 255 / .5);
+}
+.specimen__plate::before, .specimen__plate::after { content: ""; position: absolute; pointer-events: none; }
+.specimen__plate::before { inset: 10px; border: 1px solid var(--ink-soft); }
+.specimen__plate::after { inset: 14px; border: 1px solid rgb(47 43 36 / .2); }
+.specimen__cap { display: grid; gap: 4px; margin-top: 16px; }
+.specimen__latin { font: 400 22px/1.25 var(--font-display); color: var(--ink); }
+.specimen__latin i { font-style: italic; }
+.specimen__common { font: 400 14px/1.4 var(--font-sc); letter-spacing: .14em; color: var(--muted); }
+
+.sprig { display: block; width: 104px; height: auto; margin-inline: auto; }
+.sprig .plate__ink path { stroke-width: .8; }
+
+/* Marco de las fotos: filete fino y paspartú de papel, como una lámina pegada en el libro */
+.frame { position: relative; padding: 9px; background: var(--paper-3); border: 1px solid var(--ink-soft); box-shadow: 0 1px 0 rgb(255 255 255 / .6), 0 14px 30px -18px rgb(47 43 36 / .35); }
+.frame img { width: 100%; height: 100%; object-fit: cover; filter: sepia(.1) saturate(.92); }
+.caption { margin-top: 12px; font: italic 400 16px/1.45 var(--font-body); color: var(--muted); text-align: center; text-wrap: balance; }
+.caption__no { font: normal 400 14px/1 var(--font-sc); letter-spacing: .14em; color: var(--red); }
+
+/* ============ Portada: frontispicio ============ */
+.hero { position: relative; padding: clamp(28px, 4vw, 48px) clamp(16px, 3vw, 40px); }
+/* Margen de página con filete doble */
+.hero::before, .hero::after { content: ""; position: absolute; pointer-events: none; }
+.hero::before { inset: clamp(10px, 1.6vw, 22px); border: 1px solid var(--ink-soft); }
+.hero::after { inset: calc(clamp(10px, 1.6vw, 22px) + 4px); border: 1px solid rgb(47 43 36 / .18); }
+.hero__book {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center;
+  gap: clamp(32px, 5vw, 88px); max-width: 1180px; min-height: calc(100svh - 2 * clamp(28px, 4vw, 48px));
+  margin-inline: auto; padding: clamp(24px, 3vw, 40px) clamp(12px, 3vw, 40px);
+}
+.hero__plate .specimen__plate { width: min(100%, calc((100svh - 230px) * .8)); min-width: 280px; }
+.hero__plate .specimen__latin { font-size: clamp(22px, 2vw, 27px); }
+
+.hero__title { display: flex; flex-direction: column; align-items: center; text-align: center; container-type: inline-size; min-width: 0; }
+.hero__eyebrow { font: 400 17px/1.3 var(--font-sc); letter-spacing: .2em; color: var(--red); margin-bottom: clamp(10px, 2vh, 20px); }
+.hero__names {
+  display: grid; justify-items: center; max-width: 100%;
+  font-size: min(96px, calc(178cqi / var(--len, 6)), 19cqi);
+  line-height: 1; letter-spacing: 0; overflow-wrap: anywhere;
+}
+.hero__name { display: block; max-width: 100%; text-wrap: balance; }
+.hero__amp { display: block; font-style: italic; font-size: .5em; line-height: 1.3; color: var(--red); }
+.hero__tagline { margin-top: clamp(14px, 2vh, 22px); max-width: 26em; font: italic 400 19px/1.5 var(--font-body); color: var(--muted); text-wrap: balance; }
+.hero__sprig { width: 92px; margin-block: clamp(14px, 2.4vh, 24px) clamp(8px, 1.6vh, 16px); }
+.hero__date { font: 400 clamp(21px, 1.9vw, 26px)/1.3 var(--font-display); }
+.hero__date::first-letter { text-transform: uppercase; }
+.hero__place { margin-top: 6px; font: 400 15px/1.5 var(--font-sc); letter-spacing: .14em; color: var(--muted); }
+.hero__photo { width: min(100%, 380px); margin-top: clamp(22px, 3.6vh, 40px); }
+.hero__photo .frame img { aspect-ratio: 4 / 3; }
+
+/* ---- La entrada (≈ 2,3 s): la lámina se dibuja trazo a trazo y luego se ilumina con la aguada ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .is-anim .plate__ink path { stroke-dasharray: 1 1; animation: draw .7s cubic-bezier(.45, 0, .25, 1) both; animation-delay: calc(var(--d, 0) * var(--draw)); }
+  .is-anim .plate__wash { animation: wash 1.1s 1.2s ease both; }
+  .is-anim .plate__dots { animation: fade .8s 1.35s ease both; }
+  .is-anim.is-pending :is(.plate__ink path, .plate__wash, .plate__dots) { animation-play-state: paused; }
+  .head .sprig .plate__ink path { stroke-dasharray: 1 1; stroke-dashoffset: 0; transition: stroke-dashoffset .9s ease; transition-delay: calc(var(--d, 0) * .6s + .2s); }
+  .head.is-pending .sprig .plate__ink path { stroke-dashoffset: 1; }
+
+  .hero .specimen__no { animation: fade .8s .1s ease both; }
+  .hero .specimen__cap { animation: rise 1s 1.5s var(--ease-out) both; }
+  .hero__eyebrow { animation: rise 1s .35s var(--ease-out) both; }
+  .hero__names { animation: rise 1.2s .5s var(--ease-out) both; }
+  .hero__tagline, .hero__sprig, .hero__date, .hero__place { animation: rise 1s .85s var(--ease-out) both; }
+  .hero__photo { animation: rise 1.2s 1.25s var(--ease-out) both; }
+
+  .is-static :is(.plate, .plate *, .hero, .hero *) { animation: none !important; }
+}
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes wash { from { opacity: 0; } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+/* ============ Secciones ============ */
+.section { padding-block: clamp(72px, 9vw, 128px); }
+.head { display: grid; justify-items: center; text-align: center; gap: 10px; margin-bottom: clamp(40px, 5.5vw, 68px); }
+.head__no {
+  display: flex; align-items: center; gap: 16px;
+  font: 400 17px/1 var(--font-sc); letter-spacing: .16em; color: var(--red); margin-bottom: 6px;
+}
+.head__rule { width: clamp(28px, 4vw, 48px); height: 1px; background: currentColor; opacity: .6; }
+.head__title {
+  font-size: clamp(40px, 5vw, 64px); line-height: 1.04;
+  max-width: 16ch; text-wrap: balance; overflow-wrap: break-word;
+}
+.head__note { font: italic 400 19px/1.45 var(--font-body); color: var(--muted); max-width: 30em; text-wrap: balance; }
+.head__sprig { margin-top: 10px; }
+.lede {
+  max-width: 32em; margin: 0 auto; text-align: center; text-wrap: pretty;
+  font: italic 400 clamp(20px, 1.8vw, 23px)/1.6 var(--font-body); color: var(--muted);
+}
+
+/* Lugar y fecha: una lámina y su etiqueta de herbario */
+.details__grid {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 88px);
+  align-items: center; max-width: 1000px; margin-inline: auto;
+}
+.details__plate { max-width: 380px; justify-self: center; width: 100%; }
+.sheet {
+  position: relative; background: var(--paper-3); border: 1px solid var(--ink-soft);
+  padding: clamp(26px, 3.4vw, 40px) clamp(22px, 3.4vw, 44px);
+  box-shadow: 0 1px 0 rgb(255 255 255 / .6), 0 18px 40px -26px rgb(47 43 36 / .4);
+}
+.sheet::before { content: ""; position: absolute; inset: 5px; border: 1px solid rgb(47 43 36 / .18); pointer-events: none; }
+.sheet > * { position: relative; }
+.sheet__top {
+  font: 400 15px/1.4 var(--font-sc); letter-spacing: .14em; color: var(--red); text-align: center;
+  padding-bottom: 14px; margin-bottom: 8px; border-bottom: 1px solid var(--line); text-wrap: balance;
+}
+.sheet__row { padding-block: 18px; border-bottom: 1px dotted rgb(47 43 36 / .35); }
+.sheet__row:last-child { border-bottom: 0; padding-bottom: 4px; }
+.sheet__row dt { font: 400 14px/1.3 var(--font-sc); letter-spacing: .16em; color: var(--muted); margin-bottom: 4px; }
+.sheet__value { font: italic 400 clamp(24px, 2.4vw, 29px)/1.25 var(--font-body); overflow-wrap: break-word; }
+.sheet__note { font: italic 400 17px/1.4 var(--font-body); color: var(--red); margin-top: 4px; }
+.sheet__sub { font-size: 17px; color: var(--muted); margin-top: 2px; }
+
+/* Historia: párrafos numerados como en un tratado */
+.chapters { display: grid; gap: clamp(28px, 4vw, 44px); max-width: 680px; margin-inline: auto; text-align: center; }
+.chapter { display: grid; justify-items: center; gap: 10px; }
+.chapter__sprig { width: 70px; margin-bottom: clamp(8px, 2vw, 18px); opacity: .9; }
+.chapter__photo { width: min(100%, 420px); margin-bottom: 14px; }
+.chapter__photo .frame img { aspect-ratio: 4 / 3; }
+.chapter__meta { font: 400 15px/1.4 var(--font-sc); letter-spacing: .14em; color: var(--muted); }
+.chapter__no { color: var(--red); }
+.chapter__text { font: 400 clamp(23px, 2.4vw, 29px)/1.45 var(--font-display); text-wrap: pretty; }
+
+/* Programa: como el índice de un libro, con puntos guía hasta la hora */
+.index { max-width: 720px; margin-inline: auto; }
+.index__item {
+  display: grid; grid-template-columns: auto minmax(24px, 1fr) auto; column-gap: 14px; align-items: baseline;
+  padding-block: 18px; border-bottom: 1px solid rgb(47 43 36 / .14);
+}
+.index__item:first-child { border-top: 1px solid rgb(47 43 36 / .14); }
+.index__label { font: 400 clamp(25px, 2.6vw, 31px)/1.15 var(--font-display); min-width: 0; overflow-wrap: break-word; }
+.index__dots { align-self: end; height: 1px; margin-bottom: .45em; background-image: radial-gradient(circle, var(--ink-soft) .9px, transparent 1.2px); background-size: 7px 3px; background-repeat: repeat-x; background-position: 0 50%; height: 3px; }
+.index__time { font: 400 clamp(23px, 2.3vw, 28px)/1 var(--font-display); color: var(--red); font-variant-numeric: oldstyle-nums tabular-nums; }
+.index__place { grid-column: 1 / -1; font: italic 400 17px/1.4 var(--font-body); color: var(--muted); margin-top: 4px; }
+
+/* Galería: fotos como láminas numeradas */
+.figs { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: clamp(28px, 4vw, 48px) clamp(18px, 3vw, 40px); margin-inline: auto; align-items: start; }
+.figs[data-count="1"] { --n: 1; max-width: 520px; }
+.figs[data-count="2"] { --n: 2; max-width: 860px; }
+.figs .frame img { aspect-ratio: 4 / 5; }
+.figs[data-count="many"] .fig:nth-child(3n + 2) { margin-top: clamp(24px, 4vw, 56px); }
+
+/* Regalo */
+.gifts .wrap { display: grid; justify-items: center; text-align: center; }
+.iban { margin-top: 26px; display: grid; justify-items: center; width: min(100%, 520px); }
+.iban > summary { list-style: none; margin: 0; }
+.iban > summary::-webkit-details-marker { display: none; }
+.iban[open] > summary { display: none; }
+.iban__sheet { width: 100%; display: grid; justify-items: center; gap: 4px; }
+.iban__label { font: 400 14px/1.3 var(--font-sc); letter-spacing: .16em; color: var(--muted); }
+.iban__holder { font: italic 400 22px/1.35 var(--font-body); margin-bottom: 14px; overflow-wrap: anywhere; }
+.iban__num { font: 400 clamp(19px, 2.4vw, 25px)/1.4 var(--font-body); letter-spacing: .05em; font-variant-numeric: lining-nums tabular-nums; overflow-wrap: anywhere; }
+
+/* Cierre y colofón */
+.closing { padding-bottom: 0; }
+.closing__in { display: grid; justify-items: center; text-align: center; }
+.closing .head { margin-bottom: 24px; }
+.closing__cta { margin-top: 30px; }
+.closing__plate { width: min(100%, 300px); margin-top: clamp(56px, 8vw, 96px); }
+.closing__plate .specimen__latin { font-size: 20px; }
+.colophon {
+  display: grid; justify-items: center; gap: 6px; text-align: center;
+  margin-top: clamp(64px, 9vw, 112px); padding: 40px 20px calc(48px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--ink-soft); box-shadow: inset 0 4px 0 -3px rgb(47 43 36 / .2);
+}
+.colophon__finis { font: italic 400 26px/1 var(--font-display); }
+.colophon__names { font: 400 15px/1.4 var(--font-sc); letter-spacing: .16em; color: var(--muted); overflow-wrap: anywhere; }
+.colophon__year { font: 400 14px/1 var(--font-sc); letter-spacing: .2em; color: var(--red); }
+
+/* Entradas al bajar (js/reveal.js) */
+.reveal { transition: opacity 1s ease, transform 1.1s var(--ease-out); transition-delay: calc(var(--i, 0) * 110ms); }
+.reveal.is-pending { opacity: 0; transform: translateY(18px); }
+
+.load-error { padding: 48px 16px; text-align: center; color: var(--error); }
+
+/* ============ Formulario: hoja de papel con filete ============ */
+.rsvp-pill.rsvp-pill { border-radius: 0; box-shadow: inset 0 0 0 3px var(--green), inset 0 0 0 4px rgb(248 243 231 / .45), 0 12px 30px rgb(47 43 36 / .28); }
+/* Doble clase: css/rsvp.css se carga después y redondea esquinas en móvil */
+.rsvp-dialog.rsvp-dialog { border-radius: 0; background: var(--paper-3); }
+.rsvp-dialog::backdrop { background: rgb(47 43 36 / .5); }
+.rsvp-dialog__inner { padding: clamp(32px, 5vw, 48px); }
+.rsvp-dialog__inner::before { content: ""; position: absolute; inset: 8px; border: 1px solid var(--ink-soft); pointer-events: none; }
+.rsvp-dialog__inner::after { content: ""; position: absolute; inset: 12px; border: 1px solid rgb(47 43 36 / .16); pointer-events: none; }
+.rsvp-dialog__inner > * { position: relative; }
+.rsvp-close { position: absolute; top: 18px; right: 18px; z-index: 1; }
+.rsvp-title.rsvp-title { font-family: var(--font-display); font-weight: 400; font-style: normal; font-size: clamp(36px, 6vw, 46px); margin: 0; }
+.rsvp-note { font-style: italic; font-size: 17px; }
+.field.field > label, .field.field > legend { font: 400 14px/1.3 var(--font-sc); letter-spacing: .16em; text-transform: none; }
+.field input[type="text"] { font-size: 19px; }
+.choice.choice label { border-radius: 0; font-size: 17px; }
+.choice label:has(input:checked) { background: var(--green); border-color: var(--green); color: var(--paper-3); }
+.rsvp-thanks h3 { font-family: var(--font-display); font-style: normal; }
+
+/* ============ Tableta y móvil ============ */
+@media (max-width: 900px) {
+  .hero__book { grid-template-columns: minmax(0, 1fr); gap: 28px; min-height: 0; padding-top: 18px; }
+  .hero__plate .specimen__plate { width: min(100%, 46svh, 400px); min-width: 0; }
+  .details__grid { grid-template-columns: minmax(0, 1fr); }
+  .details__plate { max-width: 300px; }
+}
+@media (max-width: 600px) {
+  body { font-size: 18px; }
+  .hero { padding: 26px 14px 40px; }
+  .hero__book { padding-inline: 8px; gap: 22px; }
+  .hero__plate .specimen__plate { width: min(100%, 30svh); padding: 7% 6% 5%; }
+  .specimen__plate::before { inset: 7px; }
+  .specimen__plate::after { inset: 10px; }
+  .hero__plate .specimen__cap { margin-top: 12px; }
+  .hero__plate .specimen__latin { font-size: 21px; }
+  .hero__names { font-size: min(76px, calc(170cqi / var(--len, 6)), 20cqi); }
+  .hero__photo { width: 100%; }
+  .section { padding-block: 64px; }
+  .head__title { font-size: clamp(36px, 10.5vw, 46px); }
+  .details__plate { max-width: 250px; }
+  .sheet { padding: 24px 20px; }
+  .index__item { column-gap: 10px; padding-block: 15px; }
+  .figs, .figs[data-count="many"] { --n: 2; gap: 22px 14px; }
+  .figs[data-count="1"] { --n: 1; }
+  .figs[data-count="3"] .fig:first-child { grid-column: 1 / -1; }
+  .figs[data-count="many"] .fig:nth-child(3n + 2) { margin-top: 0; }
+  .figs[data-count="many"] .fig:nth-child(2n) { margin-top: 28px; }
+  .caption { font-size: 15px; }
+  .closing__plate { width: min(100%, 240px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+}

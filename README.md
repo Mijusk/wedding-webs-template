@@ -45,6 +45,11 @@ No hay `npm run dev`: no hay paso de build.
 | `plantillas/carta/` | Carta manuscrita (`copy.letter`) que se escribe sola, con botón Saltar. Autocontenida |
 | `plantillas/vegetal/` | Hoja de papel vegetal translúcida sobre la foto que se levanta al bajar. Autocontenida |
 | `plantillas/capilla/` | Arcos, rosetón con iniciales, entrada de luz; sección opcional `liturgy` (lecturas y música). Autocontenida |
+| `plantillas/botanica/` | Láminas de herbario en SVG que se dibujan y colorean; la planta de portada depende de la estación de la boda. Autocontenida |
+| `plantillas/costa/` | Horizonte y ola; hora real de la puesta de sol (NOAA) si `venue.lat`/`venue.lon`; sección `travel` (cómo llegar). Autocontenida |
+| `plantillas/estrellas/` | Mapa del cielo real de esa noche (catálogo de 411 estrellas, Luna) con `venue.lat`/`venue.lon`; sin ellas usa Madrid. Autocontenida |
+| `plantillas/galeria/` | Museo: marcos dorados, focos que se encienden, cartelas en `copy.gallery.labels`. Autocontenida |
+| `plantillas/ciudades/` | Pasaporte y sello; `cities` (dos ciudades con tz y lat/lon) para relojes y mapa; ES/EN con `copy_en`; sección `travel`. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |

@@ -83,6 +83,26 @@
     "capilla": {
       "name": "Capilla",
       "url": "../plantillas/capilla/"
+    },
+    "botanica": {
+      "name": "Botánica",
+      "url": "../plantillas/botanica/"
+    },
+    "costa": {
+      "name": "Costa",
+      "url": "../plantillas/costa/"
+    },
+    "estrellas": {
+      "name": "Noche estrellada",
+      "url": "../plantillas/estrellas/"
+    },
+    "galeria": {
+      "name": "Galería de arte",
+      "url": "../plantillas/galeria/"
+    },
+    "ciudades": {
+      "name": "Dos ciudades",
+      "url": "../plantillas/ciudades/"
     }
   },
   "styles": [
@@ -349,6 +369,66 @@
         "#6b2737"
       ],
       "description": "Arcos, un rosetón con vuestras iniciales y luz cálida que entra por la ventana. Para bodas en iglesia, con lecturas y música."
+    },
+    {
+      "id": "botanica",
+      "name": "Botánica",
+      "template": "botanica",
+      "theme": "botanica",
+      "status": "available",
+      "swatch": [
+        "#f3ecdd",
+        "#536b4e"
+      ],
+      "description": "Láminas de herbario antiguo con nombre en latín que se dibujan y se colorean. La planta cambia según la estación de vuestra boda."
+    },
+    {
+      "id": "costa",
+      "name": "Costa",
+      "template": "costa",
+      "theme": "costa",
+      "status": "available",
+      "swatch": [
+        "#f7f5f0",
+        "#1e4a6b"
+      ],
+      "description": "Azul mar, arena y una línea de horizonte. Calcula la hora exacta de la puesta de sol de vuestro día. Para bodas junto al mar."
+    },
+    {
+      "id": "estrellas",
+      "name": "Noche estrellada",
+      "template": "estrellas",
+      "theme": "estrellas",
+      "status": "available",
+      "swatch": [
+        "#0d1424",
+        "#d8b46a"
+      ],
+      "description": "El cielo real de la noche de vuestra boda, calculado para ese lugar, con sus constelaciones en dorado."
+    },
+    {
+      "id": "galeria",
+      "name": "Galería de arte",
+      "template": "galeria",
+      "theme": "galeria",
+      "status": "available",
+      "swatch": [
+        "#e9e4da",
+        "#b38e4a"
+      ],
+      "description": "Vuestras fotos colgadas como cuadros de museo, con marco dorado, foco y cartelas con humor fino."
+    },
+    {
+      "id": "ciudades",
+      "name": "Dos ciudades",
+      "template": "ciudades",
+      "theme": "ciudades",
+      "status": "available",
+      "swatch": [
+        "#f5f2ec",
+        "#b23a2e"
+      ],
+      "description": "Pasaporte, sello y dos relojes con la hora de vuestras ciudades. En español e inglés, para bodas de destino."
     }
   ],
   "sections": {
@@ -365,6 +445,10 @@
       "details": {
         "name": "Fecha y lugar",
         "fixed": true
+      },
+      "travel": {
+        "name": "Viaje y cómo llegar",
+        "hint": "Vuelos, traslados y alojamiento"
       },
       "story": {
         "name": "Vuestra historia",
