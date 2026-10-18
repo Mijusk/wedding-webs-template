@@ -1,6 +1,6 @@
 import { longDate, esc, daysUntil } from "../format.js";
 
-export function hero({ event, locale, copy = {} }) {
+export function hero({ event }) {
   const [a, b] = event.couple;
   const days = daysUntil(event.date);
   // Antes de la boda, cuenta atrás; el día, "es hoy"; después, nada.
@@ -20,6 +20,5 @@ export function hero({ event, locale, copy = {} }) {
       <p class="hero__tagline">${esc(event.tagline)}</p>
       ${countdown}
     </div>
-    ${t.scrollHint ? `<span class="hero__cue" aria-hidden="true">${esc(t.scrollHint)}</span>` : ""}
   </section>`;
 }

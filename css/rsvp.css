@@ -11,23 +11,19 @@
   background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
   box-shadow: 0 18px 48px var(--shadow); padding: 24px;
 }
-.rsvp-close:hover { color: var(--ink); background: var(--paper-2); }
-
-.rsvp-form { display: grid; gap: 26px; margin-top: 14px; }
-.field { display: grid; gap: 8px; border: 0; margin: 0; padding: 0; min-width: 0; }
-.field > label, .field > legend { padding: 0; font-size: 12px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
-.field > legend { margin-bottom: 10px; }
+.rsvp-panel h2 { font-size: 28px; }
+.rsvp-panel form { display: grid; gap: 18px; margin-top: 16px; }
+.field { display: grid; gap: 6px; }
+.field label, .field legend { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0; }
 .field input[type="text"] {
   font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px;
 }
 fieldset.field { border: 0; margin: 0; padding: 0; }
 .choice { display: flex; gap: 8px; }
 .choice label {
-  position: relative; text-align: center; border: 1px solid var(--line); border-radius: 999px;
-  padding: 12px 10px; cursor: pointer; font-size: 15px; line-height: 1.3;
-  transition: border-color .3s ease, background-color .3s ease, color .3s ease;
+  flex: 1; text-align: center; border: 1px solid var(--line); border-radius: 4px; padding: 10px; cursor: pointer;
+  text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--ink);
 }
-.choice label:hover { border-color: var(--ink); }
 .choice input { position: absolute; opacity: 0; pointer-events: none; }
 .choice input:checked + span { font-weight: 600; }
 .choice label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }

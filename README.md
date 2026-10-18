@@ -13,30 +13,16 @@ No hay `npm run dev`: no hay paso de build.
 
 (Hace falta un servidor: `fetch("config.json")` no funciona abriendo el archivo directamente.)
 
-## La idea: la página atardece
-
-La historia se cuenta como el propio día de la boda. La portada es la foto de la pareja; debajo, la página empieza con luz de tarde y, al bajar por el programa, cada hora tiñe la página con su tono: tarde (`day`), atardecer (`dusk`), hora azul (`blue`) y noche (`night`). El regalo y el cierre ya ocurren de noche, y la página termina con los nombres de la pareja a todo el ancho.
-
-El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si el atardecer de esa fecha no cuadra, un elemento del programa puede forzar su tono con `"tone": "dusk"`. Los colores de cada tono están en `css/theme.css`.
-
 ## Estructura
 
 | Ruta | Qué es |
 | --- | --- |
-| `config.json` | Todo lo variable: pareja, fechas, foto, lugar, historia, programa, IBAN, RSVP, textos (`copy`) y secciones visibles |
-| `css/theme.css` | Colores de cada hora y tipografías (lo único de estilo que debería cambiar por cliente) |
-| `css/base.css` | Retícula, tipografía base, enlaces, botones y entradas al hacer scroll |
-| `css/sections.css` | Maquetación de cada sección |
-| `css/rsvp.css` | Botón flotante y formulario |
-| `js/main.js` | Carga el config, pinta las secciones de `config.sections` y arranca los comportamientos |
-| `js/sections/*.js` | Una sección por archivo: `hero`, `story`, `details`, `schedule`, `gifts`, `closing` |
-| `js/tone.js` | Cambio de tono de la página según la hora de la sección visible |
-| `js/reveal.js` | Entradas suaves de lo que queda por debajo de la primera pantalla |
-| `js/hero-shape.js` | Si la foto de portada es vertical, en escritorio la coloca a la izquierda en vez de recortarla |
-| `js/fit.js` | Ajusta la firma final al ancho de la pantalla |
-| `js/copy.js` | Botón de copiar IBAN |
-| `js/calendar.js` | Enlace "Añadir al calendario" (Google Calendar) |
-| `js/rsvp.js` | Formulario de confirmación en un `<dialog>` (hoja inferior en móvil) |
+| `config.json` | Datos de la boda: pareja, fecha, lugar, programa, RSVP y secciones visibles |
+| `css/theme.css` | Colores y tipografías (lo único de estilo que debería cambiar por cliente) |
+| `css/base.css`, `css/rsvp.css` | Maquetación y formulario |
+| `js/main.js` | Carga el config y pinta las secciones de `config.sections` |
+| `js/sections/*.js` | Una sección por archivo (hero, detalles, programa) |
+| `js/rsvp.js` | Formulario flotante de confirmación |
 | `js/storage.js` | Guardado del RSVP: Google Sheets si hay `rsvp.endpoint`, si no, simulado en localStorage |
 | `css/themes/*.css` | Estilos alternativos (`config.theme`): sobrescriben los tokens de `theme.css` |
 | `studio/` | Escaparate comercial con el generador de vista previa (ver abajo) |
@@ -90,7 +76,7 @@ Guarda la fecha con su zona horaria (`2027-06-12T18:00:00+02:00`): sin ella, "A�
 
 ## Añadir una sección
 
-Crea `js/sections/<nombre>.js` exportando una función `(config) => html`, regístrala en `SECTIONS` dentro de `js/main.js` y añade su nombre a `config.sections`. Pon sus textos en `config.copy.<nombre>`. Si quieres que marque la hora de la página, dale `data-tone`; si quieres que entre al hacer scroll, dale la clase `reveal`.
+Crea `js/sections/<nombre>.js` exportando una función `(config) => html`, regístrala en `SECTIONS` dentro de `js/main.js` y añade su nombre a `config.sections`.
 
 La fecha y la hora se muestran tal cual están en el config (hora local del lugar), sin convertir a la zona horaria del invitado.
 
