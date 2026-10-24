@@ -166,6 +166,20 @@ end $$;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function app.link_new_user();
 
+-- Y al revés: si el usuario de acceso ya existía cuando se le da de alta en el equipo o en una boda.
+create or replace function app.link_existing_user() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if new.user_id is null then
+    select u.id into new.user_id from auth.users u where lower(u.email) = lower(new.email) limit 1;
+  end if;
+  return new;
+end $$;
+create trigger staff_link_user before insert or update of email on public.staff
+  for each row execute function app.link_existing_user();
+create trigger couple_users_link_user before insert or update of email on public.couple_users
+  for each row execute function app.link_existing_user();
+
 -- ── Pedidos y pagos ───────────────────────────────────────────
 
 create table public.orders (
