@@ -6,8 +6,10 @@ import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } 
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll } from "./entrance.js";
+import { captureAttribution } from "./attribution.js";
 
 async function start() {
+  captureAttribution();
   const catalog = await loadCatalog();
   const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
@@ -86,10 +88,16 @@ function leadFromTrial(w, style) {
     type: "prueba",
     email: w.email,
     name: w.couple.join(" y "),
+    nameA: w.couple[0],
+    nameB: w.couple[1],
     weddingDate: `${w.date} ${w.time}`,
     venue: [w.venue, w.city].filter(Boolean).join(", "),
+    city: w.city,
     style: style.id,
     photos: w.photos.length,
+    // El texto exacto que aceptaron (prueba del consentimiento, RGPD).
+    consent: true,
+    consentText: document.querySelector("label[for=b-consent] span")?.textContent.replace(/\s+/g, " ").trim(),
   };
 }
 

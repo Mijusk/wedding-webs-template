@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>No encontramos esta página</title>
+<link rel="icon" href="/studio/icono.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/studio/fonts/fonts.css">
+<style>
+  :root { --bg: #f6f4f1; --ink: #1f1a24; --muted: #675f6d; --line: #ddd6d6; --accent: #7d2a4b; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 17px/1.6 "Hanken Grotesk", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    display: grid; place-items: center; padding: 24px;
+  }
+  main { max-width: 34rem; text-align: center; display: grid; gap: 18px; justify-items: center; }
+  .rings { width: 92px; height: 56px; color: var(--accent); }
+  h1 { font: 400 clamp(32px, 7vw, 46px)/1.08 "Gloock", "Didot", Georgia, serif; margin: 0; text-wrap: balance; }
+  .lead { margin: 0; color: var(--muted); font-size: 18px; text-wrap: pretty; }
+  .rule { width: 56px; height: 1px; background: var(--line); margin: 6px 0; }
+  .foot { margin: 0; font-size: 14px; color: var(--muted); }
+  .foot a { color: var(--ink); text-underline-offset: 3px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .rings circle { stroke-dasharray: 160; stroke-dashoffset: 160; animation: draw 1.4s ease-out forwards; }
+    .rings circle + circle { animation-delay: .25s; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+  }
+</style>
+</head>
+<body>
+<main>
+  <svg class="rings" viewBox="0 0 92 56" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+    <circle cx="34" cy="28" r="22"/><circle cx="58" cy="28" r="22"/>
+  </svg>
+  <h1>No encontramos esta página</h1>
+  <p class="lead">Puede que el enlace esté incompleto o que la web ya no esté publicada. Revisa el enlace que te enviaron o pídeselo de nuevo a los novios.</p>
+  <span class="rule" aria-hidden="true"></span>
+  <p class="foot">¿Os casáis? <a href="/studio/">Probad vuestra web de boda</a></p>
+</main>
+</body>
+</html>

@@ -1,9 +1,33 @@
 {
+  "regions": ["fra1"],
+  "functions": {
+    "api/boda.js": { "includeFiles": "{index.html,404.html,plantillas/*/index.html}" }
+  },
   "redirects": [
     {
       "source": "/",
       "destination": "/studio/",
       "permanent": false
+    },
+    {
+      "source": "/(supabase|scripts|tests|docs)/:path*",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/(package\\.json|README\\.md|\\.env.*|\\.gitignore)",
+      "destination": "/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/b/:slug",
+      "destination": "/api/boda?slug=:slug"
+    },
+    {
+      "source": "/b/:slug/",
+      "destination": "/api/boda?slug=:slug"
     }
   ],
   "headers": [
@@ -17,6 +41,19 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/panel/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

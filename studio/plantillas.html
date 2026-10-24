@@ -49,6 +49,8 @@
 <script type="module">
   import { loadCatalog, renderStyleCards } from "./app/catalog.js";
   import { revealOnScroll } from "./app/entrance.js";
+  import { captureAttribution } from "./app/attribution.js";
+  captureAttribution();
   try {
     const catalog = await loadCatalog();
     document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = catalog.studio.brand.name; });
