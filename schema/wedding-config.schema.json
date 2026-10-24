@@ -139,8 +139,8 @@
       "title": "Tarjeta para WhatsApp e icono",
       "additionalProperties": false,
       "properties": {
-        "image": { "type": "string", "maxLength": 1000, "pattern": "^https://", "title": "Imagen 1200×630 para compartir" },
-        "icon": { "type": "string", "maxLength": 1000, "pattern": "^https://", "title": "Icono con las iniciales" }
+        "image": { "type": "string", "maxLength": 1000, "pattern": "^https?://", "title": "Imagen 1200×630 para compartir" },
+        "icon": { "type": "string", "maxLength": 1000, "pattern": "^https?://", "title": "Icono con las iniciales" }
       }
     },
     "copy": { "type": "object", "title": "Textos de la plantilla (por sección)" },
