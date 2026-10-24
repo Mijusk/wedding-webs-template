@@ -155,3 +155,19 @@ update public.orders set paid_cents = total_cents;
 with open(os.path.join(ROOT, 'supabase/seed.sql'), 'w', encoding='utf-8') as f:
     f.write(out)
 print('supabase/seed.sql escrito')
+
+# Los mismos datos para un proyecto de Supabase en la nube (staging), sin usuarios de acceso:
+# allí los usuarios se crean desde Authentication > Users.
+cloud = out[out.index('-- Clientes'):]
+cloud = cloud.replace("""insert into public.couple_users (wedding_id, email, name, user_id) values
+  ('b0000000-0000-4000-8000-000000000001', 'lucia@example.com', 'Lucía', '33333333-3333-4333-8333-333333333333');""",
+  """insert into public.couple_users (wedding_id, email, name) values
+  ('b0000000-0000-4000-8000-000000000001', 'lucia@example.com', 'Lucía');""")
+header = """-- Datos FICTICIOS de ejemplo para el proyecto de staging en Supabase (nunca en producción).
+-- Generado por scripts/generar-semillas.py. Cómo usarlo: SQL Editor > pega este archivo > Run.
+-- Para borrarlos después: ver docs/SUPABASE.md.
+
+"""
+with open(os.path.join(ROOT, 'supabase/datos-de-ejemplo.sql'), 'w', encoding='utf-8') as f:
+    f.write(header + cloud)
+print('supabase/datos-de-ejemplo.sql escrito')

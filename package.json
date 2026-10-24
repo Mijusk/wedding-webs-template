@@ -9,10 +9,12 @@
   "scripts": {
     "dev": "node scripts/servidor-local.mjs",
     "validar": "node scripts/validar-configs.mjs",
-    "test": "node --test \"tests/unit/*.test.js\" && node scripts/validar-configs.mjs",
+    "test": "node --test \"tests/unit/*.test.js\" && node scripts/validar-configs.mjs && node scripts/unir-migraciones.mjs --comprobar",
     "test:db": "tests/db/run.sh",
     "test:api": "node --test \"tests/api/*.test.js\"",
-    "test:e2e": "node tests/e2e/flujo-completo.mjs",
-    "semillas": "python3 scripts/generar-semillas.py"
+    "test:e2e": "node tests/e2e/flujo-completo.mjs && node tests/e2e/panel.mjs && node tests/e2e/plantillas.mjs",
+    "semillas": "python3 scripts/generar-semillas.py",
+    "migraciones": "node scripts/unir-migraciones.mjs",
+    "importar-boda": "node scripts/importar-boda.mjs"
   }
 }

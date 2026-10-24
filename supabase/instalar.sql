@@ -1,0 +1,1907 @@
+-- WeddingWebs: instalación completa de la base de datos en un proyecto de Supabase NUEVO.
+-- Generado por scripts/unir-migraciones.mjs a partir de supabase/migrations: no lo edites a mano.
+-- Cómo usarlo: Supabase > SQL Editor > New query > pega todo este archivo > Run. Ver docs/SUPABASE.md.
+
+-- ════════════════ 20261024000100_base.sql ════════════════
+
+-- WeddingWebs · 1/9 · Cimientos: esquema interno, utilidades, equipo y ajustes.
+--
+-- Convenciones de todas las tablas:
+--   id uuid, created_at y updated_at (con disparador), importes en céntimos (integer),
+--   fechas con zona horaria. La zona del negocio es Europe/Madrid.
+-- El esquema "app" guarda funciones internas: no se publica en la API REST.
+
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
+create schema if not exists app;
+grant usage on schema app to anon, authenticated, service_role;
+
+-- updated_at automático
+create or replace function app.set_updated_at() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+-- Texto sin tildes, en minúsculas y con espacios simples (para buscar y comparar nombres).
+create or replace function app.normalize(p text) returns text
+language sql immutable as $$
+  select btrim(regexp_replace(
+    translate(lower(coalesce(p, '')),
+      'áàäâãåéèëêíìïîóòöôõúùüûñçœæ',
+      'aaaaaaeeeeiiiiooooouuuuncoa'),
+    '\s+', ' ', 'g'))
+$$;
+
+-- Convierte un texto en un trozo de URL: "Lucía y Martín" -> "lucia-y-martin".
+create or replace function app.slugify(p text) returns text
+language sql immutable as $$
+  select btrim(regexp_replace(app.normalize(p), '[^a-z0-9]+', '-', 'g'), '-')
+$$;
+
+-- Token aleatorio apto para URL (192 bits).
+create or replace function app.random_token() returns text
+language sql volatile as $$
+  select translate(encode(extensions.gen_random_bytes(24), 'base64'), '+/=', '-_')
+$$;
+
+-- ── Equipo ─────────────────────────────────────────────────────
+
+create table public.staff (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid unique references auth.users(id) on delete set null,
+  email text not null check (email ~ '^\S+@\S+\.\S+$'),
+  name text not null default '',
+  role text not null default 'editor' check (role in ('owner', 'admin', 'editor')),
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create unique index staff_email_key on public.staff (lower(email));
+create trigger staff_updated_at before update on public.staff
+  for each row execute function app.set_updated_at();
+comment on table public.staff is 'Usuarios internos (Luis y futuros ayudantes). owner y admin lo ven todo; editor no toca ajustes, equipo ni facturas.';
+
+-- Rol del usuario conectado, si es del equipo y está activo. SECURITY DEFINER para que las
+-- políticas de RLS puedan consultarlo sin pasar por la RLS de staff (evita recursión).
+create or replace function app.staff_role() returns text
+language sql stable security definer set search_path = '' as $$
+  select s.role from public.staff s where s.user_id = auth.uid() and s.active
+$$;
+
+create or replace function app.staff_id() returns uuid
+language sql stable security definer set search_path = '' as $$
+  select s.id from public.staff s where s.user_id = auth.uid() and s.active
+$$;
+
+create or replace function app.is_staff() returns boolean
+language sql stable as $$ select app.staff_role() is not null $$;
+
+create or replace function app.is_admin() returns boolean
+language sql stable as $$ select coalesce(app.staff_role() in ('owner', 'admin'), false) $$;
+
+-- Llamadas hechas desde nuestras funciones de servidor (clave secreta de Supabase).
+-- Ojo: dentro de una función SECURITY DEFINER current_user es el dueño de la función; por eso se
+-- mira el rol de la sesión (SET ROLE, que es lo que hace PostgREST) y el rol del JWT.
+create or replace function app.is_service() returns boolean
+language sql stable as $$
+  select current_setting('role', true) = 'service_role'
+      or coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role', '') = 'service_role'
+$$;
+
+grant execute on all functions in schema app to anon, authenticated, service_role;
+
+-- Primer paso tras crear el proyecto: hacer dueño a Luis (se ejecuta en el editor SQL de Supabase).
+--   select app.make_owner('tu-email@ejemplo.com', 'Luis');
+create or replace function app.make_owner(p_email text, p_name text default '') returns public.staff
+language plpgsql security definer set search_path = '' as $$
+declare
+  r public.staff;
+begin
+  insert into public.staff (email, name, role, user_id)
+  values (lower(btrim(p_email)), coalesce(p_name, ''), 'owner',
+          (select u.id from auth.users u where lower(u.email) = lower(btrim(p_email)) limit 1))
+  on conflict (lower(email)) do update
+    set role = 'owner', active = true,
+        name = coalesce(nullif(excluded.name, ''), public.staff.name),
+        user_id = coalesce(excluded.user_id, public.staff.user_id)
+  returning * into r;
+  return r;
+end $$;
+revoke execute on function app.make_owner(text, text) from public, anon, authenticated;
+
+-- ── Ajustes ────────────────────────────────────────────────────
+
+create table public.settings (
+  id uuid primary key default gen_random_uuid(),
+  key text not null unique check (key ~ '^[a-z_]+$'),
+  value jsonb not null default '{}'::jsonb,
+  description text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by uuid references public.staff(id) on delete set null
+);
+create trigger settings_updated_at before update on public.settings
+  for each row execute function app.set_updated_at();
+
+insert into public.settings (key, value, description) values
+  ('vendedor', jsonb_build_object(
+      'nombre', '', 'nif', '', 'direccion', '', 'codigo_postal', '', 'ciudad', '', 'provincia', '',
+      'pais', 'ES', 'email', '', 'tipo', null, 'regimen_iva', null),
+   'Datos fiscales de WeddingWebs para la página legal y las facturas. Si faltan, la facturación real queda bloqueada. tipo: autonomo | sociedad.'),
+  ('plazos', jsonb_build_object(
+      'entrega_dias', 3, 'web_meses_tras_boda', 12, 'invitados_meses_tras_boda', 6,
+      'leads_perdidos_anonimizar_meses', 24),
+   'Plazos del negocio: entrega, retirada de la web y borrado de datos de invitados.'),
+  ('sitio', jsonb_build_object('url', null, 'bodas_en', 'ruta'),
+   'Dirección pública de la web (para enlaces y tarjetas de WhatsApp) y si las bodas van en ruta (/b/slug) o en subdominio.')
+on conflict (key) do nothing;
+
+create or replace function app.setting(p_key text) returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select s.value from public.settings s where s.key = p_key
+$$;
+grant execute on function app.setting(text) to anon, authenticated, service_role;
+
+-- Contadores por año (números de pedido P-2026-0001). Las facturas tienen su propia serie.
+create table public.counters (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  year integer not null,
+  value integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (name, year)
+);
+create trigger counters_updated_at before update on public.counters
+  for each row execute function app.set_updated_at();
+
+create or replace function app.next_counter(p_name text, p_year integer) returns integer
+language plpgsql security definer set search_path = '' as $$
+declare
+  v integer;
+begin
+  insert into public.counters (name, year, value) values (p_name, p_year, 1)
+  on conflict (name, year) do update set value = public.counters.value + 1
+  returning value into v;
+  return v;
+end $$;
+
+-- ════════════════ 20261024000200_crm.sql ════════════════
+
+-- WeddingWebs · 2/9 · Captación y CRM: clientes, leads, atribución de publicidad y consentimientos.
+
+-- La pareja como cliente (datos de facturación). Un lead ganado se convierte en cliente.
+create table public.clients (
+  id uuid primary key default gen_random_uuid(),
+  display_name text not null check (length(btrim(display_name)) > 0),
+  email text,
+  phone text,
+  billing_name text,
+  tax_id text,
+  billing_address text,
+  postal_code text,
+  city text,
+  province text,
+  country text not null default 'ES' check (country ~ '^[A-Z]{2}$'),
+  language text not null default 'es' check (language in ('es', 'en', 'ca')),
+  notes text,
+  anonymized_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index clients_email_idx on public.clients (lower(email));
+create index clients_tax_id_idx on public.clients (upper(tax_id));
+create trigger clients_updated_at before update on public.clients
+  for each row execute function app.set_updated_at();
+
+create table public.leads (
+  id uuid primary key default gen_random_uuid(),
+  names text not null default '',
+  partner_a text,
+  partner_b text,
+  email text,
+  phone text,
+  wedding_date date,
+  wedding_time time,
+  venue text,
+  city text,
+  style text,
+  tier text,
+  sections jsonb,
+  trial_config jsonb,
+  message text,
+  source text not null default 'manual' check (source in (
+    'prueba', 'reserva', 'importado', 'manual', 'whatsapp', 'email', 'telefono',
+    'bodas_net', 'instagram', 'recomendacion', 'otro')),
+  status text not null default 'nuevo' check (status in (
+    'nuevo', 'contactado', 'propuesta', 'esperando_pago', 'ganado', 'perdido')),
+  status_changed_at timestamptz not null default now(),
+  lost_reason text,
+  owner_id uuid references public.staff(id) on delete set null,
+  next_action text,
+  next_action_at timestamptz,
+  last_contacted_at timestamptz,
+  trials integer not null default 0,
+  reserved_at timestamptz,
+  client_id uuid references public.clients(id) on delete set null,
+  anonymized_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint leads_contact check (email is not null or phone is not null or anonymized_at is not null),
+  constraint leads_lost_reason check (status <> 'perdido' or lost_reason is not null)
+);
+create index leads_status_idx on public.leads (status, created_at desc);
+create index leads_email_idx on public.leads (lower(email));
+create index leads_next_action_idx on public.leads (next_action_at) where status not in ('ganado', 'perdido');
+create trigger leads_updated_at before update on public.leads
+  for each row execute function app.set_updated_at();
+
+comment on column public.leads.status is 'nuevo → contactado → propuesta → esperando_pago → ganado | perdido';
+comment on column public.leads.trial_config is 'Config de la vista previa que probó la pareja en el escaparate (sin fotos).';
+
+-- Cambios de estado: fecha del cambio y "último contacto".
+create or replace function app.leads_status_dates() returns trigger
+language plpgsql as $$
+begin
+  if tg_op = 'UPDATE' and new.status is distinct from old.status then
+    new.status_changed_at := now();
+    if old.status = 'nuevo' and new.status <> 'perdido' then
+      new.last_contacted_at := coalesce(new.last_contacted_at, now());
+    end if;
+    if new.status <> 'perdido' then new.lost_reason := null; end if;
+  end if;
+  new.email := nullif(lower(btrim(new.email)), '');
+  new.phone := nullif(btrim(new.phone), '');
+  if coalesce(btrim(new.names), '') = '' then
+    new.names := concat_ws(' y ', nullif(btrim(new.partner_a), ''), nullif(btrim(new.partner_b), ''));
+  end if;
+  return new;
+end $$;
+create trigger leads_status_dates before insert or update on public.leads
+  for each row execute function app.leads_status_dates();
+
+-- Atribución de publicidad: primer y último toque antes de dejar los datos.
+create table public.lead_attribution (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid not null references public.leads(id) on delete cascade,
+  touch text not null check (touch in ('primero', 'ultimo')),
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  utm_term text,
+  utm_content text,
+  gclid text,
+  fbclid text,
+  landing_page text,
+  referrer text,
+  captured_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (lead_id, touch)
+);
+create index lead_attribution_campaign_idx on public.lead_attribution (utm_source, utm_campaign);
+create trigger lead_attribution_updated_at before update on public.lead_attribution
+  for each row execute function app.set_updated_at();
+
+-- Consentimientos: texto exacto aceptado, fecha e IP. Solo se añaden filas (es una prueba).
+create table public.consents (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references public.leads(id) on delete set null,
+  client_id uuid references public.clients(id) on delete set null,
+  email text,
+  purpose text not null check (purpose in (
+    'contacto_comercial', 'cookies_publicidad', 'cookies_analitica', 'tratamiento_invitados')),
+  granted boolean not null default true,
+  text text not null,
+  source text,
+  ip inet,
+  user_agent text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index consents_lead_idx on public.consents (lead_id);
+create index consents_email_idx on public.consents (lower(email));
+
+-- ════════════════ 20261024000300_bodas.sql ════════════════
+
+-- WeddingWebs · 3/9 · Productos, bodas, pedidos, pagos, actividad y tareas.
+
+-- ── Productos (planes y extras). Los precios viven aquí, no en el código. ──
+
+create table public.products (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique check (code ~ '^[a-z0-9-]+$'),
+  name text not null,
+  description text,
+  kind text not null default 'plan' check (kind in ('plan', 'extra')),
+  price_cents integer not null check (price_cents >= 0),
+  price_is_from boolean not null default false,
+  vat_rate_bp integer not null default 2100 check (vat_rate_bp between 0 and 10000),
+  features jsonb not null default '{}'::jsonb,
+  includes jsonb not null default '[]'::jsonb,
+  active boolean not null default true,
+  sort integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create trigger products_updated_at before update on public.products
+  for each row execute function app.set_updated_at();
+comment on column public.products.price_cents is 'Precio final con IVA incluido, en céntimos.';
+comment on column public.products.vat_rate_bp is 'Tipo de IVA en puntos básicos: 2100 = 21 %.';
+comment on column public.products.features is 'Lo que activa el plan, p. ej. {"rsvp_ampliado": true, "dominio_propio": true}.';
+
+insert into public.products (code, name, description, kind, price_cents, price_is_from, features, includes, sort) values
+  ('tal-cual', 'Tal cual', 'Os quedáis con el estilo que habéis probado, con vuestros datos y fotos.', 'plan', 7900, false,
+   '{"rsvp_ampliado": false, "dominio_propio": false}',
+   '["Vuestros datos, fotos y programa del día", "Confirmaciones de asistencia", "Publicada y lista para compartir"]', 1),
+  ('con-cambios', 'Con cambios', 'Partimos de una plantilla y la ajustamos a vuestro gusto.', 'plan', 13900, false,
+   '{"rsvp_ampliado": false, "dominio_propio": false}',
+   '["Todo lo de Tal cual", "Colores, tipografías y textos a medida", "Secciones extra: galería, regalos, alojamiento"]', 2),
+  ('a-medida', 'A medida', 'Un diseño propio, hecho desde cero para vuestra boda.', 'plan', 24900, true,
+   '{"rsvp_ampliado": false, "dominio_propio": true}',
+   '["Todo lo de Con cambios", "Diseño único, sin plantilla de partida", "Hasta 3 rondas de revisiones"]', 3)
+on conflict (code) do nothing;
+
+-- ── Bodas: cada boda es una fila ──────────────────────────────
+
+create table public.weddings (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique check (slug ~ '^[a-z0-9](?:[a-z0-9-]{1,58}[a-z0-9])$'),
+  template text not null check (template ~ '^[a-z0-9-]+$'),
+  config jsonb not null,
+  status text not null default 'borrador' check (status in (
+    'borrador', 'vista_previa', 'publicada', 'archivada', 'retirada')),
+  client_id uuid references public.clients(id) on delete set null,
+  lead_id uuid references public.leads(id) on delete set null,
+  custom_domain text unique check (custom_domain ~ '^[a-z0-9.-]+\.[a-z]{2,}$'),
+  wedding_date date,
+  retire_at date,
+  guest_data_delete_at date,
+  published_version_id uuid,
+  published_at timestamptz,
+  rsvp_sheet_endpoint text check (rsvp_sheet_endpoint ~ '^https://script\.google\.com/'),
+  preview_token text not null default app.random_token(),
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint weddings_config_object check (jsonb_typeof(config) = 'object')
+);
+create index weddings_date_idx on public.weddings (wedding_date);
+create index weddings_status_idx on public.weddings (status);
+create trigger weddings_updated_at before update on public.weddings
+  for each row execute function app.set_updated_at();
+
+comment on column public.weddings.config is 'El mismo config.json de las plantillas (schema/wedding-config.schema.json). Es el borrador: lo público sale de la versión publicada.';
+comment on column public.weddings.preview_token is 'Clave del enlace de vista previa del borrador (/b/<slug>?vista=<clave>). Se puede regenerar para invalidar enlaces antiguos.';
+comment on column public.weddings.status is 'borrador y vista_previa: no son públicas (solo con enlace de vista previa). publicada y archivada: online. retirada: fuera de línea.';
+
+-- Fecha de la boda y plazos de retirada calculados desde config.event.date.
+create or replace function app.weddings_dates() returns trigger
+language plpgsql as $$
+declare
+  p jsonb := coalesce(app.setting('plazos'), '{}'::jsonb);
+  d date;
+begin
+  begin
+    d := ((new.config #>> '{event,date}')::timestamptz at time zone 'Europe/Madrid')::date;
+  exception when others then
+    d := null;
+  end;
+  if tg_op = 'INSERT' or d is distinct from old.wedding_date then
+    new.wedding_date := d;
+    new.retire_at := d + make_interval(months => coalesce((p ->> 'web_meses_tras_boda')::int, 12));
+    new.guest_data_delete_at := d + make_interval(months => coalesce((p ->> 'invitados_meses_tras_boda')::int, 6));
+  end if;
+  return new;
+end $$;
+create trigger weddings_dates before insert or update of config on public.weddings
+  for each row execute function app.weddings_dates();
+
+create table public.wedding_versions (
+  id uuid primary key default gen_random_uuid(),
+  wedding_id uuid not null references public.weddings(id) on delete cascade,
+  version integer not null check (version > 0),
+  template text not null,
+  config jsonb not null,
+  note text,
+  published_by uuid references public.staff(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (wedding_id, version)
+);
+create trigger wedding_versions_updated_at before update on public.wedding_versions
+  for each row execute function app.set_updated_at();
+
+alter table public.weddings
+  add constraint weddings_published_version_fk foreign key (published_version_id)
+  references public.wedding_versions(id) on delete set null;
+
+-- Fotos de la pareja (Supabase Storage). Nunca fotos de invitados.
+create table public.wedding_assets (
+  id uuid primary key default gen_random_uuid(),
+  wedding_id uuid not null references public.weddings(id) on delete cascade,
+  bucket text not null default 'wedding-assets',
+  path text not null,
+  url text not null,
+  kind text not null default 'foto' check (kind in ('foto', 'compartir', 'icono', 'otro')),
+  width integer,
+  height integer,
+  bytes integer,
+  mime text,
+  focus_x numeric(5, 2) check (focus_x between 0 and 100),
+  focus_y numeric(5, 2) check (focus_y between 0 and 100),
+  sort integer not null default 0,
+  original_name text,
+  note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (bucket, path)
+);
+create index wedding_assets_wedding_idx on public.wedding_assets (wedding_id, sort);
+create trigger wedding_assets_updated_at before update on public.wedding_assets
+  for each row execute function app.set_updated_at();
+
+-- Usuarios de la pareja (los dos pueden tener acceso a su panel).
+create table public.couple_users (
+  id uuid primary key default gen_random_uuid(),
+  wedding_id uuid not null references public.weddings(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
+  email text not null check (email ~ '^\S+@\S+\.\S+$'),
+  name text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create unique index couple_users_wedding_email_key on public.couple_users (wedding_id, lower(email));
+create index couple_users_user_idx on public.couple_users (user_id);
+create trigger couple_users_updated_at before update on public.couple_users
+  for each row execute function app.set_updated_at();
+
+create or replace function app.couple_wedding_ids() returns setof uuid
+language sql stable security definer set search_path = '' as $$
+  select c.wedding_id from public.couple_users c where c.user_id = auth.uid()
+$$;
+
+-- Al crear un usuario de acceso, se enlaza con su ficha de equipo o de pareja por email.
+create or replace function app.link_new_user() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  update public.staff set user_id = new.id where lower(email) = lower(new.email) and user_id is null;
+  update public.couple_users set user_id = new.id where lower(email) = lower(new.email) and user_id is null;
+  return new;
+end $$;
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function app.link_new_user();
+
+-- Y al revés: si el usuario de acceso ya existía cuando se le da de alta en el equipo o en una boda.
+create or replace function app.link_existing_user() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if new.user_id is null then
+    select u.id into new.user_id from auth.users u where lower(u.email) = lower(new.email) limit 1;
+  end if;
+  return new;
+end $$;
+create trigger staff_link_user before insert or update of email on public.staff
+  for each row execute function app.link_existing_user();
+create trigger couple_users_link_user before insert or update of email on public.couple_users
+  for each row execute function app.link_existing_user();
+
+-- ── Pedidos y pagos ───────────────────────────────────────────
+
+create table public.orders (
+  id uuid primary key default gen_random_uuid(),
+  number text unique,
+  client_id uuid references public.clients(id) on delete restrict,
+  wedding_id uuid references public.weddings(id) on delete set null,
+  lead_id uuid references public.leads(id) on delete set null,
+  status text not null default 'borrador' check (status in (
+    'borrador', 'pendiente_pago', 'pagado', 'en_produccion', 'entregado', 'cancelado', 'reembolsado')),
+  currency text not null default 'EUR' check (currency ~ '^[A-Z]{3}$'),
+  total_cents integer not null default 0,
+  paid_cents integer not null default 0,
+  promised_delivery_at date,
+  paid_at timestamptz,
+  delivered_at timestamptz,
+  cancelled_at timestamptz,
+  payment_link_url text,
+  payment_provider_ref text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index orders_status_idx on public.orders (status);
+create trigger orders_updated_at before update on public.orders
+  for each row execute function app.set_updated_at();
+
+create or replace function app.orders_number() returns trigger
+language plpgsql as $$
+declare
+  y integer := extract(year from now() at time zone 'Europe/Madrid')::int;
+begin
+  if new.number is null then
+    new.number := 'P-' || y || '-' || lpad(app.next_counter('pedido', y)::text, 4, '0');
+  end if;
+  return new;
+end $$;
+create trigger orders_number before insert on public.orders
+  for each row execute function app.orders_number();
+
+create table public.order_lines (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  product_id uuid references public.products(id) on delete set null,
+  position integer not null default 0,
+  description text not null,
+  quantity integer not null default 1 check (quantity > 0),
+  unit_price_cents integer not null,
+  vat_rate_bp integer not null default 2100,
+  total_cents integer generated always as (quantity * unit_price_cents) stored,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index order_lines_order_idx on public.order_lines (order_id, position);
+create trigger order_lines_updated_at before update on public.order_lines
+  for each row execute function app.set_updated_at();
+
+create or replace function app.order_total() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare
+  oid uuid := coalesce(new.order_id, old.order_id);
+begin
+  update public.orders o
+     set total_cents = coalesce((select sum(l.total_cents) from public.order_lines l where l.order_id = oid), 0)
+   where o.id = oid;
+  return null;
+end $$;
+create trigger order_lines_total after insert or update or delete on public.order_lines
+  for each row execute function app.order_total();
+
+create table public.payments (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete restrict,
+  provider text not null check (provider in ('stripe', 'transferencia', 'bizum', 'efectivo', 'otro')),
+  external_id text,
+  amount_cents integer not null,
+  refunded_cents integer not null default 0 check (refunded_cents >= 0),
+  status text not null default 'pendiente' check (status in (
+    'pendiente', 'pagado', 'fallido', 'reembolsado', 'reembolso_parcial')),
+  paid_at timestamptz,
+  raw jsonb,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (provider, external_id)
+);
+create index payments_order_idx on public.payments (order_id);
+create trigger payments_updated_at before update on public.payments
+  for each row execute function app.set_updated_at();
+
+-- ── Actividad (línea de tiempo) y tareas ──────────────────────
+
+create table public.activities (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references public.leads(id) on delete cascade,
+  client_id uuid references public.clients(id) on delete cascade,
+  wedding_id uuid references public.weddings(id) on delete cascade,
+  order_id uuid references public.orders(id) on delete cascade,
+  kind text not null check (kind in (
+    'nota', 'email', 'llamada', 'whatsapp', 'estado', 'prueba', 'reserva', 'pago', 'boda', 'tarea', 'sistema')),
+  title text not null,
+  body text,
+  meta jsonb not null default '{}'::jsonb,
+  actor_id uuid references public.staff(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint activities_subject check (num_nonnulls(lead_id, client_id, wedding_id, order_id) > 0)
+);
+create index activities_lead_idx on public.activities (lead_id, created_at desc);
+create index activities_client_idx on public.activities (client_id, created_at desc);
+create index activities_wedding_idx on public.activities (wedding_id, created_at desc);
+create trigger activities_updated_at before update on public.activities
+  for each row execute function app.set_updated_at();
+
+create table public.tasks (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (length(btrim(title)) > 0),
+  notes text,
+  due_at timestamptz,
+  status text not null default 'pendiente' check (status in ('pendiente', 'hecha', 'cancelada')),
+  done_at timestamptz,
+  lead_id uuid references public.leads(id) on delete cascade,
+  client_id uuid references public.clients(id) on delete cascade,
+  wedding_id uuid references public.weddings(id) on delete cascade,
+  order_id uuid references public.orders(id) on delete cascade,
+  assignee_id uuid references public.staff(id) on delete set null,
+  created_by uuid references public.staff(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index tasks_open_idx on public.tasks (due_at) where status = 'pendiente';
+create trigger tasks_updated_at before update on public.tasks
+  for each row execute function app.set_updated_at();
+
+create or replace function app.tasks_done() returns trigger
+language plpgsql as $$
+begin
+  if new.status = 'hecha' and (tg_op = 'INSERT' or old.status <> 'hecha') then new.done_at := now(); end if;
+  if new.status <> 'hecha' then new.done_at := null; end if;
+  if tg_op = 'INSERT' and new.created_by is null then new.created_by := app.staff_id(); end if;
+  return new;
+end $$;
+create trigger tasks_done before insert or update on public.tasks
+  for each row execute function app.tasks_done();
+
+-- La línea de tiempo se escribe sola.
+create or replace function app.log_activity(
+  p_kind text, p_title text, p_body text default null, p_meta jsonb default '{}'::jsonb,
+  p_lead uuid default null, p_client uuid default null, p_wedding uuid default null, p_order uuid default null
+) returns void
+language sql security definer set search_path = '' as $$
+  insert into public.activities (kind, title, body, meta, lead_id, client_id, wedding_id, order_id, actor_id)
+  values (p_kind, p_title, p_body, coalesce(p_meta, '{}'::jsonb), p_lead, p_client, p_wedding, p_order, app.staff_id())
+$$;
+
+create or replace function app.status_label(p text) returns text
+language sql immutable as $$
+  select case p
+    when 'nuevo' then 'Nuevo' when 'contactado' then 'Contactado' when 'propuesta' then 'Propuesta'
+    when 'esperando_pago' then 'Esperando pago' when 'ganado' then 'Ganado' when 'perdido' then 'Perdido'
+    when 'borrador' then 'Borrador' when 'vista_previa' then 'Vista previa' when 'publicada' then 'Publicada'
+    when 'archivada' then 'Archivada' when 'retirada' then 'Retirada'
+    else p end
+$$;
+
+create or replace function app.leads_activity() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if tg_op = 'INSERT' then
+    perform app.log_activity(
+      case new.source when 'prueba' then 'prueba' when 'reserva' then 'reserva' else 'sistema' end,
+      case new.source
+        when 'prueba' then 'Ha probado su web en el escaparate'
+        when 'reserva' then 'Ha enviado una reserva'
+        when 'importado' then 'Importado de la hoja de Google'
+        else 'Lead creado' end,
+      null,
+      jsonb_strip_nulls(jsonb_build_object('estilo', new.style, 'tarifa', new.tier)),
+      new.id);
+  elsif new.status is distinct from old.status then
+    perform app.log_activity('estado',
+      'Estado: ' || app.status_label(old.status) || ' → ' || app.status_label(new.status),
+      case when new.status = 'perdido' then new.lost_reason end,
+      jsonb_build_object('de', old.status, 'a', new.status), new.id, new.client_id);
+  end if;
+  return null;
+end $$;
+create trigger leads_activity after insert or update of status on public.leads
+  for each row execute function app.leads_activity();
+
+create or replace function app.weddings_activity() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if tg_op = 'INSERT' then
+    perform app.log_activity('boda', 'Web creada: /b/' || new.slug, null,
+      jsonb_build_object('plantilla', new.template), new.lead_id, new.client_id, new.id);
+  elsif new.status is distinct from old.status then
+    perform app.log_activity('boda', 'Web ' || lower(app.status_label(new.status)) || ': /b/' || new.slug, null,
+      jsonb_build_object('de', old.status, 'a', new.status), new.lead_id, new.client_id, new.id);
+  end if;
+  return null;
+end $$;
+create trigger weddings_activity after insert or update of status on public.weddings
+  for each row execute function app.weddings_activity();
+
+create or replace function app.tasks_activity() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if new.status = 'hecha' and old.status <> 'hecha'
+     and num_nonnulls(new.lead_id, new.client_id, new.wedding_id, new.order_id) > 0 then
+    perform app.log_activity('tarea', 'Tarea hecha: ' || new.title, null, '{}'::jsonb,
+      new.lead_id, new.client_id, new.wedding_id, new.order_id);
+  end if;
+  return null;
+end $$;
+create trigger tasks_activity after update of status on public.tasks
+  for each row execute function app.tasks_activity();
+
+-- ════════════════ 20261024000400_invitados.sql ════════════════
+
+-- WeddingWebs · 4/9 · Invitados y confirmaciones (RSVP).
+-- El RSVP sencillo de las plantillas (nombre, asistencia, canción) se guarda en rsvp_responses.
+-- Grupos con enlace personal, acompañantes, alergias y autobús son el módulo opcional
+-- "RSVP ampliado" (products.features.rsvp_ampliado), que se usa en la fase 3.
+
+create table public.guest_groups (
+  id uuid primary key default gen_random_uuid(),
+  wedding_id uuid not null references public.weddings(id) on delete cascade,
+  name text not null check (length(btrim(name)) > 0),
+  token text not null unique default app.random_token(),
+  token_revoked_at timestamptz,
+  seats integer not null default 1 check (seats between 1 and 50),
+  children_seats integer not null default 0 check (children_seats between 0 and 50),
+  notes text,
+  sort integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index guest_groups_wedding_idx on public.guest_groups (wedding_id, sort);
+create trigger guest_groups_updated_at before update on public.guest_groups
+  for each row execute function app.set_updated_at();
+
+create table public.guests (
+  id uuid primary key default gen_random_uuid(),
+  wedding_id uuid not null references public.weddings(id) on delete cascade,
+  group_id uuid references public.guest_groups(id) on delete cascade,
+  first_name text not null check (length(btrim(first_name)) > 0),
+  last_name text,
+  is_child boolean not null default false,
+  email text,
+  phone text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index guests_wedding_idx on public.guests (wedding_id);
+create index guests_group_idx on public.guests (group_id);
+create trigger guests_updated_at before update on public.guests
+  for each row execute function app.set_updated_at();
+
+-- Cada envío es una fila nueva (queda la fecha de cada cambio). Vale la última de cada persona
+-- o grupo: ver la vista rsvp_latest.
+create table public.rsvp_responses (
+  id uuid primary key default gen_random_uuid(),
+  wedding_id uuid not null references public.weddings(id) on delete cascade,
+  group_id uuid references public.guest_groups(id) on delete set null,
+  name text not null check (length(btrim(name)) between 2 and 120),
+  name_key text not null default '',
+  attending boolean not null,
+  adults integer check (adults between 0 and 50),
+  children integer check (children between 0 and 50),
+  companions jsonb not null default '[]'::jsonb,
+  dietary text,
+  bus boolean,
+  song text,
+  message text,
+  payload jsonb not null default '{}'::jsonb,
+  source text not null default 'web' check (source in ('web', 'panel', 'importado')),
+  ip_hash text,
+  user_agent text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index rsvp_responses_wedding_idx on public.rsvp_responses (wedding_id, name_key, created_at desc);
+create trigger rsvp_responses_updated_at before update on public.rsvp_responses
+  for each row execute function app.set_updated_at();
+
+create or replace function app.rsvp_name_key() returns trigger
+language plpgsql as $$
+begin
+  new.name := btrim(regexp_replace(new.name, '\s+', ' ', 'g'));
+  new.name_key := app.normalize(new.name);
+  return new;
+end $$;
+create trigger rsvp_responses_name_key before insert or update of name on public.rsvp_responses
+  for each row execute function app.rsvp_name_key();
+
+-- La respuesta vigente de cada persona (o grupo) y cuántas veces ha contestado.
+create view public.rsvp_current with (security_invoker = true) as
+select x.*
+from (
+  select r.*,
+         count(*) over (partition by r.wedding_id, coalesce(r.group_id::text, r.name_key)) as times_answered,
+         row_number() over (partition by r.wedding_id, coalesce(r.group_id::text, r.name_key)
+                            order by r.created_at desc, r.id desc) as rn
+  from public.rsvp_responses r
+) x
+where x.rn = 1;
+
+comment on view public.rsvp_current is 'Una fila por invitado (o grupo): su última respuesta, con times_answered.';
+
+-- ════════════════ 20261024000500_facturacion.sql ════════════════
+
+-- WeddingWebs · 5/9 · Facturación preparada para Verifactu.
+--
+-- Reglas que se cumplen aquí, en la base de datos, y no solo en la pantalla:
+--   · Numeración correlativa sin huecos por serie y año (WW-2026-0001), asignada al emitir,
+--     dentro de una transacción y con la fila de la serie bloqueada.
+--   · Una factura emitida no se puede cambiar ni borrar. Para corregirla: factura rectificativa
+--     (serie R) que apunta a la original, o un registro de anulación.
+--   · Cada emisión y cada anulación deja un registro de facturación encadenado con una huella
+--     SHA-256 (formato de la AEAT). Aunque luego lo calcule el proveedor, aquí queda guardado.
+-- El envío a la AEAT lo hará un proveedor certificado (capa InvoicingProvider, fase 4).
+-- Mientras tanto, las facturas quedan "pendientes de registrar" (proveedor 'manual').
+
+create table public.invoice_series (
+  id uuid primary key default gen_random_uuid(),
+  code text not null check (code ~ '^[A-Z]{1,5}$'),
+  year integer not null check (year between 2024 and 2100),
+  kind text not null check (kind in ('ordinaria', 'rectificativa', 'simplificada')),
+  next_number integer not null default 1 check (next_number > 0),
+  description text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (code, year)
+);
+create trigger invoice_series_updated_at before update on public.invoice_series
+  for each row execute function app.set_updated_at();
+
+create table public.invoices (
+  id uuid primary key default gen_random_uuid(),
+  series_id uuid references public.invoice_series(id) on delete restrict,
+  series_code text not null default 'WW' check (series_code ~ '^[A-Z]{1,5}$'),
+  number integer,
+  full_number text unique,
+  kind text not null default 'ordinaria' check (kind in ('ordinaria', 'rectificativa', 'simplificada')),
+  status text not null default 'borrador' check (status in ('borrador', 'emitida', 'anulada')),
+  issued_at timestamptz,
+  operation_date date,
+  client_id uuid references public.clients(id) on delete restrict,
+  order_id uuid references public.orders(id) on delete restrict,
+  corrects_invoice_id uuid references public.invoices(id) on delete restrict,
+  correction_reason text,
+  issuer jsonb,
+  recipient jsonb not null default '{}'::jsonb,
+  language text not null default 'es' check (language in ('es', 'en')),
+  currency text not null default 'EUR' check (currency ~ '^[A-Z]{3}$'),
+  base_cents integer not null default 0,
+  vat_cents integer not null default 0,
+  total_cents integer not null default 0,
+  provider text not null default 'manual',
+  provider_ref text,
+  provider_status text,
+  qr_payload text,
+  legend text,
+  pdf_path text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint invoices_corrective check (kind <> 'rectificativa' or (corrects_invoice_id is not null and correction_reason is not null)),
+  constraint invoices_issued check (status = 'borrador' or (number is not null and full_number is not null and issued_at is not null and issuer is not null))
+);
+create index invoices_issued_idx on public.invoices (issued_at);
+create index invoices_client_idx on public.invoices (client_id);
+create trigger invoices_updated_at before update on public.invoices
+  for each row execute function app.set_updated_at();
+
+comment on column public.invoices.recipient is 'Copia de los datos del cliente al emitir: {nombre, nif, direccion, codigo_postal, ciudad, provincia, pais}.';
+comment on column public.invoices.provider is 'manual = pendiente de registrar; o el proveedor certificado que la registró (fase 4).';
+
+create table public.invoice_lines (
+  id uuid primary key default gen_random_uuid(),
+  invoice_id uuid not null references public.invoices(id) on delete cascade,
+  position integer not null default 0,
+  description text not null check (length(btrim(description)) > 0),
+  quantity integer not null default 1 check (quantity <> 0),
+  unit_total_cents integer not null,
+  vat_rate_bp integer not null default 2100 check (vat_rate_bp between 0 and 10000),
+  line_total_cents integer not null default 0,
+  base_cents integer not null default 0,
+  vat_cents integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index invoice_lines_invoice_idx on public.invoice_lines (invoice_id, position);
+create trigger invoice_lines_updated_at before update on public.invoice_lines
+  for each row execute function app.set_updated_at();
+comment on column public.invoice_lines.unit_total_cents is 'Precio unitario con IVA incluido. La base y la cuota se calculan desde aquí, para que el total sea exactamente el precio anunciado.';
+
+create table public.invoicing_records (
+  id uuid primary key default gen_random_uuid(),
+  chain_seq bigint generated always as identity unique,
+  invoice_id uuid not null references public.invoices(id) on delete restrict,
+  record_type text not null check (record_type in ('alta', 'anulacion')),
+  hash text not null,
+  previous_hash text,
+  hash_input text not null,
+  generated_at timestamptz not null default now(),
+  payload jsonb not null default '{}'::jsonb,
+  response jsonb,
+  status text not null default 'pendiente' check (status in ('pendiente', 'aceptado', 'aceptado_con_errores', 'rechazado')),
+  attempts integer not null default 0,
+  last_attempt_at timestamptz,
+  next_attempt_at timestamptz,
+  error text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index invoicing_records_pending_idx on public.invoicing_records (next_attempt_at) where status = 'pendiente';
+create trigger invoicing_records_updated_at before update on public.invoicing_records
+  for each row execute function app.set_updated_at();
+
+-- ── Inmutabilidad ─────────────────────────────────────────────
+
+create or replace function app.invoices_guard() returns trigger
+language plpgsql as $$
+begin
+  if tg_op = 'DELETE' then
+    if old.status <> 'borrador' then
+      raise exception 'Una factura emitida no se puede borrar. Para corregirla, haz una factura rectificativa.'
+        using errcode = 'P0001', hint = 'factura_inmutable';
+    end if;
+    return old;
+  end if;
+  if old.status = 'borrador' then return new; end if;
+  if (new.series_id, new.series_code, new.number, new.full_number, new.kind, new.issued_at, new.operation_date,
+      new.client_id, new.order_id, new.corrects_invoice_id, new.correction_reason, new.issuer, new.recipient,
+      new.language, new.currency, new.base_cents, new.vat_cents, new.total_cents, new.notes)
+     is distinct from
+     (old.series_id, old.series_code, old.number, old.full_number, old.kind, old.issued_at, old.operation_date,
+      old.client_id, old.order_id, old.corrects_invoice_id, old.correction_reason, old.issuer, old.recipient,
+      old.language, old.currency, old.base_cents, old.vat_cents, old.total_cents, old.notes) then
+    raise exception 'Una factura emitida no se puede modificar. Para corregirla, haz una factura rectificativa.'
+      using errcode = 'P0001', hint = 'factura_inmutable';
+  end if;
+  if new.status is distinct from old.status and not (old.status = 'emitida' and new.status = 'anulada') then
+    raise exception 'Cambio de estado no permitido en una factura emitida (% → %).', old.status, new.status
+      using errcode = 'P0001', hint = 'factura_inmutable';
+  end if;
+  return new;
+end $$;
+create trigger invoices_guard before update or delete on public.invoices
+  for each row execute function app.invoices_guard();
+
+create or replace function app.invoice_lines_guard() returns trigger
+language plpgsql as $$
+declare
+  st text;
+  iid uuid := case when tg_op = 'DELETE' then old.invoice_id else new.invoice_id end;
+begin
+  select status into st from public.invoices where id = iid;
+  if st is not null and st <> 'borrador' then
+    raise exception 'Las líneas de una factura emitida no se pueden cambiar.'
+      using errcode = 'P0001', hint = 'factura_inmutable';
+  end if;
+  if tg_op = 'DELETE' then return old; end if;
+  new.line_total_cents := new.quantity * new.unit_total_cents;
+  new.base_cents := round(new.line_total_cents * 10000.0 / (10000 + new.vat_rate_bp))::int;
+  new.vat_cents := new.line_total_cents - new.base_cents;
+  return new;
+end $$;
+create trigger invoice_lines_guard before insert or update or delete on public.invoice_lines
+  for each row execute function app.invoice_lines_guard();
+
+create or replace function app.invoice_totals() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare
+  iid uuid := coalesce(new.invoice_id, old.invoice_id);
+begin
+  update public.invoices i set
+    base_cents = coalesce((select sum(l.base_cents) from public.invoice_lines l where l.invoice_id = iid), 0),
+    vat_cents = coalesce((select sum(l.vat_cents) from public.invoice_lines l where l.invoice_id = iid), 0),
+    total_cents = coalesce((select sum(l.line_total_cents) from public.invoice_lines l where l.invoice_id = iid), 0)
+  where i.id = iid and i.status = 'borrador';
+  return null;
+end $$;
+create trigger invoice_lines_totals after insert or update or delete on public.invoice_lines
+  for each row execute function app.invoice_totals();
+
+create or replace function app.invoicing_records_guard() returns trigger
+language plpgsql as $$
+begin
+  if tg_op = 'DELETE' then
+    raise exception 'Los registros de facturación no se pueden borrar.' using errcode = 'P0001', hint = 'registro_inmutable';
+  end if;
+  if (new.invoice_id, new.record_type, new.hash, new.previous_hash, new.hash_input, new.generated_at, new.payload, new.chain_seq)
+     is distinct from
+     (old.invoice_id, old.record_type, old.hash, old.previous_hash, old.hash_input, old.generated_at, old.payload, old.chain_seq) then
+    raise exception 'Un registro de facturación no se puede modificar (solo su estado de envío).'
+      using errcode = 'P0001', hint = 'registro_inmutable';
+  end if;
+  return new;
+end $$;
+create trigger invoicing_records_guard before update or delete on public.invoicing_records
+  for each row execute function app.invoicing_records_guard();
+
+-- ── Huella (formato de la AEAT para VERI*FACTU) ───────────────
+
+-- 2026-10-24T19:20:30+02:00 en hora de Madrid.
+create or replace function app.iso_madrid(p timestamptz) returns text
+language sql stable as $$
+  select to_char(p at time zone 'Europe/Madrid', 'YYYY-MM-DD"T"HH24:MI:SS')
+    || case when off >= 0 then '+' else '-' end
+    || lpad((abs(off) / 3600)::text, 2, '0') || ':' || lpad(((abs(off) % 3600) / 60)::text, 2, '0')
+  from (select extract(epoch from (p at time zone 'Europe/Madrid') - (p at time zone 'UTC'))::int as off) o
+$$;
+
+create or replace function app.money(p_cents integer) returns text
+language sql immutable as $$ select to_char(p_cents / 100.0, 'FM9999999990.00') $$;
+
+create or replace function app.invoice_type_code(p public.invoices) returns text
+language sql stable as $$
+  select case p.kind
+    when 'ordinaria' then 'F1'
+    when 'simplificada' then 'F2'
+    else case when (select o.kind from public.invoices o where o.id = p.corrects_invoice_id) = 'simplificada'
+              then 'R5' else 'R1' end
+  end
+$$;
+
+-- Añade un registro (alta o anulación) al final de la cadena. Bloquea la cadena entera mientras.
+create or replace function app.append_invoicing_record(p_invoice public.invoices, p_type text) returns public.invoicing_records
+language plpgsql security definer set search_path = '' as $$
+declare
+  prev text;
+  ts timestamptz := clock_timestamp();
+  nif text := upper(coalesce(p_invoice.issuer ->> 'nif', ''));
+  input text;
+  r public.invoicing_records;
+begin
+  perform pg_advisory_xact_lock(hashtext('wedding-webs:cadena-facturacion'));
+  select hash into prev from public.invoicing_records order by chain_seq desc limit 1;
+  if p_type = 'alta' then
+    input := 'IDEmisorFactura=' || nif
+      || '&NumSerieFactura=' || p_invoice.full_number
+      || '&FechaExpedicionFactura=' || to_char(p_invoice.issued_at at time zone 'Europe/Madrid', 'DD-MM-YYYY')
+      || '&TipoFactura=' || app.invoice_type_code(p_invoice)
+      || '&CuotaTotal=' || app.money(p_invoice.vat_cents)
+      || '&ImporteTotal=' || app.money(p_invoice.total_cents)
+      || '&Huella=' || coalesce(prev, '')
+      || '&FechaHoraHusoGenRegistro=' || app.iso_madrid(ts);
+  else
+    input := 'IDEmisorFacturaAnulada=' || nif
+      || '&NumSerieFacturaAnulada=' || p_invoice.full_number
+      || '&FechaExpedicionFacturaAnulada=' || to_char(p_invoice.issued_at at time zone 'Europe/Madrid', 'DD-MM-YYYY')
+      || '&Huella=' || coalesce(prev, '')
+      || '&FechaHoraHusoGenRegistro=' || app.iso_madrid(ts);
+  end if;
+  insert into public.invoicing_records (invoice_id, record_type, hash, previous_hash, hash_input, generated_at, payload)
+  values (p_invoice.id, p_type, upper(encode(extensions.digest(input, 'sha256'), 'hex')), prev, input, ts,
+          jsonb_build_object('tipo_factura', app.invoice_type_code(p_invoice), 'numero', p_invoice.full_number,
+                             'total_cents', p_invoice.total_cents, 'iva_cents', p_invoice.vat_cents))
+  returning * into r;
+  return r;
+end $$;
+
+-- ── Emitir, anular y rectificar ───────────────────────────────
+
+create or replace function public.issue_invoice(p_invoice_id uuid) returns public.invoices
+language plpgsql security definer set search_path = '' as $$
+declare
+  inv public.invoices;
+  seller jsonb := coalesce(app.setting('vendedor'), '{}'::jsonb);
+  y integer := extract(year from now() at time zone 'Europe/Madrid')::int;
+  s public.invoice_series;
+  n integer;
+begin
+  if not (app.is_admin() or app.is_service()) then
+    raise exception 'Solo el dueño o un administrador pueden emitir facturas.' using errcode = '42501';
+  end if;
+  select * into inv from public.invoices where id = p_invoice_id for update;
+  if not found then raise exception 'Factura no encontrada.'; end if;
+  if inv.status <> 'borrador' then raise exception 'La factura % ya está emitida.', inv.full_number; end if;
+  if coalesce(seller ->> 'nombre', '') = '' or coalesce(seller ->> 'nif', '') = '' or coalesce(seller ->> 'direccion', '') = '' then
+    raise exception 'Faltan los datos fiscales de WeddingWebs (nombre, NIF y dirección). Rellénalos en Ajustes antes de facturar.'
+      using hint = 'faltan_datos_vendedor';
+  end if;
+  if not exists (select 1 from public.invoice_lines where invoice_id = inv.id) then
+    raise exception 'La factura no tiene líneas.';
+  end if;
+  if inv.kind <> 'simplificada' and (coalesce(inv.recipient ->> 'nombre', '') = '' or coalesce(inv.recipient ->> 'nif', '') = '') then
+    raise exception 'Una factura completa necesita el nombre y el NIF/NIE del cliente.';
+  end if;
+
+  insert into public.invoice_series (code, year, kind) values (inv.series_code, y, inv.kind)
+  on conflict (code, year) do nothing;
+  select * into s from public.invoice_series where code = inv.series_code and year = y for update;
+  if s.kind <> inv.kind then
+    raise exception 'La serie % es de facturas de tipo %; esta factura es %.', s.code, s.kind, inv.kind;
+  end if;
+  n := s.next_number;
+  update public.invoice_series set next_number = n + 1 where id = s.id;
+
+  update public.invoices set
+    series_id = s.id,
+    number = n,
+    full_number = s.code || '-' || y || '-' || lpad(n::text, 4, '0'),
+    status = 'emitida',
+    issued_at = now(),
+    operation_date = coalesce(operation_date, (now() at time zone 'Europe/Madrid')::date),
+    issuer = seller
+  where id = inv.id
+  returning * into inv;
+
+  perform app.append_invoicing_record(inv, 'alta');
+  return inv;
+end $$;
+
+create or replace function public.cancel_invoice(p_invoice_id uuid, p_reason text) returns public.invoices
+language plpgsql security definer set search_path = '' as $$
+declare
+  inv public.invoices;
+begin
+  if not (app.is_admin() or app.is_service()) then
+    raise exception 'Solo el dueño o un administrador pueden anular facturas.' using errcode = '42501';
+  end if;
+  if coalesce(btrim(p_reason), '') = '' then raise exception 'Indica el motivo de la anulación.'; end if;
+  select * into inv from public.invoices where id = p_invoice_id for update;
+  if not found or inv.status <> 'emitida' then raise exception 'Solo se puede anular una factura emitida.'; end if;
+  perform app.append_invoicing_record(inv, 'anulacion');
+  update public.invoices set status = 'anulada' where id = inv.id returning * into inv;
+  insert into public.activities (kind, title, body, client_id, order_id, actor_id)
+  select 'sistema', 'Factura anulada: ' || inv.full_number, p_reason, inv.client_id, inv.order_id, app.staff_id()
+  where inv.client_id is not null or inv.order_id is not null;
+  return inv;
+end $$;
+
+-- Crea el borrador de una rectificativa (serie R) con las líneas en negativo. Luego se emite.
+create or replace function public.create_corrective_invoice(p_invoice_id uuid, p_reason text) returns public.invoices
+language plpgsql security definer set search_path = '' as $$
+declare
+  orig public.invoices;
+  inv public.invoices;
+begin
+  if not (app.is_admin() or app.is_service()) then
+    raise exception 'Solo el dueño o un administrador pueden rectificar facturas.' using errcode = '42501';
+  end if;
+  if coalesce(btrim(p_reason), '') = '' then raise exception 'Indica el motivo de la rectificación.'; end if;
+  select * into orig from public.invoices where id = p_invoice_id;
+  if not found or orig.status <> 'emitida' then raise exception 'Solo se puede rectificar una factura emitida.'; end if;
+  insert into public.invoices (series_code, kind, client_id, order_id, corrects_invoice_id, correction_reason,
+                               recipient, language, currency, operation_date)
+  values ('R', 'rectificativa', orig.client_id, orig.order_id, orig.id, p_reason,
+          orig.recipient, orig.language, orig.currency, orig.operation_date)
+  returning * into inv;
+  insert into public.invoice_lines (invoice_id, position, description, quantity, unit_total_cents, vat_rate_bp)
+  select inv.id, l.position, l.description, -l.quantity, l.unit_total_cents, l.vat_rate_bp
+  from public.invoice_lines l where l.invoice_id = orig.id;
+  select * into inv from public.invoices where id = inv.id;
+  return inv;
+end $$;
+
+revoke execute on function public.issue_invoice(uuid) from public, anon;
+revoke execute on function public.cancel_invoice(uuid, text) from public, anon;
+revoke execute on function public.create_corrective_invoice(uuid, text) from public, anon;
+grant execute on function public.issue_invoice(uuid) to authenticated, service_role;
+grant execute on function public.cancel_invoice(uuid, text) to authenticated, service_role;
+grant execute on function public.create_corrective_invoice(uuid, text) to authenticated, service_role;
+
+-- ════════════════ 20261024000600_sistema.sql ════════════════
+
+-- WeddingWebs · 6/9 · Sistema: emails enviados, webhooks, registro de cambios y límite de peticiones.
+
+create table public.email_log (
+  id uuid primary key default gen_random_uuid(),
+  to_email text not null,
+  template text,
+  subject text,
+  provider text,
+  provider_id text,
+  status text not null default 'pendiente' check (status in (
+    'pendiente', 'enviado', 'entregado', 'rebotado', 'fallido', 'simulado')),
+  error text,
+  lead_id uuid references public.leads(id) on delete set null,
+  client_id uuid references public.clients(id) on delete set null,
+  wedding_id uuid references public.weddings(id) on delete set null,
+  meta jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index email_log_created_idx on public.email_log (created_at desc);
+create trigger email_log_updated_at before update on public.email_log
+  for each row execute function app.set_updated_at();
+
+-- Todo webhook entrante se guarda tal cual. (provider, event_id) único: si llega dos veces, se ignora.
+create table public.webhook_events (
+  id uuid primary key default gen_random_uuid(),
+  provider text not null,
+  event_id text not null,
+  type text,
+  payload jsonb not null,
+  received_at timestamptz not null default now(),
+  processed_at timestamptz,
+  attempts integer not null default 0,
+  error text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (provider, event_id)
+);
+create trigger webhook_events_updated_at before update on public.webhook_events
+  for each row execute function app.set_updated_at();
+
+-- Quién cambió qué.
+create table public.audit_log (
+  id uuid primary key default gen_random_uuid(),
+  table_name text not null,
+  row_id uuid,
+  action text not null check (action in ('insert', 'update', 'delete')),
+  actor_user_id uuid,
+  actor_staff_id uuid,
+  actor_role text,
+  changes jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index audit_log_row_idx on public.audit_log (table_name, row_id, created_at desc);
+
+create or replace function app.audit() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare
+  o jsonb := case when tg_op in ('UPDATE', 'DELETE') then to_jsonb(old) end;
+  n jsonb := case when tg_op in ('INSERT', 'UPDATE') then to_jsonb(new) end;
+  diff jsonb := '{}'::jsonb;
+  k text;
+begin
+  if tg_op = 'UPDATE' then
+    for k in select jsonb_object_keys(n) loop
+      continue when k in ('updated_at');
+      if (o -> k) is distinct from (n -> k) then
+        -- El config de una boda puede ser grande: se apunta el cambio, el detalle está en wedding_versions.
+        diff := diff || jsonb_build_object(k, case when k in ('config', 'trial_config', 'raw', 'payload')
+          then jsonb_build_object('cambiado', true)
+          else jsonb_build_object('antes', o -> k, 'despues', n -> k) end);
+      end if;
+    end loop;
+    if diff = '{}'::jsonb then return null; end if;
+  elsif tg_op = 'INSERT' then
+    diff := n - 'config' - 'trial_config' - 'raw' - 'payload';
+  else
+    diff := o - 'config' - 'trial_config' - 'raw' - 'payload';
+  end if;
+  insert into public.audit_log (table_name, row_id, action, actor_user_id, actor_staff_id, actor_role, changes)
+  values (tg_table_name, coalesce((n ->> 'id'), (o ->> 'id'))::uuid, lower(tg_op), auth.uid(), app.staff_id(),
+          coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role', current_user), diff);
+  return null;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['staff', 'settings', 'products', 'clients', 'leads', 'weddings', 'orders', 'payments',
+                           'invoices', 'couple_users']
+  loop
+    execute format('create trigger %I after insert or update or delete on public.%I for each row execute function app.audit()',
+                   t || '_audit', t);
+  end loop;
+end $$;
+
+-- Límite de peticiones de los formularios públicos (por IP con huella, nunca la IP en claro).
+create table public.rate_limits (
+  id uuid primary key default gen_random_uuid(),
+  key text not null,
+  window_start timestamptz not null,
+  hits integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (key, window_start)
+);
+
+-- ════════════════ 20261024000700_rls.sql ════════════════
+
+-- WeddingWebs · 7/9 · Seguridad por filas (RLS) en TODAS las tablas.
+--
+-- Quién ve qué:
+--   · anon (cualquiera sin sesión): nada. Lo público (webs de boda, RSVP, leads) pasa por
+--     nuestras funciones de servidor con la clave secreta y por las funciones api_* de 8/9.
+--   · equipo (staff): el CRM, las bodas y los invitados. Ajustes, equipo y facturas: solo owner/admin.
+--   · pareja (couple_users): solo su boda, sus invitados y sus respuestas.
+--   · service_role (nuestras funciones de servidor): se salta la RLS, como en todo Supabase.
+
+do $$
+declare t text;
+begin
+  for t in select tablename from pg_tables where schemaname = 'public' loop
+    execute format('alter table public.%I enable row level security', t);
+  end loop;
+end $$;
+
+-- Defensa extra: el rol anónimo no toca ninguna tabla ni vista directamente.
+revoke all on all tables in schema public from anon;
+
+-- ── Equipo y ajustes ──────────────────────────────────────────
+create policy staff_select on public.staff for select to authenticated using (app.is_staff());
+create policy staff_write on public.staff for all to authenticated using (app.is_admin()) with check (app.is_admin());
+
+create policy settings_select on public.settings for select to authenticated using (app.is_staff());
+create policy settings_write on public.settings for all to authenticated using (app.is_admin()) with check (app.is_admin());
+
+-- counters y rate_limits: sin políticas (solo funciones internas y service_role).
+
+-- ── CRM ───────────────────────────────────────────────────────
+create policy clients_select on public.clients for select to authenticated using (app.is_staff());
+create policy clients_insert on public.clients for insert to authenticated with check (app.is_staff());
+create policy clients_update on public.clients for update to authenticated using (app.is_staff()) with check (app.is_staff());
+create policy clients_delete on public.clients for delete to authenticated using (app.is_admin());
+
+create policy leads_select on public.leads for select to authenticated using (app.is_staff());
+create policy leads_insert on public.leads for insert to authenticated with check (app.is_staff());
+create policy leads_update on public.leads for update to authenticated using (app.is_staff()) with check (app.is_staff());
+create policy leads_delete on public.leads for delete to authenticated using (app.is_admin());
+
+create policy lead_attribution_select on public.lead_attribution for select to authenticated using (app.is_staff());
+create policy lead_attribution_write on public.lead_attribution for all to authenticated using (app.is_admin()) with check (app.is_staff());
+
+create policy consents_select on public.consents for select to authenticated using (app.is_staff());
+create policy consents_insert on public.consents for insert to authenticated with check (app.is_staff());
+
+create policy activities_select on public.activities for select to authenticated using (app.is_staff());
+create policy activities_insert on public.activities for insert to authenticated with check (app.is_staff());
+create policy activities_update on public.activities for update to authenticated
+  using (app.is_admin() or (kind = 'nota' and actor_id = app.staff_id()))
+  with check (app.is_admin() or (kind = 'nota' and actor_id = app.staff_id()));
+create policy activities_delete on public.activities for delete to authenticated
+  using (app.is_admin() or (kind = 'nota' and actor_id = app.staff_id()));
+
+create policy tasks_all on public.tasks for all to authenticated using (app.is_staff()) with check (app.is_staff());
+
+-- ── Productos, pedidos y pagos ────────────────────────────────
+create policy products_select on public.products for select to authenticated using (app.is_staff());
+create policy products_write on public.products for all to authenticated using (app.is_admin()) with check (app.is_admin());
+
+create policy orders_select on public.orders for select to authenticated using (app.is_staff());
+create policy orders_insert on public.orders for insert to authenticated with check (app.is_staff());
+create policy orders_update on public.orders for update to authenticated using (app.is_staff()) with check (app.is_staff());
+create policy orders_delete on public.orders for delete to authenticated using (app.is_admin());
+
+create policy order_lines_all on public.order_lines for all to authenticated using (app.is_staff()) with check (app.is_staff());
+
+create policy payments_select on public.payments for select to authenticated using (app.is_staff());
+create policy payments_insert on public.payments for insert to authenticated with check (app.is_staff());
+create policy payments_update on public.payments for update to authenticated using (app.is_staff()) with check (app.is_staff());
+create policy payments_delete on public.payments for delete to authenticated using (app.is_admin());
+
+-- ── Bodas ─────────────────────────────────────────────────────
+create policy weddings_select on public.weddings for select to authenticated
+  using (app.is_staff() or id in (select app.couple_wedding_ids()));
+create policy weddings_insert on public.weddings for insert to authenticated with check (app.is_staff());
+create policy weddings_update on public.weddings for update to authenticated using (app.is_staff()) with check (app.is_staff());
+create policy weddings_delete on public.weddings for delete to authenticated using (app.is_admin());
+
+create policy wedding_versions_select on public.wedding_versions for select to authenticated
+  using (app.is_staff() or wedding_id in (select app.couple_wedding_ids()));
+create policy wedding_versions_insert on public.wedding_versions for insert to authenticated with check (app.is_staff());
+create policy wedding_versions_delete on public.wedding_versions for delete to authenticated using (app.is_admin());
+
+create policy wedding_assets_select on public.wedding_assets for select to authenticated
+  using (app.is_staff() or wedding_id in (select app.couple_wedding_ids()));
+create policy wedding_assets_write on public.wedding_assets for all to authenticated using (app.is_staff()) with check (app.is_staff());
+
+create policy couple_users_select on public.couple_users for select to authenticated
+  using (app.is_staff() or wedding_id in (select app.couple_wedding_ids()));
+create policy couple_users_write on public.couple_users for all to authenticated using (app.is_staff()) with check (app.is_staff());
+
+-- ── Invitados ─────────────────────────────────────────────────
+create policy guest_groups_all on public.guest_groups for all to authenticated
+  using (app.is_staff() or wedding_id in (select app.couple_wedding_ids()))
+  with check (app.is_staff() or wedding_id in (select app.couple_wedding_ids()));
+create policy guests_all on public.guests for all to authenticated
+  using (app.is_staff() or wedding_id in (select app.couple_wedding_ids()))
+  with check (app.is_staff() or wedding_id in (select app.couple_wedding_ids()));
+
+create policy rsvp_responses_select on public.rsvp_responses for select to authenticated
+  using (app.is_staff() or wedding_id in (select app.couple_wedding_ids()));
+create policy rsvp_responses_insert on public.rsvp_responses for insert to authenticated
+  with check ((app.is_staff() or wedding_id in (select app.couple_wedding_ids())) and source = 'panel');
+create policy rsvp_responses_delete on public.rsvp_responses for delete to authenticated using (app.is_admin());
+
+-- ── Facturación: solo owner/admin. Las reglas de inmutabilidad están en los disparadores. ──
+create policy invoice_series_all on public.invoice_series for all to authenticated using (app.is_admin()) with check (app.is_admin());
+create policy invoices_all on public.invoices for all to authenticated using (app.is_admin()) with check (app.is_admin());
+create policy invoice_lines_all on public.invoice_lines for all to authenticated using (app.is_admin()) with check (app.is_admin());
+create policy invoicing_records_select on public.invoicing_records for select to authenticated using (app.is_admin());
+
+-- ── Sistema ───────────────────────────────────────────────────
+create policy email_log_select on public.email_log for select to authenticated using (app.is_staff());
+create policy webhook_events_select on public.webhook_events for select to authenticated using (app.is_admin());
+create policy audit_log_select on public.audit_log for select to authenticated using (app.is_admin());
+
+-- ════════════════ 20261024000800_api.sql ════════════════
+
+-- WeddingWebs · 8/9 · Funciones que usan la web pública (api_*) y el panel.
+--
+-- api_*: solo las puede llamar nuestro servidor (service_role). Nunca el navegador.
+-- El resto: el panel, con la sesión del usuario; comprueban que sea del equipo.
+
+-- ── Web pública de una boda ───────────────────────────────────
+
+create or replace function public.api_public_wedding(p_slug text, p_preview_token text default null, p_host text default null)
+returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  w public.weddings;
+  v public.wedding_versions;
+begin
+  if not app.is_service() then raise exception 'Solo desde el servidor.' using errcode = '42501'; end if;
+  if p_host is not null then
+    select * into w from public.weddings where custom_domain = lower(p_host);
+  end if;
+  if w.id is null then
+    select * into w from public.weddings where slug = lower(coalesce(p_slug, ''));
+  end if;
+  if w.id is null then return null; end if;
+
+  -- Vista previa del borrador con su clave (la que comparte Luis con la pareja).
+  if p_preview_token is not null then
+    if length(p_preview_token) < 20 or p_preview_token is distinct from w.preview_token then return null; end if;
+    return jsonb_build_object('id', w.id, 'slug', w.slug, 'status', w.status, 'template', w.template,
+      'config', w.config, 'version', null, 'draft', true, 'updated_at', w.updated_at);
+  end if;
+  if w.status = 'retirada' then
+    return jsonb_build_object('slug', w.slug, 'status', 'retirada');
+  end if;
+  if w.status not in ('publicada', 'archivada') or w.published_version_id is null then
+    return null;
+  end if;
+  select * into v from public.wedding_versions where id = w.published_version_id;
+  return jsonb_build_object('id', w.id, 'slug', w.slug, 'status', w.status, 'template', v.template,
+    'config', v.config, 'version', v.version, 'draft', false, 'updated_at', v.created_at);
+end $$;
+
+-- ── RSVP sencillo de las plantillas ───────────────────────────
+
+create or replace function public.api_submit_rsvp(p_slug text, p_payload jsonb, p_ip_hash text default null, p_user_agent text default null)
+returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  w public.weddings;
+  cfg jsonb;
+  deadline date;
+  today date := (now() at time zone 'Europe/Madrid')::date;
+  nm text := btrim(regexp_replace(coalesce(p_payload ->> 'name', ''), '\s+', ' ', 'g'));
+  att text := coalesce(p_payload ->> 'attending', '');
+  song text := nullif(btrim(coalesce(p_payload ->> 'song', '')), '');
+begin
+  if not app.is_service() then raise exception 'Solo desde el servidor.' using errcode = '42501'; end if;
+  select * into w from public.weddings where slug = lower(coalesce(p_slug, ''));
+  if w.id is null or w.status not in ('publicada', 'archivada') or w.published_version_id is null then
+    return jsonb_build_object('ok', false, 'error', 'no_existe');
+  end if;
+  select v.config into cfg from public.wedding_versions v where v.id = w.published_version_id;
+  if not coalesce(cfg -> 'sections' ? 'rsvp', false) then
+    return jsonb_build_object('ok', false, 'error', 'sin_rsvp');
+  end if;
+  begin
+    deadline := nullif(cfg #>> '{rsvp,deadline}', '')::date;
+  exception when others then deadline := null;
+  end;
+  -- Un día de margen por las zonas horarias de los invitados (la web cierra el formulario sola).
+  if (deadline is not null and today > deadline + 1) or (w.wedding_date is not null and today > w.wedding_date) then
+    return jsonb_build_object('ok', false, 'error', 'cerrado');
+  end if;
+  if length(nm) < 2 or length(nm) > 120 then return jsonb_build_object('ok', false, 'error', 'nombre'); end if;
+  if att not in ('si', 'no') then return jsonb_build_object('ok', false, 'error', 'asistencia'); end if;
+  if song is not null and length(song) > 300 then song := left(song, 300); end if;
+
+  insert into public.rsvp_responses (wedding_id, name, attending, song, payload, source, ip_hash, user_agent)
+  values (w.id, nm, att = 'si', song, p_payload - 'website', 'web', p_ip_hash, left(p_user_agent, 300));
+
+  return jsonb_build_object('ok', true, 'sheet', w.rsvp_sheet_endpoint);
+end $$;
+
+-- ── Leads del escaparate ──────────────────────────────────────
+
+create or replace function app.parse_attr(p jsonb) returns jsonb
+language sql immutable as $$
+  select jsonb_strip_nulls(jsonb_build_object(
+    'utm_source', left(p ->> 'utm_source', 200), 'utm_medium', left(p ->> 'utm_medium', 200),
+    'utm_campaign', left(p ->> 'utm_campaign', 200), 'utm_term', left(p ->> 'utm_term', 200),
+    'utm_content', left(p ->> 'utm_content', 200), 'gclid', left(p ->> 'gclid', 300),
+    'fbclid', left(p ->> 'fbclid', 300), 'landing_page', left(p ->> 'landing_page', 500),
+    'referrer', left(p ->> 'referrer', 500), 'captured_at', p ->> 'captured_at'))
+$$;
+
+create or replace function public.api_submit_lead(p jsonb, p_ip text default null, p_user_agent text default null)
+returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  em text := nullif(lower(btrim(coalesce(p ->> 'email', ''))), '');
+  typ text := case when p ->> 'type' = 'reserva' then 'reserva' else 'prueba' end;
+  wd text := coalesce(p ->> 'weddingDate', '');
+  d date;
+  t time;
+  l public.leads;
+  is_new boolean := false;
+  v_attr jsonb;
+  v_touch text;
+  v_ip inet;
+begin
+  if not app.is_service() then raise exception 'Solo desde el servidor.' using errcode = '42501'; end if;
+  if em is null or em !~ '^\S+@\S+\.\S+$' or length(em) > 200 then
+    return jsonb_build_object('ok', false, 'error', 'email');
+  end if;
+  begin
+    if wd ~ '^\d{4}-\d{2}-\d{2}' then d := left(wd, 10)::date; end if;
+    if wd ~ '\d{2}:\d{2}$' then t := right(wd, 5)::time; end if;
+  exception when others then d := null; t := null;
+  end;
+  begin v_ip := nullif(p_ip, '')::inet; exception when others then v_ip := null; end;
+
+  select * into l from public.leads
+   where lower(email) = em and status not in ('ganado', 'perdido') and anonymized_at is null
+   order by created_at desc limit 1;
+
+  if l.id is null then
+    insert into public.leads (names, partner_a, partner_b, email, phone, wedding_date, wedding_time, venue, city,
+                              style, tier, sections, trial_config, message, source, trials, reserved_at)
+    values (left(coalesce(p ->> 'name', ''), 200), left(p ->> 'nameA', 100), left(p ->> 'nameB', 100), em,
+            left(nullif(btrim(p ->> 'phone'), ''), 40), d, t, left(p ->> 'venue', 300), left(p ->> 'city', 200),
+            left(p ->> 'style', 60), left(p ->> 'tier', 60), p -> 'sections', p -> 'wedding',
+            left(nullif(btrim(p ->> 'message'), ''), 4000), typ,
+            case when typ = 'prueba' then 1 else 0 end, case when typ = 'reserva' then now() end)
+    returning * into l;
+    is_new := true;
+  else
+    update public.leads set
+      names = coalesce(nullif(left(p ->> 'name', 200), ''), names),
+      partner_a = coalesce(nullif(left(p ->> 'nameA', 100), ''), partner_a),
+      partner_b = coalesce(nullif(left(p ->> 'nameB', 100), ''), partner_b),
+      phone = coalesce(nullif(left(btrim(p ->> 'phone'), 40), ''), phone),
+      wedding_date = coalesce(d, wedding_date),
+      wedding_time = coalesce(t, wedding_time),
+      venue = coalesce(nullif(left(p ->> 'venue', 300), ''), venue),
+      city = coalesce(nullif(left(p ->> 'city', 200), ''), city),
+      style = coalesce(nullif(left(p ->> 'style', 60), ''), style),
+      tier = coalesce(nullif(left(p ->> 'tier', 60), ''), tier),
+      sections = coalesce(p -> 'sections', sections),
+      trial_config = coalesce(p -> 'wedding', trial_config),
+      message = coalesce(nullif(left(btrim(p ->> 'message'), 4000), ''), message),
+      trials = trials + case when typ = 'prueba' then 1 else 0 end,
+      reserved_at = case when typ = 'reserva' then now() else reserved_at end
+    where id = l.id
+    returning * into l;
+    perform app.log_activity(typ,
+      case when typ = 'prueba' then 'Ha vuelto a probar su web' else 'Ha enviado una reserva' end,
+      nullif(left(btrim(p ->> 'message'), 4000), ''),
+      jsonb_strip_nulls(jsonb_build_object('estilo', p ->> 'style', 'tarifa', p ->> 'tier')), l.id);
+  end if;
+
+  -- Atribución: el primer toque no se sobrescribe; el último, sí.
+  for v_touch, v_attr in select e.k, e.v from jsonb_each(coalesce(p -> 'attribution', '{}'::jsonb)) as e(k, v)
+                          where e.k in ('first', 'last') and jsonb_typeof(e.v) = 'object' loop
+    v_attr := app.parse_attr(v_attr);
+    continue when v_attr = '{}'::jsonb;
+    if v_touch = 'first' then
+      insert into public.lead_attribution as la (lead_id, touch, utm_source, utm_medium, utm_campaign, utm_term,
+                                                 utm_content, gclid, fbclid, landing_page, referrer, captured_at)
+      values (l.id, 'primero', v_attr ->> 'utm_source', v_attr ->> 'utm_medium', v_attr ->> 'utm_campaign',
+              v_attr ->> 'utm_term', v_attr ->> 'utm_content', v_attr ->> 'gclid', v_attr ->> 'fbclid',
+              v_attr ->> 'landing_page', v_attr ->> 'referrer', coalesce((v_attr ->> 'captured_at')::timestamptz, now()))
+      on conflict on constraint lead_attribution_lead_id_touch_key do nothing;
+    else
+      insert into public.lead_attribution as la (lead_id, touch, utm_source, utm_medium, utm_campaign, utm_term,
+                                                 utm_content, gclid, fbclid, landing_page, referrer, captured_at)
+      values (l.id, 'ultimo', v_attr ->> 'utm_source', v_attr ->> 'utm_medium', v_attr ->> 'utm_campaign',
+              v_attr ->> 'utm_term', v_attr ->> 'utm_content', v_attr ->> 'gclid', v_attr ->> 'fbclid',
+              v_attr ->> 'landing_page', v_attr ->> 'referrer', coalesce((v_attr ->> 'captured_at')::timestamptz, now()))
+      on conflict on constraint lead_attribution_lead_id_touch_key do update set
+        utm_source = excluded.utm_source, utm_medium = excluded.utm_medium, utm_campaign = excluded.utm_campaign,
+        utm_term = excluded.utm_term, utm_content = excluded.utm_content, gclid = excluded.gclid,
+        fbclid = excluded.fbclid, landing_page = excluded.landing_page, referrer = excluded.referrer,
+        captured_at = excluded.captured_at;
+    end if;
+  end loop;
+
+  if coalesce((p ->> 'consent')::boolean, false) and nullif(btrim(p ->> 'consentText'), '') is not null then
+    insert into public.consents (lead_id, email, purpose, granted, text, source, ip, user_agent)
+    values (l.id, em, 'contacto_comercial', true, left(p ->> 'consentText', 2000),
+            left(coalesce(p ->> 'page', 'escaparate'), 300), v_ip, left(p_user_agent, 300));
+  end if;
+
+  return jsonb_build_object('ok', true, 'lead_id', l.id, 'is_new', is_new, 'type', typ,
+    'names', l.names, 'status', l.status, 'trials', l.trials);
+end $$;
+
+-- ── Límite de peticiones ──────────────────────────────────────
+
+create or replace function public.api_hit_rate_limit(p_key text, p_max integer, p_window_seconds integer)
+returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare
+  ws timestamptz := to_timestamp(floor(extract(epoch from now()) / p_window_seconds) * p_window_seconds);
+  h integer;
+begin
+  if not app.is_service() then raise exception 'Solo desde el servidor.' using errcode = '42501'; end if;
+  insert into public.rate_limits (key, window_start, hits) values (left(p_key, 200), ws, 1)
+  on conflict (key, window_start) do update set hits = public.rate_limits.hits + 1
+  returning hits into h;
+  if random() < 0.02 then
+    delete from public.rate_limits where window_start < now() - interval '1 day';
+  end if;
+  return h <= p_max;
+end $$;
+
+-- Tarifas activas para el escaparate.
+create or replace function public.api_products() returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'code', p.code, 'name', p.name, 'description', p.description, 'price_cents', p.price_cents,
+    'price_is_from', p.price_is_from, 'includes', p.includes, 'kind', p.kind) order by p.sort), '[]'::jsonb)
+  from public.products p where p.active and app.is_service()
+$$;
+
+revoke execute on function public.api_public_wedding(text, text, text) from public, anon, authenticated;
+revoke execute on function public.api_submit_rsvp(text, jsonb, text, text) from public, anon, authenticated;
+revoke execute on function public.api_submit_lead(jsonb, text, text) from public, anon, authenticated;
+revoke execute on function public.api_hit_rate_limit(text, integer, integer) from public, anon, authenticated;
+revoke execute on function public.api_products() from public, anon, authenticated;
+grant execute on function public.api_public_wedding(text, text, text) to service_role;
+grant execute on function public.api_submit_rsvp(text, jsonb, text, text) to service_role;
+grant execute on function public.api_submit_lead(jsonb, text, text) to service_role;
+grant execute on function public.api_hit_rate_limit(text, integer, integer) to service_role;
+grant execute on function public.api_products() to service_role;
+
+-- ── Panel ─────────────────────────────────────────────────────
+
+create or replace function app.require_staff() returns void
+language plpgsql stable as $$
+begin
+  if not (app.is_staff() or app.is_service()) then
+    raise exception 'No tienes acceso al panel.' using errcode = '42501';
+  end if;
+end $$;
+
+-- Publica el borrador actual como una versión nueva (queda el historial para volver atrás).
+create or replace function public.publish_wedding(p_wedding_id uuid, p_note text default null) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  w public.weddings;
+  n integer;
+  v public.wedding_versions;
+begin
+  perform app.require_staff();
+  select * into w from public.weddings where id = p_wedding_id for update;
+  if w.id is null then raise exception 'Boda no encontrada.'; end if;
+  if jsonb_array_length(coalesce(w.config #> '{event,couple}', '[]'::jsonb)) <> 2 then
+    raise exception 'Faltan los nombres de la pareja.';
+  end if;
+  if w.wedding_date is null then raise exception 'Falta la fecha de la boda (con su hora y zona).'; end if;
+  select coalesce(max(version), 0) + 1 into n from public.wedding_versions where wedding_id = w.id;
+  insert into public.wedding_versions (wedding_id, version, template, config, note, published_by)
+  values (w.id, n, w.template, w.config, p_note, app.staff_id())
+  returning * into v;
+  update public.weddings set published_version_id = v.id, published_at = now(),
+         status = case when status in ('publicada', 'archivada') then status else 'publicada' end
+   where id = w.id;
+  return jsonb_build_object('version', v.version, 'version_id', v.id, 'published_at', now());
+end $$;
+
+-- Quita la web de internet: vuelve a borrador (se puede volver a publicar) o queda retirada.
+create or replace function public.unpublish_wedding(p_wedding_id uuid, p_status text default 'borrador') returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  perform app.require_staff();
+  if p_status not in ('borrador', 'vista_previa', 'retirada') then raise exception 'Estado no válido.'; end if;
+  update public.weddings set status = p_status where id = p_wedding_id;
+  if not found then raise exception 'Boda no encontrada.'; end if;
+end $$;
+
+-- Copia una versión publicada al borrador (no publica: hay que pulsar Publicar).
+create or replace function public.restore_wedding_version(p_version_id uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+  v public.wedding_versions;
+begin
+  perform app.require_staff();
+  select * into v from public.wedding_versions where id = p_version_id;
+  if v.id is null then raise exception 'Versión no encontrada.'; end if;
+  update public.weddings set config = v.config, template = v.template where id = v.wedding_id;
+  perform app.log_activity('boda', 'Borrador restaurado a la versión ' || v.version, null, '{}'::jsonb,
+    null, null, v.wedding_id);
+end $$;
+
+-- Lead ganado -> cliente, sin volver a teclear nada.
+create or replace function public.convert_lead_to_client(p_lead_id uuid) returns uuid
+language plpgsql security definer set search_path = '' as $$
+declare
+  l public.leads;
+  cid uuid;
+begin
+  perform app.require_staff();
+  select * into l from public.leads where id = p_lead_id for update;
+  if l.id is null then raise exception 'Lead no encontrado.'; end if;
+  cid := l.client_id;
+  if cid is null then
+    insert into public.clients (display_name, email, phone)
+    values (coalesce(nullif(l.names, ''), l.email, l.phone), l.email, l.phone)
+    returning id into cid;
+    perform app.log_activity('sistema', 'Convertido en cliente', null, '{}'::jsonb, l.id, cid);
+  end if;
+  update public.leads set client_id = cid, status = 'ganado' where id = l.id;
+  update public.weddings set client_id = cid where lead_id = l.id and client_id is null;
+  return cid;
+end $$;
+
+-- Una dirección libre para una boda nueva: "lucia-y-martin", "lucia-y-martin-2"...
+create or replace function public.suggest_slug(p_text text) returns text
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  base text := left(app.slugify(p_text), 50);
+  s text;
+  i integer := 1;
+begin
+  perform app.require_staff();
+  if length(base) < 3 then base := 'boda-' || to_char(now(), 'YYMMDD'); end if;
+  s := base;
+  while exists (select 1 from public.weddings where slug = s) or s in ('admin', 'panel', 'api', 'studio', 'b') loop
+    i := i + 1;
+    s := base || '-' || i;
+  end loop;
+  return s;
+end $$;
+
+-- Buscador global del panel (nombre, email, teléfono, dirección de la web, NIF).
+create or replace function public.global_search(p_q text) returns table (kind text, id uuid, title text, subtitle text)
+language plpgsql stable security invoker set search_path = '' as $$
+declare
+  q text := app.normalize(p_q);
+  like_q text := '%' || replace(replace(app.normalize(p_q), '%', ''), '_', '') || '%';
+begin
+  perform app.require_staff();
+  if length(q) < 2 then return; end if;
+  return query
+  (select 'lead'::text, l.id, coalesce(nullif(l.names, ''), l.email, l.phone),
+          concat_ws(' · ', app.status_label(l.status), l.email, l.phone, to_char(l.wedding_date, 'DD/MM/YYYY'))
+     from public.leads l
+    where app.normalize(concat_ws(' ', l.names, l.email, l.phone, l.venue, l.city)) like like_q
+    order by l.created_at desc limit 8)
+  union all
+  (select 'cliente'::text, c.id, c.display_name, concat_ws(' · ', c.email, c.phone, c.tax_id)
+     from public.clients c
+    where app.normalize(concat_ws(' ', c.display_name, c.email, c.phone, c.tax_id, c.billing_name)) like like_q
+    order by c.created_at desc limit 8)
+  union all
+  (select 'boda'::text, w.id, coalesce(w.config #>> '{event,couple,0}', '') || ' y ' || coalesce(w.config #>> '{event,couple,1}', ''),
+          concat_ws(' · ', '/b/' || w.slug, app.status_label(w.status), to_char(w.wedding_date, 'DD/MM/YYYY'))
+     from public.weddings w
+    where app.normalize(concat_ws(' ', w.slug, w.config #>> '{event,couple,0}', w.config #>> '{event,couple,1}',
+                                  w.config #>> '{venue,name}', w.custom_domain)) like like_q
+    order by w.wedding_date nulls last limit 8);
+end $$;
+
+-- Importador único de la hoja "Contactos" de Google (CSV). Si el email ya existe, no lo duplica.
+create or replace function public.import_leads(p_rows jsonb) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  r jsonb;
+  em text;
+  st text;
+  wd text;
+  d date;
+  t time;
+  created timestamptz;
+  imported integer := 0;
+  repeated integer := 0;
+  bad jsonb := '[]'::jsonb;
+  i integer := 0;
+begin
+  perform app.require_staff();
+  for r in select * from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) loop
+    i := i + 1;
+    em := nullif(lower(btrim(coalesce(r ->> 'email', ''))), '');
+    if em is null or em !~ '^\S+@\S+\.\S+$' then
+      bad := bad || jsonb_build_object('fila', i, 'motivo', 'email no válido');
+      continue;
+    end if;
+    if exists (select 1 from public.leads where lower(email) = em) then
+      repeated := repeated + 1;
+      continue;
+    end if;
+    st := case app.normalize(r ->> 'estado')
+      when 'contactado' then 'contactado' when 'propuesta' then 'propuesta'
+      when 'esperando pago' then 'esperando_pago' when 'pagado' then 'ganado' when 'ganado' then 'ganado'
+      when 'cliente' then 'ganado' when 'perdido' then 'perdido' when 'descartado' then 'perdido'
+      else 'nuevo' end;
+    wd := coalesce(r ->> 'fecha_boda', '');
+    d := null; t := null; created := null;
+    begin
+      if wd ~ '^\d{4}-\d{2}-\d{2}' then d := left(wd, 10)::date;
+      elsif wd ~ '^\d{1,2}/\d{1,2}/\d{4}' then d := to_date(substring(wd from '^\d{1,2}/\d{1,2}/\d{4}'), 'DD/MM/YYYY');
+      end if;
+      if wd ~ '\d{1,2}:\d{2}(:\d{2})?$' then t := substring(wd from '\d{1,2}:\d{2}(?::\d{2})?$')::time; end if;
+    exception when others then d := null; t := null;
+    end;
+    begin
+      created := coalesce(nullif(r ->> 'fecha', ''), now()::text)::timestamptz;
+    exception when others then
+      begin created := to_timestamp(r ->> 'fecha', 'DD/MM/YYYY HH24:MI:SS');
+      exception when others then created := now(); end;
+    end;
+    insert into public.leads (names, email, phone, wedding_date, wedding_time, venue, style, tier, message,
+                              trial_config, source, status, lost_reason, trials, reserved_at, created_at, status_changed_at)
+    values (left(coalesce(r ->> 'nombres', ''), 200), em, nullif(left(btrim(r ->> 'telefono'), 40), ''), d, t,
+            nullif(left(r ->> 'lugar', 300), ''), nullif(left(r ->> 'estilo', 60), ''), nullif(left(r ->> 'tarifa', 60), ''),
+            nullif(left(r ->> 'mensaje', 4000), ''),
+            case when coalesce(r ->> 'config', '') like '{%' then (r ->> 'config')::jsonb end,
+            'importado', st, case when st = 'perdido' then 'Importado como perdido' end,
+            case when r ->> 'tipo' = 'prueba' then 1 else 0 end,
+            case when r ->> 'tipo' = 'reserva' then created end, created, created);
+    imported := imported + 1;
+  end loop;
+  return jsonb_build_object('importados', imported, 'repetidos', repeated, 'errores', bad);
+end $$;
+
+-- Lo importante del día para la pantalla de inicio (en una sola llamada).
+create or replace function public.dashboard_summary() returns jsonb
+language plpgsql stable security invoker set search_path = '' as $$
+declare
+  today date := (now() at time zone 'Europe/Madrid')::date;
+begin
+  perform app.require_staff();
+  return jsonb_build_object(
+    'leads_nuevos', (select coalesce(jsonb_agg(x order by x.created_at desc), '[]'::jsonb) from (
+        select l.id, l.names, l.email, l.phone, l.source, l.style, l.tier, l.wedding_date, l.created_at, l.trials
+          from public.leads l where l.status = 'nuevo' order by l.created_at desc limit 20) x),
+    'leads_nuevos_total', (select count(*) from public.leads where status = 'nuevo'),
+    'proximas_acciones', (select coalesce(jsonb_agg(x order by x.next_action_at), '[]'::jsonb) from (
+        select l.id, l.names, l.status, l.next_action, l.next_action_at from public.leads l
+         where l.status not in ('ganado', 'perdido') and l.next_action_at is not null
+           and (l.next_action_at at time zone 'Europe/Madrid')::date <= today + 1
+         order by l.next_action_at limit 20) x),
+    'tareas', (select coalesce(jsonb_agg(x order by x.due_at nulls last), '[]'::jsonb) from (
+        select t.id, t.title, t.due_at, t.lead_id, t.client_id, t.wedding_id,
+               coalesce(l.names, c.display_name, w.slug) as about
+          from public.tasks t
+          left join public.leads l on l.id = t.lead_id
+          left join public.clients c on c.id = t.client_id
+          left join public.weddings w on w.id = t.wedding_id
+         where t.status = 'pendiente' and (t.due_at is null or (t.due_at at time zone 'Europe/Madrid')::date <= today)
+         order by t.due_at nulls last limit 30) x),
+    'bodas_por_entregar', (select coalesce(jsonb_agg(x order by x.promised_delivery_at nulls last), '[]'::jsonb) from (
+        select o.id, o.number, o.status, o.promised_delivery_at, o.wedding_id, c.display_name
+          from public.orders o left join public.clients c on c.id = o.client_id
+         where o.status in ('pagado', 'en_produccion') order by o.promised_delivery_at nulls last limit 20) x),
+    'pagos_recientes', (select coalesce(jsonb_agg(x order by x.paid_at desc), '[]'::jsonb) from (
+        select p.id, p.amount_cents, p.provider, p.paid_at, o.number, c.display_name
+          from public.payments p join public.orders o on o.id = p.order_id
+          left join public.clients c on c.id = o.client_id
+         where p.status = 'pagado' and p.paid_at > now() - interval '14 days' order by p.paid_at desc limit 10) x),
+    'bodas_semana', (select coalesce(jsonb_agg(x order by x.wedding_date), '[]'::jsonb) from (
+        select w.id, w.slug, w.status, w.wedding_date, w.config #> '{event,couple}' as couple, w.config #>> '{venue,name}' as venue
+          from public.weddings w where w.wedding_date between today and today + 7 order by w.wedding_date) x),
+    'embudo', (select coalesce(jsonb_object_agg(s.status, s.n), '{}'::jsonb) from (
+        select l.status, count(*) as n from public.leads l group by l.status) s),
+    'respuestas_semana', (select count(*) from public.rsvp_responses r where r.created_at > now() - interval '7 days')
+  );
+end $$;
+
+do $$
+declare f text;
+begin
+  foreach f in array array[
+    'public.publish_wedding(uuid, text)', 'public.unpublish_wedding(uuid, text)',
+    'public.restore_wedding_version(uuid)', 'public.convert_lead_to_client(uuid)', 'public.suggest_slug(text)',
+    'public.global_search(text)', 'public.import_leads(jsonb)', 'public.dashboard_summary()']
+  loop
+    execute format('revoke execute on function %s from public, anon', f);
+    execute format('grant execute on function %s to authenticated, service_role', f);
+  end loop;
+end $$;
+
+-- ════════════════ 20261024000900_almacenamiento.sql ════════════════
+
+-- WeddingWebs · 9/9 · Fotos de las parejas en Supabase Storage.
+--
+-- Cubo "wedding-assets" de lectura pública con rutas imposibles de adivinar
+-- (weddings/<id de la boda>/<uuid>.jpg): la foto es tan privada como la propia web de la boda,
+-- que también es pública para quien tenga el enlace. Así las webs cargan rápido y se pueden
+-- cachear, sin URLs firmadas que caducan. Solo el equipo puede subir, cambiar o borrar.
+-- Nunca se guardan aquí fotos de invitados (regla de negocio 1).
+
+do $$
+begin
+  if not exists (select 1 from information_schema.schemata where schema_name = 'storage') then
+    raise notice 'Sin esquema storage (base local sin Supabase Storage): se omite.';
+    return;
+  end if;
+
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values ('wedding-assets', 'wedding-assets', true, 26214400, array['image/jpeg', 'image/webp', 'image/png'])
+  on conflict (id) do update set public = true, file_size_limit = excluded.file_size_limit,
+                                 allowed_mime_types = excluded.allowed_mime_types;
+
+  execute $p$drop policy if exists wedding_assets_staff_select on storage.objects$p$;
+  execute $p$drop policy if exists wedding_assets_staff_insert on storage.objects$p$;
+  execute $p$drop policy if exists wedding_assets_staff_update on storage.objects$p$;
+  execute $p$drop policy if exists wedding_assets_staff_delete on storage.objects$p$;
+  execute $p$create policy wedding_assets_staff_select on storage.objects for select to authenticated
+            using (bucket_id = 'wedding-assets' and app.is_staff())$p$;
+  execute $p$create policy wedding_assets_staff_insert on storage.objects for insert to authenticated
+            with check (bucket_id = 'wedding-assets' and app.is_staff())$p$;
+  execute $p$create policy wedding_assets_staff_update on storage.objects for update to authenticated
+            using (bucket_id = 'wedding-assets' and app.is_staff())
+            with check (bucket_id = 'wedding-assets' and app.is_staff())$p$;
+  execute $p$create policy wedding_assets_staff_delete on storage.objects for delete to authenticated
+            using (bucket_id = 'wedding-assets' and app.is_staff())$p$;
+end $$;

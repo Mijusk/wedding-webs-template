@@ -28,7 +28,11 @@ async function readTemplate(template, origin) {
     try {
       html = await readFile(join(ROOT, templateDir(template), "index.html"), "utf8");
     } catch {
-      const res = await fetch(`${origin}/${templateDir(template)}index.html`, { signal: AbortSignal.timeout(5000) });
+      // En las vistas previas de Vercel protegidas, la clave de "Protection Bypass for Automation" deja pasar.
+      const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+      const res = await fetch(`${origin}/${templateDir(template)}index.html`, {
+        headers: bypass ? { "x-vercel-protection-bypass": bypass } : {}, signal: AbortSignal.timeout(5000),
+      });
       if (!res.ok) throw new Error(`No se pudo leer la plantilla ${template}`);
       html = await res.text();
     }
@@ -104,8 +108,13 @@ export async function renderWedding(data, { origin, pageUrl }) {
 }
 
 // Página de "no encontrada" o "ya no disponible", con el diseño de 404.html.
+const FALLBACK_404 = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow"><title>No encontramos esta página</title></head>
+<body style="font:17px/1.6 system-ui,sans-serif;display:grid;place-items:center;min-height:90vh;text-align:center;padding:24px">
+<main><h1>No encontramos esta página</h1><p class="lead">Revisa el enlace que te enviaron.</p></main></body></html>`;
+
 export async function renderNotFound({ title, text } = {}) {
-  let html = await readFile(join(ROOT, "404.html"), "utf8");
+  let html = await readFile(join(ROOT, "404.html"), "utf8").catch(() => FALLBACK_404);
   if (title) html = html.replace(/<h1>[\s\S]*?<\/h1>/, () => `<h1>${esc(title)}</h1>`);
   if (text) html = html.replace(/<p class="lead">[\s\S]*?<\/p>/, () => `<p class="lead">${esc(text)}</p>`);
   return html;

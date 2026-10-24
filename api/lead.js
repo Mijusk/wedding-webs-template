@@ -56,7 +56,9 @@ export default async function handler(req, res) {
   }
 }
 
-// Anti-bots de Cloudflare Turnstile, solo si está configurado (TURNSTILE_SECRET_KEY).
+// Anti-bots de Cloudflare Turnstile, solo si está configurado (TURNSTILE_SECRET_KEY). Aún NO está el
+// widget en el escaparate: no pongas esta variable hasta añadirlo, o se rechazarían todos los leads.
+// Mientras tanto protegen el campo trampa y el límite de peticiones.
 async function turnstileOk(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) return true;
