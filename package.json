@@ -1,0 +1,18 @@
+{
+  "name": "wedding-webs",
+  "private": true,
+  "type": "module",
+  "description": "WeddingWebs: escaparate, 27 plantillas, panel y API. Sin dependencias ni paso de compilación.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/servidor-local.mjs",
+    "validar": "node scripts/validar-configs.mjs",
+    "test": "node --test \"tests/unit/*.test.js\" && node scripts/validar-configs.mjs",
+    "test:db": "tests/db/run.sh",
+    "test:api": "node --test \"tests/api/*.test.js\"",
+    "test:e2e": "node tests/e2e/flujo-completo.mjs",
+    "semillas": "python3 scripts/generar-semillas.py"
+  }
+}
