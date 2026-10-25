@@ -2366,7 +2366,7 @@ begin
                                      song, message, payload, source, ip_hash, user_agent)
   values (w.id, grp.id, nm, att = 'si', n_adults, n_children, comp, diet, bus, song, msg,
           jsonb_strip_nulls(jsonb_build_object('sentAt', left(p_payload ->> 'sentAt', 40))), 'web', p_ip_hash, left(p_user_agent, 300));
-  return jsonb_build_object('ok', true, 'sheet', w.rsvp_sheet_endpoint, 'adults', n_adults, 'children', n_children);
+  return jsonb_build_object('ok', true, 'sheet', w.rsvp_sheet_endpoint, 'name', nm, 'adults', n_adults, 'children', n_children);
 end $$;
 
 -- ── Para las funciones del servidor ───────────────────────────

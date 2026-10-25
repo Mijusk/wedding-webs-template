@@ -91,6 +91,15 @@ export async function renderWedding(data, { origin, pageUrl }) {
   // El RSVP de esta boda se guarda en nuestra base de datos. En la vista previa se simula
   // (así las pruebas de la pareja o de Luis no ensucian la lista de invitados).
   config.rsvp = { ...(config.rsvp || {}), endpoint: data.draft ? "" : `/api/rsvp?w=${encodeURIComponent(data.slug)}` };
+  // RSVP ampliado si el plan de la boda lo incluye: lo pinta /lib/rsvp-ampliado.js con el estilo de la plantilla.
+  if (data.features?.rsvp_ampliado) {
+    config.rsvp.extended = {
+      invite: data.invite || null,
+      inviteInvalid: Boolean(data.invite_invalid),
+      bus: config.rsvp.bus === true,
+      dietary: config.rsvp.dietary !== false,
+    };
+  }
 
   let html = await readTemplate(template, origin);
   html = html.replace(/<head>/i, `<head>\n<base href="/${dir}">`);

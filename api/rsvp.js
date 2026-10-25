@@ -3,7 +3,7 @@
 import { rpc, isConfigured } from "./_lib/supabase.js";
 import { sendJson, readJson, queryOf, clientIp, ipHash, forwardToSheet, HttpError } from "./_lib/http.js";
 
-const STATUS = { no_existe: 404, sin_rsvp: 404, cerrado: 409, nombre: 400, asistencia: 400 };
+const STATUS = { no_existe: 404, sin_rsvp: 404, cerrado: 409, nombre: 400, asistencia: 400, plazas: 400, nadie: 400, invitacion: 404 };
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return sendJson(res, 405, { ok: false, error: "metodo" }, { Allow: "POST" });
@@ -27,11 +27,23 @@ export default async function handler(req, res) {
     ]);
     if (!porBoda || !porIp) return sendJson(res, 429, { ok: false, error: "demasiadas" }, { "Retry-After": "600" });
 
+    const str = (v, max) => (v === undefined || v === null ? undefined : String(v).slice(0, max));
+    const int = (v) => (v === undefined || v === null || v === "" ? undefined : Number.isInteger(Number(v)) ? Number(v) : -1);
     const entry = {
       name: String(body.name ?? "").slice(0, 200),
       attending: String(body.attending ?? ""),
       song: String(body.song ?? "").slice(0, 400),
       sentAt: typeof body.sentAt === "string" ? body.sentAt.slice(0, 40) : undefined,
+      // RSVP ampliado (la base de datos lo ignora si la boda no tiene el módulo)
+      invite: str(body.invite, 80),
+      adults: int(body.adults),
+      children: int(body.children),
+      dietary: str(body.dietary, 500),
+      bus: str(body.bus, 4),
+      message: str(body.message, 1000),
+      guests: Array.isArray(body.guests)
+        ? body.guests.slice(0, 50).map((g) => ({ id: String(g?.id ?? "").slice(0, 40), attending: g?.attending === true, dietary: str(g?.dietary, 300) }))
+        : undefined,
     };
     const r = await rpc("api_submit_rsvp", {
       p_slug: slug, p_payload: entry, p_ip_hash: ip, p_user_agent: String(req.headers["user-agent"] || "").slice(0, 300),
@@ -39,7 +51,7 @@ export default async function handler(req, res) {
     if (!r?.ok) return sendJson(res, STATUS[r?.error] || 400, { ok: false, error: r?.error || "error" });
 
     // Copia en la hoja de Google de la pareja durante la transición (si la boda la tiene).
-    if (r.sheet) await forwardToSheet(r.sheet, entry);
+    if (r.sheet) await forwardToSheet(r.sheet, { name: r.name || entry.name, attending: entry.attending, song: entry.song });
     return sendJson(res, 200, { ok: true });
   } catch (e) {
     console.error("rsvp", slug, e.status, e.message);
