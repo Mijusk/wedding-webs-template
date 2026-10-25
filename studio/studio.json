@@ -539,7 +539,8 @@
     "note": "Precio final, pago único: sin cuotas ni permanencia."
   },
   "contact": {
-    "endpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"
+    "endpoint": "/api/lead",
+    "fallbackEndpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"
   },
   "demoPhotos": {
     "folder": "demo/",

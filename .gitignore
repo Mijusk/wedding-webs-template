@@ -2,3 +2,7 @@
 node_modules/
 .vercel/
 .netlify/
+.env
+.env.local
+.env.*.local
+tests/e2e/capturas/

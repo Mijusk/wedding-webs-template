@@ -141,6 +141,8 @@ main section, .contact { scroll-margin-top: 80px; }
 .hint { font-size: 13px; color: var(--muted); }
 .consent { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 14px; color: var(--muted); cursor: pointer; }
 .consent input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); }
+.checkout, .billing { display: grid; gap: 16px; }
+.billing { padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
 .error { color: var(--error); font-size: 14px; min-height: 1.2em; }
 
 /* Fotos del formulario */

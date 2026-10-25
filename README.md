@@ -1,15 +1,28 @@
-# Wedding Webs · template
+# WeddingWebs
 
-Web de boda configurable desde un único `config.json`. HTML, CSS y JS sin framework ni paso de build.
+Webs de boda configurables desde un único config. HTML, CSS y JS sin framework ni paso de build.
+
+Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 27 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
+
+| Documento | Para qué |
+| --- | --- |
+| [docs/SUPABASE.md](docs/SUPABASE.md) | Ponerlo en marcha: crear el proyecto, pegar la base de datos y las claves en Vercel. Sin terminal. |
+| [docs/STRIPE.md](docs/STRIPE.md) | Cobros: crear la cuenta de Stripe y conectarla. Sin terminal. |
+| [docs/FACTURACION.md](docs/FACTURACION.md) | Cómo factura la web, Verifactu y qué proveedor elegir. |
+| [docs/EMAILS.md](docs/EMAILS.md) | Que los emails salgan de verdad: Resend y tu dominio. Sin terminal. |
+| [docs/ARRANCAR.md](docs/ARRANCAR.md) | Trabajar en local y pasar las pruebas. |
+| [docs/DECISIONES.md](docs/DECISIONES.md) | Por qué está hecho así, y lo que falta por decidir. |
+| [docs/COSTES.md](docs/COSTES.md) | Cuánto cuesta al mes. |
+| [docs/INVENTARIO.md](docs/INVENTARIO.md) | Plantillas, secciones, campos e integraciones. |
 
 ## Probar en local
 
 ```bash
-npx serve .          # o: python3 -m http.server 8000
-# plantilla: http://localhost:3000/   escaparate: http://localhost:3000/studio/
+npm run dev          # servidor local sin dependencias: http://localhost:3000/studio/
+# plantilla clásica: http://localhost:3000/index.html   panel: http://localhost:3000/panel/
 ```
 
-No hay `npm run dev`: no hay paso de build.
+No hay paso de build. Las plantillas y el escaparate también funcionan con `npx serve .`; el panel y `/b/<boda>` necesitan Supabase (ver [docs/ARRANCAR.md](docs/ARRANCAR.md)).
 
 (Hace falta un servidor: `fetch("config.json")` no funciona abriendo el archivo directamente.)
 
@@ -68,9 +81,21 @@ El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
 | `studio/legal.html` | Aviso legal, privacidad y condiciones. Los datos del titular y los plazos salen de `studio.json > legal` |
-| `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas |
+| `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas. `vercel.json` además manda `/b/<slug>` a `api/boda.js` |
+| `api/` | Funciones de Vercel: `boda.js` (webs de boda desde la base de datos), `rsvp.js`, `lead.js`, `productos.js`, `panel-config.js`, `pareja.js` (acceso y recordatorios), `cron.js` (resumen diario), `pedido.js` (pagar y seguimiento), `stripe.js` (avisos de pago) y `factura.js` (PDF) |
+| `panel/` | Panel interno de Luis: leads, tareas, clientes, pedidos, bodas, propuestas, facturas, automatizaciones y ajustes |
+| `seguimiento/` | Página de seguimiento de cada pedido, con su código y sin contraseña: pagar, propuestas, cambios y factura |
+| `pareja/` | Panel de cada pareja (entra sin contraseña): invitados, respuestas, datos prácticos y QR para imprimir |
+| `lib/` | Código compartido: validador del config, fotos, IBAN, NIF, QR, lector de Excel y el RSVP ampliado que cargan las plantillas |
+| `schema/` | JSON Schema del config de boda |
+| `supabase/` | Migraciones de la base de datos, datos de ejemplo e `instalar.sql` (todo en uno para pegar en Supabase) |
+| `scripts/`, `tests/`, `docs/` | Utilidades, pruebas y documentación (no se publican en la web) |
 
 ## Nueva boda
+
+**Desde el panel** (lo normal ahora): Panel › Bodas › Nueva boda, o «Crear su web» desde la ficha del lead. Fotos, textos, publicar y versiones, todo ahí; sin tocar git.
+
+El sistema anterior (una rama por boda) sigue funcionando y se puede pasar a la base de datos con `npm run importar-boda -- --rama <rama>`:
 
 1. Rama nueva desde `main`.
 2. Edita `config.json` y `css/theme.css`.
