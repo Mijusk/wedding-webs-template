@@ -96,7 +96,7 @@ En el despliegue de vista previa que acabas de rehacer (el botón **Visit**):
 
 Y el panel de la pareja (fase 3):
 
-- Panel › **Bodas** › **Lucía y Martín** › **Pareja y acceso a su panel**: pon **tu propio email** (otro distinto del tuyo de Luis, por ejemplo uno personal) en «Dar acceso» y pulsa **Enlace de acceso**. Ábrelo **en el móvil** (o en una ventana de incógnito): entras como si fueras la pareja.
+- Panel › **Bodas** › **Lucía y Martín** › **Pareja y acceso a su panel** › **Enlace de acceso** (junto a lucia@example.com). Ábrelo en una ventana de incógnito o mándatelo al móvil: entras como si fueras la pareja.
 - Ahí prueba a importar un Excel de invitados, cambiar el horario y descargar el Excel del catering.
 - `…/b/lucia-y-martin?i=demo-familia-ortega-0000000001` → la web como la ve la Familia Ortega con su enlace personal: les saluda y marcan uno a uno quién viene.
 
