@@ -121,9 +121,11 @@ await check("Cliente: nuevo pedido y pago apuntado → pagado con entrega en 3 d
   await p.getByText(/Pedido P-\d{4}-\d{4} creado/).waitFor();
   await p.getByRole("button", { name: "Apuntar un pago" }).first().click();
   await p.locator("dialog[open]").getByRole("button", { name: "Apuntar pago" }).click();
-  await p.getByText("Pago apuntado: pedido pagado.").waitFor();
+  await p.getByText(/Pago apuntado: pedido pagado, entrega el/).waitFor();
   const orders = await db.select("orders?client_id=eq.c0000000-0000-4000-8000-000000000002&select=id,status,promised_delivery_at&order=created_at.desc");
   if (orders[0].status !== "pagado" || !orders[0].promised_delivery_at) throw new Error(JSON.stringify(orders[0]));
+  // Sin datos fiscales la factura queda en borrador (y se puede borrar); con ellos, se emitiría.
+  await db.remove(`invoices?order_id=eq.${orders[0].id}&status=eq.borrador`);
   await db.remove(`payments?order_id=eq.${orders[0].id}`);
   await db.remove(`orders?id=eq.${orders[0].id}`);
 });

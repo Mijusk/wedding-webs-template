@@ -1,11 +1,12 @@
 // GET /b/<slug>            -> la web publicada de esa boda (vercel.json la reescribe a /api/boda?slug=<slug>)
 // GET /b/<slug>?vista=<k>  -> vista previa del borrador (la clave está en el panel: "Enlace de vista previa")
 // GET /b/<slug>?i=<k>      -> enlace personal de un grupo de invitados (RSVP ampliado): saluda y sabe sus plazas
+// GET /b/<slug>?propuesta=<n>&c=<código> -> una propuesta tal como se mandó a la pareja (página de seguimiento)
 //
 // Una sola ruta sirve todas las bodas con cualquiera de las 27 plantillas. La plantilla no cambia:
 // solo recibe su config desde aquí en vez de desde config.json.
 import { rpc, isConfigured } from "./_lib/supabase.js";
-import { sendHtml, queryOf, origin } from "./_lib/http.js";
+import { sendHtml, queryOf, origin, clientIp, ipHash } from "./_lib/http.js";
 import { renderWedding, renderNotFound } from "./_lib/render.js";
 
 const NO_INDEX = { "X-Robots-Tag": "noindex, nofollow" };
@@ -25,9 +26,18 @@ export default async function handler(req, res) {
   if (!host && !/^[a-z0-9][a-z0-9-]{1,58}[a-z0-9]$/.test(slug)) return notFound(res);
   if (!isConfigured()) return notFound(res, 503);
 
+  const proposal = /^\d{1,3}$/.test(q.get("propuesta") || "") && q.get("c") ? Number(q.get("propuesta")) : null;
+
   let data;
   try {
-    data = await rpc("api_public_wedding", { p_slug: slug, p_preview_token: vista || null, p_host: host || null, p_invite: invite });
+    // Las propuestas se abren con el código del pedido: mismo límite de intentos que el seguimiento.
+    if (proposal && !(await rpc("api_hit_rate_limit", { p_key: `seguimiento:${ipHash(clientIp(req))}`, p_max: 120, p_window_seconds: 600 }))) {
+      return notFound(res, 429);
+    }
+    data = proposal
+      ? await rpc("api_public_proposal", { p_code: q.get("c"), p_number: proposal })
+      : await rpc("api_public_wedding", { p_slug: slug, p_preview_token: vista || null, p_host: host || null, p_invite: invite });
+    if (proposal && data && data.slug !== slug) data = null;
   } catch (e) {
     console.error("api_public_wedding", e.status, e.message);
     return sendHtml(res, 503, await renderNotFound({

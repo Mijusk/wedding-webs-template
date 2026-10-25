@@ -12,9 +12,10 @@
     "test": "node --test \"tests/unit/*.test.js\" && node scripts/validar-configs.mjs && node scripts/unir-migraciones.mjs --comprobar",
     "test:db": "tests/db/run.sh",
     "test:api": "node --test \"tests/api/*.test.js\"",
-    "test:e2e": "node tests/e2e/flujo-completo.mjs && node tests/e2e/panel.mjs && node tests/e2e/pareja.mjs && node tests/e2e/plantillas.mjs",
+    "test:e2e": "node tests/e2e/flujo-completo.mjs && node tests/e2e/panel.mjs && node tests/e2e/pareja.mjs && node tests/e2e/cobros.mjs && node tests/e2e/plantillas.mjs",
     "semillas": "python3 scripts/generar-semillas.py",
     "migraciones": "node scripts/unir-migraciones.mjs",
-    "importar-boda": "node scripts/importar-boda.mjs"
+    "importar-boda": "node scripts/importar-boda.mjs",
+    "stripe-falso": "node tests/stripe-falso.mjs"
   }
 }

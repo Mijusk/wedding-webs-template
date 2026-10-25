@@ -1,13 +1,19 @@
 // Ficha de cliente: datos de facturación, pedidos y pagos, su web y su historial.
-import { db } from "../supa.js";
-import { html, raw, render, $, $$, ORDER_STATUSES, statusChip, fmtDate, fmtDateTime, fmtMoney, formDialog, confirmDialog, toast, fail, icons } from "../ui.js";
+import { db, api, download, siteUrl } from "../supa.js";
+import { html, raw, render, $, $$, ORDER_STATUSES, statusChip, fmtDate, fmtDateTime, fmtMoney, formDialog, confirmDialog, showDialog, toast, fail, icons, waLink } from "../ui.js";
+import { validNif } from "/lib/nif.js";
+
+export { validNif };
+const pretty = (c) => (c ? `${c.slice(0, 4)}-${c.slice(4)}` : "");
+const PAY_LABEL = { stripe: "Tarjeta o Bizum (Stripe)", bizum: "Bizum", transferencia: "Transferencia", efectivo: "Efectivo", otro: "Otro" };
 
 export default async function cliente(ctx) {
   const { el, params, staff, setTitle, go } = ctx;
   const id = params.id;
-  const [c, orders, products, activities] = await Promise.all([
+  const [c, orders, invoices, products, activities] = await Promise.all([
     db.one("clients", { select: "*,weddings(id,slug,status,wedding_date,template),leads(id,names,status)", id: `eq.${id}` }),
     db.select("orders", { select: "*,order_lines(*),payments(*)", client_id: `eq.${id}`, order: "created_at.desc" }),
+    db.select("invoices", { select: "id,full_number,kind,status,total_cents,issued_at,order_id,provider,corrects_invoice_id", client_id: `eq.${id}`, order: "created_at.asc" }).catch(() => []),
     db.select("products", { select: "*", active: "is.true", order: "sort" }),
     db.select("activities", { select: "*", client_id: `eq.${id}`, order: "created_at.desc", limit: 100 }),
   ]);
@@ -15,6 +21,42 @@ export default async function cliente(ctx) {
   setTitle(c.display_name);
   const reload = () => cliente(ctx);
   const isAdmin = ["owner", "admin"].includes(staff.role);
+  // El pedido al que se enlaza la web nueva («Crear su web»): el más reciente sin web.
+  const openOrder = orders.find((o) => !o.wedding_id && !["cancelado", "reembolsado"].includes(o.status));
+  const paidOf = (o) => o.payments.filter((p) => ["pagado", "reembolso_parcial"].includes(p.status)).reduce((a, p) => a + p.amount_cents - p.refunded_cents, 0);
+
+  const orderCard = (o) => {
+    const invs = invoices.filter((i) => i.order_id === o.id);
+    const main = invs.find((i) => i.kind !== "rectificativa" && i.status === "emitida");
+    const paid = paidOf(o);
+    return html`<div class="panel-block order" style="margin-top:10px;background:var(--surface-2)" data-order-card="${o.id}">
+      <div class="block-title"><span>Pedido ${o.number} ${statusChip(o.status)}</span><b>${fmtMoney(o.total_cents)}</b></div>
+      <div class="rows">${o.order_lines.map((li) => html`<div class="row"><span class="row__title" style="font-weight:500">${li.description}${li.quantity > 1 ? ` × ${li.quantity}` : ""}</span><span class="row__side">${fmtMoney(li.total_cents)}</span></div>`)}</div>
+      <p class="small muted" style="margin:8px 0">
+        Pagado ${fmtMoney(paid)} de ${fmtMoney(o.total_cents)}
+        ${o.promised_delivery_at ? ` · entrega prometida el ${fmtDate(o.promised_delivery_at)}` : ""}
+        ${o.delivered_at ? ` · entregado el ${fmtDate(o.delivered_at)}` : ""}
+        ${o.source === "escaparate" ? " · pagado desde la web" : ""}
+      </p>
+      ${o.payments.length ? html`<div class="rows small">${o.payments.map((p) => html`<div class="row"><span>${PAY_LABEL[p.provider] || p.provider} · ${fmtDateTime(p.paid_at || p.created_at)}${p.refunded_cents ? html` · <b>devuelto ${fmtMoney(p.refunded_cents)}</b>` : ""}</span>
+        <span class="row__side">${statusChip(p.status)} ${fmtMoney(p.amount_cents)}
+          ${isAdmin && p.provider !== "stripe" && p.amount_cents > p.refunded_cents ? html`<button class="btn btn--small btn--quiet" type="button" data-refund="${p.id}">Devolver</button>` : ""}</span></div>`)}</div>` : ""}
+      ${isAdmin && invs.length ? html`<div class="rows small" style="margin-top:8px">${invs.map((i) => html`<div class="row">
+        <span>Factura <b>${i.full_number || "borrador"}</b> · ${i.kind}${i.status === "anulada" ? " · anulada" : ""}${i.issued_at ? ` · ${fmtDate(i.issued_at)}` : ""}</span>
+        <span class="row__side">${fmtMoney(i.total_cents)}
+          ${i.status !== "borrador" ? html`<button class="btn btn--small" type="button" data-pdf="${i.id}" data-name="${i.full_number}">PDF</button>` : ""}
+          ${i.status === "emitida" && i.kind !== "rectificativa" ? html`<button class="btn btn--small btn--quiet" type="button" data-rectify="${i.id}" data-number="${i.full_number}" data-total="${i.total_cents}">Rectificar</button>` : ""}</span></div>`)}</div>` : ""}
+      <div class="btn-row" style="margin-top:12px">
+        <select data-order-status="${o.id}" aria-label="Estado del pedido" style="width:auto">${ORDER_STATUSES.map(([v, l]) => html`<option value="${v}" ${o.status === v ? "selected" : ""}>${l}</option>`)}</select>
+        <button class="btn btn--small" type="button" data-track="${o.id}">Enlace para la pareja</button>
+        ${paid < o.total_cents ? html`<button class="btn btn--small" type="button" data-pay="${o.id}">Apuntar un pago</button>` : ""}
+        ${isAdmin && paid > 0 && !main ? html`<button class="btn btn--small" type="button" data-invoice="${o.id}">Hacer la factura</button>` : ""}
+        ${o.wedding_id ? html`<a class="btn btn--small btn--quiet" href="#/bodas/${o.wedding_id}">Su web</a>`
+          : c.weddings?.length ? html`<button class="btn btn--small" type="button" data-link-wedding="${o.id}">Enlazar con su web</button>` : ""}
+        ${!["entregado", "cancelado", "reembolsado"].includes(o.status) ? html`<button class="btn btn--small btn--quiet" type="button" data-deliver="${o.id}">Marcar entregado</button>` : ""}
+      </div>
+    </div>`;
+  };
 
   render(el, html`
     <a class="back" href="#/clientes">← Clientes</a>
@@ -27,7 +69,7 @@ export default async function cliente(ctx) {
         </div>
       </div>
       <div class="page-actions">
-        ${c.weddings?.length ? "" : html`<a class="btn" href="#/bodas/nueva?cliente=${c.id}">Crear su web</a>`}
+        ${c.weddings?.length ? "" : html`<a class="btn" href="#/bodas/nueva?cliente=${c.id}${openOrder ? `&pedido=${openOrder.id}` : ""}">Crear su web</a>`}
         <button class="btn btn--primary" type="button" data-new-order>Nuevo pedido</button>
       </div>
     </div>
@@ -36,23 +78,8 @@ export default async function cliente(ctx) {
       <div class="stack">
         <section class="panel-block">
           <h2>Pedidos</h2>
-          ${orders.length ? orders.map((o) => html`<div class="panel-block" style="margin-top:10px;background:var(--surface-2)">
-            <div class="block-title"><span>Pedido ${o.number} ${statusChip(o.status)}</span><b>${fmtMoney(o.total_cents)}</b></div>
-            <div class="rows">${o.order_lines.map((li) => html`<div class="row"><span class="row__title" style="font-weight:500">${li.description}${li.quantity > 1 ? ` × ${li.quantity}` : ""}</span><span class="row__side">${fmtMoney(li.total_cents)}</span></div>`)}</div>
-            <p class="small muted" style="margin:8px 0">
-              Pagado ${fmtMoney(o.payments.filter((p) => p.status === "pagado").reduce((a, p) => a + p.amount_cents - p.refunded_cents, 0))} de ${fmtMoney(o.total_cents)}
-              ${o.promised_delivery_at ? ` · entrega prometida el ${fmtDate(o.promised_delivery_at)}` : ""}
-              ${o.delivered_at ? ` · entregado el ${fmtDate(o.delivered_at)}` : ""}
-            </p>
-            ${o.payments.length ? html`<div class="rows small">${o.payments.map((p) => html`<div class="row"><span>${p.provider} · ${fmtDateTime(p.paid_at || p.created_at)}</span><span class="row__side">${statusChip(p.status)} ${fmtMoney(p.amount_cents)}</span></div>`)}</div>` : ""}
-            ${o.payment_link_url ? html`<p class="small" style="margin-top:8px">Enlace de pago: <a href="${o.payment_link_url}" target="_blank" rel="noopener">${o.payment_link_url}</a></p>` : ""}
-            <div class="btn-row" style="margin-top:12px">
-              <select data-order-status="${o.id}" aria-label="Estado del pedido" style="width:auto">${ORDER_STATUSES.map(([v, l]) => html`<option value="${v}" ${o.status === v ? "selected" : ""}>${l}</option>`)}</select>
-              <button class="btn btn--small" type="button" data-pay="${o.id}">Apuntar un pago</button>
-              <button class="btn btn--small" type="button" data-link="${o.id}">Enlace de pago</button>
-              ${o.status !== "entregado" ? html`<button class="btn btn--small" type="button" data-deliver="${o.id}">Marcar entregado</button>` : ""}
-            </div>
-          </div>`) : html`<p class="empty"><strong>Sin pedidos.</strong>Crea uno con «Nuevo pedido» cuando confirmen la tarifa.</p>`}
+          ${orders.length ? orders.map((o) => orderCard(o)) : ""}
+          ${orders.length ? "" : html`<p class="empty"><strong>Sin pedidos.</strong>Crea uno con «Nuevo pedido» cuando confirmen la tarifa.</p>`}
         </section>
 
         <section class="panel-block">
@@ -121,7 +148,7 @@ export default async function cliente(ctx) {
     try {
       const [o] = await db.insert("orders", { client_id: id, wedding_id: data.get("wedding") || null, lead_id: c.leads?.[0]?.id || null, status: "pendiente_pago" });
       await db.insert("order_lines", { order_id: o.id, product_id: p.id, description: `Web de boda · ${p.name}`, unit_price_cents: price, vat_rate_bp: p.vat_rate_bp });
-      toast(`Pedido ${o.number} creado.`);
+      toast(`Pedido ${o.number} creado. Con «Enlace para la pareja» les mandas dónde pagar y ver cómo va.`, { timeout: 7000 });
       reload();
     } catch (e) { fail(e); }
   });
@@ -134,25 +161,33 @@ export default async function cliente(ctx) {
     try { await db.update("orders", { id: `eq.${b.dataset.deliver}` }, { status: "entregado", delivered_at: new Date().toISOString() }); reload(); }
     catch (e) { fail(e); }
   }));
-  $$("[data-link]", el).forEach((b) => b.addEventListener("click", async () => {
-    const o = orders.find((x) => x.id === b.dataset.link);
-    const data = await formDialog({
-      title: "Enlace de pago", submit: "Guardar enlace",
-      text: "Cuando conectemos Stripe (fase 4) el enlace se creará solo. Mientras tanto, pega aquí el que generes en Stripe o tu banco.",
-      body: html`<div class="field"><label for="pl">Enlace</label><input id="pl" name="url" type="url" value="${o.payment_link_url || ""}" placeholder="https://buy.stripe.com/…"></div>`,
+  $$("[data-track]", el).forEach((b) => b.addEventListener("click", () => {
+    const o = orders.find((x) => x.id === b.dataset.track);
+    const url = `${siteUrl()}/seguimiento/${pretty(o.tracking_code)}`;
+    const due = o.total_cents - paidOf(o);
+    const msg = due > 0 && o.status === "pendiente_pago"
+      ? `¡Hola! Aquí podéis pagar vuestra web de boda (${fmtMoney(due)}) y ver cómo va, sin contraseña: ${url}`
+      : `¡Hola! Aquí veis cómo va vuestra web de boda, las propuestas y podéis pedirnos cambios, sin contraseña: ${url}`;
+    const dlg = showDialog(html`<div class="dlg"><h2>Enlace para la pareja</h2>
+      <p class="muted">Su página de seguimiento: ven el pedido${due > 0 ? ", pueden pagar" : ""}, las propuestas que les mandes, y piden cambios o aprueban. Código <b>${pretty(o.tracking_code)}</b>.</p>
+      <div class="link-box"><input readonly value="${url}"><button class="btn btn--small" type="button" data-copy>Copiar</button></div>
+      <div class="btn-row"><a class="btn btn--small btn--primary" href="${waLink(c.phone, msg) || `https://wa.me/?text=${encodeURIComponent(msg)}`}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a>
+        <a class="btn btn--small" href="${url}" target="_blank" rel="noopener">Abrir</a></div>
+      ${due > 0 && o.status !== "pendiente_pago" ? html`<p class="small muted">Para que puedan pagar desde ahí, el pedido tiene que estar «Pendiente de pago».</p>` : ""}
+      <div class="dlg__actions"><button class="btn" type="button" data-close>Cerrar</button></div></div>`);
+    dlg.addEventListener("click", async (e) => {
+      if (e.target.closest("[data-copy]")) { await navigator.clipboard?.writeText(url).catch(() => {}); toast("Enlace copiado."); }
     });
-    if (!data) return;
-    try { await db.update("orders", { id: `eq.${o.id}` }, { payment_link_url: String(data.get("url")).trim() || null }); reload(); }
-    catch (e) { fail(e); }
   }));
+
   $$("[data-pay]", el).forEach((b) => b.addEventListener("click", async () => {
     const o = orders.find((x) => x.id === b.dataset.pay);
-    const paid = o.payments.filter((p) => p.status === "pagado").reduce((a, p) => a + p.amount_cents, 0);
     const data = await formDialog({
       title: "Apuntar un pago", submit: "Apuntar pago",
+      text: "Si con este pago queda pagado, la pareja recibe la confirmación con la factura y su enlace de seguimiento.",
       body: html`<div class="form">
-        <div class="grid-2"><div class="field"><label for="p-amt">Importe (€)</label><input id="p-amt" name="amount" inputmode="decimal" value="${((o.total_cents - paid) / 100).toFixed(2).replace(".", ",")}" required></div>
-          <div class="field"><label for="p-how">Cómo</label><select id="p-how" name="provider"><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="stripe">Tarjeta (Stripe)</option><option value="efectivo">Efectivo</option><option value="otro">Otro</option></select></div></div>
+        <div class="grid-2"><div class="field"><label for="p-amt">Importe (€)</label><input id="p-amt" name="amount" inputmode="decimal" value="${((o.total_cents - paidOf(o)) / 100).toFixed(2).replace(".", ",")}" required></div>
+          <div class="field"><label for="p-how">Cómo</label><select id="p-how" name="provider"><option value="bizum">Bizum</option><option value="transferencia">Transferencia</option><option value="efectivo">Efectivo</option><option value="otro">Otro</option></select></div></div>
         <div class="field"><label for="p-date">Fecha</label><input id="p-date" name="paid_at" type="datetime-local" value="${new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 16)}"></div>
       </div>`,
     });
@@ -160,27 +195,70 @@ export default async function cliente(ctx) {
     const cents = Math.round(Number(String(data.get("amount")).replace(",", ".")) * 100);
     if (!Number.isFinite(cents) || cents <= 0) return toast("El importe no es válido.", { error: true });
     try {
-      await db.insert("payments", { order_id: o.id, provider: data.get("provider"), amount_cents: cents, status: "pagado", paid_at: new Date(data.get("paid_at")).toISOString() });
-      const total = paid + cents;
-      const patch = { paid_cents: total };
-      if (total >= o.total_cents && ["borrador", "pendiente_pago"].includes(o.status)) {
-        patch.status = "pagado";
-        patch.paid_at = new Date().toISOString();
-        if (!o.promised_delivery_at) patch.promised_delivery_at = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
-      }
-      await db.update("orders", { id: `eq.${o.id}` }, patch);
-      await db.insert("activities", { client_id: id, order_id: o.id, kind: "pago", title: `Pago de ${fmtMoney(cents)} (${data.get("provider")})`, actor_id: staff.id });
-      toast(patch.status === "pagado" ? "Pago apuntado: pedido pagado. Entrega en 3 días." : "Pago apuntado.");
+      const r = await api("/api/pedido", { accion: "pago", order_id: o.id, importe: cents, forma: data.get("provider"), fecha: new Date(data.get("paid_at")).toISOString() });
+      toast(r.became_paid
+        ? `Pago apuntado: pedido pagado, entrega el ${fmtDate(r.promised)}.${r.invoice?.ok ? ` Factura ${r.invoice.number}.` : r.invoice ? " La factura no se ha podido hacer: mira tus tareas." : ""}`
+        : "Pago apuntado.", { timeout: 7000 });
+      reload();
+    } catch (e) { fail(new Error(e.data?.message || e.message)); }
+  }));
+
+  $$("[data-invoice]", el).forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true;
+    try { const inv = await db.rpc("invoice_order", { p_order_id: b.dataset.invoice }); toast(`Factura ${inv.full_number} emitida.`); reload(); }
+    catch (e) { b.disabled = false; fail(e); }
+  }));
+
+  $$("[data-pdf]", el).forEach((b) => b.addEventListener("click", async () => {
+    try { await download(`/api/factura?id=${b.dataset.pdf}&descargar=1`, `Factura ${b.dataset.name}.pdf`); } catch (e) { fail(e); }
+  }));
+
+  $$("[data-rectify]", el).forEach((b) => b.addEventListener("click", async () => {
+    const data = await formDialog({
+      title: `Rectificar ${b.dataset.number}`, submit: "Hacer la rectificativa", danger: true,
+      text: "Se emite una factura rectificativa (serie R) en negativo. La original no cambia. Si la devolución es con Stripe, no hace falta: se hace sola al devolver el dinero en Stripe.",
+      body: html`<div class="form">
+        <div class="field"><label for="r-amt">Importe a rectificar (€)</label><input id="r-amt" name="amount" inputmode="decimal" value="${(Number(b.dataset.total) / 100).toFixed(2).replace(".", ",")}" required></div>
+        <div class="field"><label for="r-why">Motivo</label><input id="r-why" name="reason" placeholder="Desistimiento, descuento acordado, error en el precio…" required></div></div>`,
+    });
+    if (!data) return;
+    const cents = Math.round(Number(String(data.get("amount")).replace(",", ".")) * 100);
+    const reason = String(data.get("reason")).trim();
+    if (!Number.isFinite(cents) || cents <= 0) return toast("El importe no es válido.", { error: true });
+    if (!reason) return toast("Escribe el motivo.", { error: true });
+    try {
+      const draft = await db.rpc("create_corrective_invoice", { p_invoice_id: b.dataset.rectify, p_reason: reason, p_amount_cents: cents });
+      const inv = await db.rpc("issue_invoice", { p_invoice_id: draft.id });
+      toast(`Rectificativa ${inv.full_number} emitida.`);
       reload();
     } catch (e) { fail(e); }
   }));
-}
 
-// NIF (8 números + letra), NIE (X/Y/Z + 7 números + letra) o CIF de empresa (letra + 7 números + control).
-export function validNif(v) {
-  const s = String(v || "").toUpperCase();
-  const letters = "TRWAGMYFPDXBNJZSQVHLCKE";
-  if (/^\d{8}[A-Z]$/.test(s)) return letters[Number(s.slice(0, 8)) % 23] === s[8];
-  if (/^[XYZ]\d{7}[A-Z]$/.test(s)) return letters[Number("XYZ".indexOf(s[0]) + s.slice(1, 8)) % 23] === s[8];
-  return /^[ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J]$/.test(s);
+  $$("[data-refund]", el).forEach((b) => b.addEventListener("click", async () => {
+    const p = orders.flatMap((o) => o.payments).find((x) => x.id === b.dataset.refund);
+    const data = await formDialog({
+      title: "Apuntar una devolución", submit: "Apuntar devolución", danger: true,
+      text: "Para pagos por Bizum, transferencia o efectivo: primero devuelve el dinero y luego apúntalo aquí. Se hace sola la factura rectificativa.",
+      body: html`<div class="form">
+        <div class="field"><label for="d-amt">Importe devuelto (€)</label><input id="d-amt" name="amount" inputmode="decimal" value="${((p.amount_cents - p.refunded_cents) / 100).toFixed(2).replace(".", ",")}" required></div>
+        <div class="field"><label for="d-why">Motivo</label><input id="d-why" name="reason" placeholder="Desistimiento" required></div></div>`,
+    });
+    if (!data) return;
+    const cents = Math.round(Number(String(data.get("amount")).replace(",", ".")) * 100);
+    try {
+      const r = await db.rpc("refund_payment", { p_payment_id: p.id, p_amount_cents: cents, p_reason: String(data.get("reason")).trim() || "Devolución" });
+      toast(r.corrective?.ok ? `Devolución apuntada. Rectificativa ${r.corrective.number}.` : "Devolución apuntada.");
+      reload();
+    } catch (e) { fail(e); }
+  }));
+
+  $$("[data-link-wedding]", el).forEach((b) => b.addEventListener("click", async () => {
+    const data = await formDialog({
+      title: "Enlazar el pedido con su web", submit: "Enlazar",
+      body: html`<div class="field"><label for="lw">Web</label><select id="lw" name="wedding">${c.weddings.map((w) => html`<option value="${w.id}">/b/${w.slug}</option>`)}</select></div>`,
+    });
+    if (!data) return;
+    try { await db.update("orders", { id: `eq.${b.dataset.linkWedding}` }, { wedding_id: data.get("wedding") }); toast("Enlazado. Ya puedes mandarles propuestas desde su web."); reload(); }
+    catch (e) { fail(e); }
+  }));
 }

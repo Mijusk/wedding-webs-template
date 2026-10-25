@@ -52,12 +52,14 @@ export default async function ajustes(ctx) {
 
         <section class="panel-block">
           <h2>Tarifas</h2>
-          <p class="small muted" style="margin-bottom:10px">Precio final con IVA. El escaparate las lee de aquí (si no responde, usa las de studio.json). «RSVP ampliado»: qué tarifas incluyen la lista de invitados con enlaces personales.</p>
+          <p class="small muted" style="margin-bottom:10px">Precio final con IVA. El escaparate las lee de aquí (si no responde, usa las de studio.json). «RSVP ampliado»: qué tarifas incluyen la lista de invitados con enlaces personales. «Pago en la web»: se puede pagar al momento desde el escaparate (no con precios «desde»). «Rondas»: cambios de diseño incluidos; vacío = los que acordéis (corregir erratas nunca cuenta).</p>
           <form class="form" data-products>
             ${products.map((pr) => html`<div class="grid-3" data-product="${pr.id}" style="align-items:end">
               <div class="field"><label>Nombre</label><input name="name" value="${pr.name}"></div>
-              <div class="field"><label>Precio con IVA (€)</label><input name="price" inputmode="decimal" value="${(pr.price_cents / 100).toFixed(2).replace(".", ",")}"></div>
+              <div class="grid-2"><div class="field"><label>Precio con IVA (€)</label><input name="price" inputmode="decimal" value="${(pr.price_cents / 100).toFixed(2).replace(".", ",")}"></div>
+                <div class="field"><label>Rondas</label><input name="rounds" inputmode="numeric" placeholder="acordadas" value="${pr.revision_rounds ?? ""}"></div></div>
               <div class="btn-row" style="padding-bottom:8px">
+                <label class="check"><input type="checkbox" name="online" ${pr.online_checkout ? "checked" : ""}> pago en la web</label>
                 <label class="check"><input type="checkbox" name="from" ${pr.price_is_from ? "checked" : ""}> «desde»</label>
                 <label class="check"><input type="checkbox" name="active" ${pr.active ? "checked" : ""}> activa</label>
                 <label class="check" title="Lista de invitados con enlaces personales, acompañantes, niños, alergias y autobús"><input type="checkbox" name="ext" ${pr.features?.rsvp_ampliado ? "checked" : ""}> RSVP ampliado</label></div>
@@ -71,7 +73,7 @@ export default async function ajustes(ctx) {
         <section class="panel-block">
           <h2>Plazos</h2>
           <form class="form" data-plazos>
-            <div class="field"><label for="p-e">Días para entregar una web</label><input id="p-e" name="entrega_dias" type="number" min="1" value="${p.entrega_dias ?? 3}"></div>
+            <div class="field"><label for="p-e">Días laborables para entregar una web</label><input id="p-e" name="entrega_dias" type="number" min="1" value="${p.entrega_dias ?? 3}"></div>
             <div class="field"><label for="p-w">Meses online después de la boda</label><input id="p-w" name="web_meses_tras_boda" type="number" min="1" value="${p.web_meses_tras_boda ?? 12}"></div>
             <div class="field"><label for="p-i">Meses hasta borrar los datos de invitados</label><input id="p-i" name="invitados_meses_tras_boda" type="number" min="1" value="${p.invitados_meses_tras_boda ?? 6}"></div>
             <div class="field"><label for="p-l">Meses hasta anonimizar leads perdidos</label><input id="p-l" name="leads_perdidos_anonimizar_meses" type="number" min="1" value="${p.leads_perdidos_anonimizar_meses ?? 24}"></div>
@@ -114,9 +116,15 @@ export default async function ajustes(ctx) {
       for (const row of $$("[data-product]", el)) {
         const cents = Math.round(Number(row.querySelector("[name=price]").value.replace(",", ".")) * 100);
         if (!Number.isFinite(cents) || cents < 0) throw new Error("Algún precio no es un número válido.");
+        const roundsText = row.querySelector("[name=rounds]").value.trim();
+        const rounds = roundsText === "" ? null : Number(roundsText);
+        if (rounds !== null && !(Number.isInteger(rounds) && rounds >= 0 && rounds <= 20)) throw new Error("Las rondas son un número de 0 a 20 (o vacío).");
+        const from = row.querySelector("[name=from]").checked;
+        const online = row.querySelector("[name=online]").checked;
+        if (from && online) throw new Error(`«${row.querySelector("[name=name]").value}»: una tarifa «desde» no se puede pagar en la web (no hay precio cerrado).`);
         await db.update("products", { id: `eq.${row.dataset.product}` }, {
           name: row.querySelector("[name=name]").value.trim(), price_cents: cents,
-          price_is_from: row.querySelector("[name=from]").checked, active: row.querySelector("[name=active]").checked,
+          price_is_from: from, active: row.querySelector("[name=active]").checked, revision_rounds: rounds, online_checkout: online,
           features: { ...(products.find((x) => x.id === row.dataset.product)?.features || {}), rsvp_ampliado: row.querySelector("[name=ext]").checked },
         });
       }

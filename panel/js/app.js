@@ -19,12 +19,13 @@ const ROUTES = [
   [/^\/bodas\/nueva$/, "nueva-boda", "Nueva boda"],
   [/^\/bodas\/(?<id>[0-9a-f-]{36})$/, "boda", "Boda"],
   [/^\/importar$/, "importar", "Importar"],
+  [/^\/facturas$/, "facturas", "Facturas"],
   [/^\/ajustes$/, "ajustes", "Ajustes"],
 ];
 
 const NAV = [
   ["/", "Inicio", icons.home], ["/leads", "Leads", icons.leads], ["/tareas", "Tareas", icons.tasks],
-  ["/clientes", "Clientes"], ["/bodas", "Bodas", icons.weddings], ["/importar", "Importar"], ["/ajustes", "Ajustes"],
+  ["/clientes", "Clientes"], ["/bodas", "Bodas", icons.weddings], ["/facturas", "Facturas"], ["/importar", "Importar"], ["/ajustes", "Ajustes"],
 ];
 
 export const go = (path) => { location.hash = `#${path}`; };
@@ -144,7 +145,7 @@ async function enter() {
 function renderShell() {
   app.removeAttribute("aria-busy");
   app.className = "";
-  const nav = NAV.filter(([p]) => p !== "/ajustes" || ["owner", "admin"].includes(staff.role));
+  const nav = NAV.filter(([p]) => !["/ajustes", "/facturas"].includes(p) || ["owner", "admin"].includes(staff.role));
   render(app, html`<div class="shell">
     <nav class="rail" aria-label="Secciones">
       <a class="rail__brand" href="#/"><img src="/studio/icono.svg" alt=""><span>WeddingWebs</span></a>
@@ -178,7 +179,7 @@ function renderShell() {
     if (e.target.closest("[data-more]")) {
       const dlg = showDialog(html`<div class="dlg"><h2>Más</h2><nav class="sheet-menu">
         <a href="#/clientes">Clientes</a><a href="#/importar">Importar de la hoja de Google</a>
-        ${["owner", "admin"].includes(staff.role) ? html`<a href="#/ajustes">Ajustes</a>` : ""}
+        ${["owner", "admin"].includes(staff.role) ? html`<a href="#/facturas">Facturas</a><a href="#/ajustes">Ajustes</a>` : ""}
         <button type="button" data-logout>Salir</button></nav>
         <div class="dlg__actions"><button class="btn" data-close type="button">Cerrar</button></div></div>`);
       dlg.addEventListener("click", async (ev) => {

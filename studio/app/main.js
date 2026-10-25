@@ -109,8 +109,12 @@ function setupNudge() {
   const onScroll = () => {
     const trigger = $("#estilos").offsetTop - innerHeight * 0.4;
     const busy = !$("#builder").hidden || !$("#stage").hidden || !$("#loading").hidden;
+    // Si ya están en las tarifas (o reservando), el aviso estorbaría: tapa el botón de pagar en el móvil.
+    const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.8;
+    if (atPricing) return;
     if (scrollY > trigger && !busy) { nudge.hidden = false; removeEventListener("scroll", onScroll); }
   };
+  $("#contact-form").addEventListener("focusin", () => { if (!nudge.hidden) done(); });
   addEventListener("scroll", onScroll, { passive: true });
   $("#nudge-yes").addEventListener("click", () => { done(); openBuilder(); });
   $("#nudge-no").addEventListener("click", done);

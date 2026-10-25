@@ -77,9 +77,9 @@ export function shareTags(config, { pageUrl, templateBase }) {
   ].filter(Boolean).join("\n");
 }
 
-const PREVIEW_BADGE = `<div role="note" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483647;
+const previewBadge = (label) => `<div role="note" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483647;
   font:600 12px/1.2 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:rgba(20,20,20,.82);color:#fff;
-  padding:7px 12px;border-radius:999px;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.2)">Vista previa · aún no es la web publicada</div>`;
+  padding:7px 12px;border-radius:999px;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.2)">${label} · aún no es la web publicada</div>`;
 
 export async function renderWedding(data, { origin, pageUrl }) {
   const template = data.template;
@@ -112,7 +112,10 @@ export async function renderWedding(data, { origin, pageUrl }) {
     : html.replace(/<\/head>/i, () => `${tags}\n</head>`);
   html = html.replace(/<\/head>/i, () =>
     `<script type="application/json" id="wedding-config">${jsonForHtml(config)}</script>\n</head>`);
-  if (data.draft) html = html.replace(/<\/body>/i, () => `${PREVIEW_BADGE}\n</body>`);
+  if (data.draft) {
+    const badge = previewBadge(data.proposal ? `Propuesta ${Number(data.proposal)}` : "Vista previa");
+    html = html.replace(/<\/body>/i, () => `${badge}\n</body>`);
+  }
   return html;
 }
 

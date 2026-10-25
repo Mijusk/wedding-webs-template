@@ -18,12 +18,13 @@ async function applyLivePrices(studio) {
   try {
     const res = await fetch("/api/productos", { signal: AbortSignal.timeout?.(2500) });
     if (!res.ok) return;
-    const { products = [] } = await res.json();
+    const { products = [], pagos = false } = await res.json();
     for (const tier of studio.pricing?.tiers || []) {
       const p = products.find((x) => x.code === tier.id);
       if (!p) continue;
       const euros = p.price_cents / 100;
       tier.price = [euros, p.price_is_from ? null : euros];
+      tier.checkout = Boolean(pagos && p.online_checkout); // se puede pagar al momento (Stripe)
     }
   } catch { /* sin API: precios de studio.json */ }
 }

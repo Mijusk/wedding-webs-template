@@ -158,7 +158,8 @@ export const mailLink = (email, subject = "", body = "") =>
 export function downloadCsv(filename, rows, columns) {
   const cell = (v) => {
     let s = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v);
-    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+    // Fórmulas no (una celda que empiece por "=" la ejecutaría Excel), pero los números negativos sí.
+    if (/^[=+\-@\t\r]/.test(s) && !/^-\d+([.,]\d+)?$/.test(s)) s = `'${s}`;
     return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [columns.map(([, label]) => cell(label)).join(";"), ...rows.map((r) => columns.map(([key]) => cell(typeof key === "function" ? key(r) : r[key])).join(";"))];

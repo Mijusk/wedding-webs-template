@@ -164,6 +164,17 @@ insert into public.payments (order_id, provider, external_id, amount_cents, stat
   ('e0000000-0000-4000-8000-000000000001', 'transferencia', 'demo-1', 13900, 'pagado', now() - interval '1 day'),
   ('e0000000-0000-4000-8000-000000000002', 'bizum', 'demo-2', 7900, 'pagado', now() - interval '3 hours');
 update public.orders set paid_cents = total_cents;
+
+-- Seguimiento: códigos fijos para probar /seguimiento/DEMA-2345, una propuesta y un cambio pedido.
+update public.orders set tracking_code = 'DEMA2345' where id = 'e0000000-0000-4000-8000-000000000001';
+update public.orders set tracking_code = 'DEMB2345' where id = 'e0000000-0000-4000-8000-000000000002';
+insert into public.wedding_proposals (id, wedding_id, order_id, number, template, config, note, sent_at)
+select '90000000-0000-4000-8000-000000000001', w.id, 'e0000000-0000-4000-8000-000000000001', 1, w.template, w.config,
+       '¡Aquí tenéis la primera versión! Miradla con calma y decidnos qué cambiaríais.', now() - interval '2 days'
+from public.weddings w where w.id = 'b0000000-0000-4000-8000-000000000001';
+insert into public.change_requests (order_id, wedding_id, proposal_id, kind, message, created_at) values
+  ('e0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', '90000000-0000-4000-8000-000000000001',
+   'cambio', '¿Podemos poner el programa antes que el lugar? Y el titular de la portada un poco más grande.', now() - interval '1 day');
 """
 with open(os.path.join(ROOT, 'supabase/seed.sql'), 'w', encoding='utf-8') as f:
     f.write(out)

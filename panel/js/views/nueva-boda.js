@@ -8,10 +8,14 @@ let schema = null;
 export const loadSchema = async () => (schema ||= await fetch("/schema/wedding-config.schema.json").then((r) => r.json()));
 
 export default async function nuevaBoda({ el, query, go }) {
+  // Desde un pedido (ficha del cliente › «Crear su web»): sus datos y, al crearla, se enlaza al pedido.
+  const order = query.get("pedido") ? await db.one("orders", { select: "id,lead_id,client_id", id: `eq.${query.get("pedido")}` }) : null;
+  const leadId = query.get("lead") || order?.lead_id;
+  const clientId = query.get("cliente") || order?.client_id;
   const [sts, lead, client] = await Promise.all([
     styles(),
-    query.get("lead") ? db.one("leads", { select: "*", id: `eq.${query.get("lead")}` }) : null,
-    query.get("cliente") ? db.one("clients", { select: "*", id: `eq.${query.get("cliente")}` }) : null,
+    leadId ? db.one("leads", { select: "*", id: `eq.${leadId}` }) : null,
+    clientId ? db.one("clients", { select: "*", id: `eq.${clientId}` }) : null,
   ]);
   const [a, b] = lead?.partner_a ? [lead.partner_a, lead.partner_b || ""] : String(lead?.names || client?.display_name || "").split(/\s+y\s+/);
   const style = sts.find((s) => s.id === lead?.style) || sts[0];
@@ -85,6 +89,7 @@ export default async function nuevaBoda({ el, query, go }) {
       const [w] = await db.insert("weddings", {
         slug: d.slug, template: st.template, config, lead_id: lead?.id || null, client_id: client?.id || lead?.client_id || null,
       });
+      if (order) await db.update("orders", { id: `eq.${order.id}` }, { wedding_id: w.id });
       go(`/bodas/${w.id}`);
     } catch (ex) {
       err.textContent = ex.code === "23505" ? "Esa dirección ya la tiene otra boda. Elige otra." : ex.message;

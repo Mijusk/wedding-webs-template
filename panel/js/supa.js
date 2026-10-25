@@ -100,6 +100,21 @@ export async function api(path, body) {
   return data;
 }
 
+// Descarga con la sesión (p. ej. el PDF de una factura) y la guarda con su nombre.
+export async function download(path, fallbackName = "archivo") {
+  await ensureFresh();
+  const res = await fetch(path, { headers: session ? { Authorization: `Bearer ${session.access_token}` } : {} });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new ApiError(data.error === "permiso" ? "No tienes permiso para descargar esto." : `No se ha podido descargar (${res.status}).`, res.status, data.error, data);
+  }
+  const name = decodeURIComponent((res.headers.get("Content-Disposition") || "").match(/filename\*=UTF-8''([^;]+)/)?.[1] || "") || fallbackName;
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(await res.blob()), download: name });
+  document.body.append(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
 export async function signOut() {
   try { if (session) await auth("logout", {}, { bearer: true }); } catch { /* da igual: se borra la sesión local */ }
   saveSession(null);

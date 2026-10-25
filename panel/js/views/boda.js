@@ -1,7 +1,7 @@
 // Editor de una boda: formulario a la izquierda y la web de verdad a la derecha, al momento.
 // Guardar = borrador (no cambia lo que ven los invitados). Publicar = versión nueva online.
 import { db, storage, siteUrl, api } from "../supa.js";
-import { html, raw, render, $, $$, statusChip, fmtDate, fmtDateTime, formDialog, confirmDialog, toast, fail, debounce, downloadCsv, icons } from "../ui.js";
+import { html, raw, render, $, $$, statusChip, fmtDate, fmtDateTime, formDialog, confirmDialog, showDialog, toast, fail, debounce, downloadCsv, icons } from "../ui.js";
 import { styles, baseConfig, sectionInfo, livePreview, toConfig, utcOffset } from "../catalogo.js";
 import { validate } from "/lib/config-schema.js";
 import { prepare } from "/lib/fotos.js";
@@ -31,10 +31,17 @@ export default async function boda(ctx) {
     styles(), loadSchema(), sectionInfo(),
     db.select("clients", { select: "id,display_name", order: "display_name" }),
   ]);
-  const [couples, plan] = await Promise.all([
+  const [couples, plan, orders, proposals, requests] = await Promise.all([
     db.select("couple_users", { select: "*", wedding_id: `eq.${id}`, order: "created_at" }),
     db.rpc("pareja_resumen", { p_wedding_id: id }).then((r) => r.features).catch(() => ({})),
+    db.select("orders", { select: "id,number,tracking_code,status", wedding_id: `eq.${id}`, status: "not.in.(cancelado,reembolsado,borrador)", order: "created_at.desc" }),
+    db.select("wedding_proposals", { select: "id,number,sent_at,approved_at,note", wedding_id: `eq.${id}`, order: "number.desc" }),
+    db.select("change_requests", { select: "*", wedding_id: `eq.${id}`, order: "created_at.desc" }),
   ]);
+  const order = orders[0] || null;
+  const pendingReq = requests.filter((r) => r.status === "pendiente");
+  const latestProposal = proposals[0] || null;
+  const trackUrl = order ? `${siteUrl()}/seguimiento/${order.tracking_code.slice(0, 4)}-${order.tracking_code.slice(4)}` : null;
   let version = w?.updated_at; // para avisar si la pareja cambió la boda mientras se editaba aquí
   if (!w) return render(el, html`<p class="empty"><strong>Esta boda no existe.</strong><a href="#/bodas">Volver</a></p>`);
 
@@ -168,6 +175,25 @@ export default async function boda(ctx) {
             <label class="btn btn--small">Subir icono (iniciales)<input type="file" accept="image/png" hidden data-share-file="icon"></label>
           </div>
           <p class="small" data-share-state>${config.share?.image ? html`Imagen: <a href="${config.share.image}" target="_blank" rel="noopener">ver</a>` : "Sin imagen propia."} ${config.share?.icon ? html`Icono: <a href="${config.share.icon}" target="_blank" rel="noopener">ver</a>` : ""}</p>
+        </div></details>
+
+        <details class="sec" ${pendingReq.length || (latestProposal?.approved_at && w.status !== "publicada") ? "open" : ""} data-proposals><summary>Propuestas y cambios <span class="summary-note">${pendingReq.length ? `${pendingReq.length} cambio${pendingReq.length === 1 ? "" : "s"} por hacer` : proposals.length ? `${proposals.length} enviada${proposals.length === 1 ? "" : "s"}` : ""}</span></summary><div class="sec__body">
+          ${order ? html`<p class="small muted">Lo ven en su página de seguimiento: <a href="${trackUrl}" target="_blank" rel="noopener">${trackUrl.replace(/^https?:\/\//, "")}</a> (pedido ${order.number}).</p>`
+            : html`<p class="notice">Esta web no está enlazada a ningún pedido pagado. Enlázala desde la ficha del cliente (pedido › «Enlazar con su web») para mandar propuestas y que la pareja pida cambios.</p>`}
+          ${latestProposal?.approved_at && !["publicada", "archivada"].includes(w.status) ? html`<p class="notice notice--ok">La pareja aprobó la propuesta ${latestProposal.number} el ${fmtDate(latestProposal.approved_at)}. Ya puedes publicarla.</p>` : ""}
+          ${requests.length ? html`<div class="rows">${requests.map((r) => html`<div class="row">
+            <span class="row__title" style="font-weight:500;white-space:pre-line">${r.message}</span>
+            <span class="row__side">${r.status === "pendiente" ? html`<button class="btn btn--small" type="button" data-req="${r.id}" data-to="hecho">Hecho</button>
+              <button class="btn btn--small btn--quiet" type="button" data-req="${r.id}" data-to="descartado">No se hará</button>` : statusChip(r.status === "hecho" ? "hecha" : "cancelada")}
+              <button class="btn btn--small btn--quiet" type="button" data-reply="${r.id}">Responder</button></span>
+            <span class="row__sub">${r.kind === "cambio" ? "Cambio de diseño" : "Corrección"}${r.proposal_id ? ` · propuesta ${proposals.find((x) => x.id === r.proposal_id)?.number ?? ""}` : ""} · ${fmtDateTime(r.created_at)}${r.reply ? html` · <i>Respuesta: ${r.reply}</i>` : ""}</span></div>`)}</div>`
+            : html`<p class="small muted">Sin cambios pedidos.</p>`}
+          ${proposals.length ? html`<div class="rows">${proposals.map((x) => html`<div class="row">
+            <span class="row__title">Propuesta ${x.number}${x.approved_at ? html` <span class="tag tag--accent">aprobada</span>` : ""}</span>
+            <span class="row__side">${order ? html`<a class="btn btn--small" href="/b/${w.slug}?propuesta=${x.number}&amp;c=${order.tracking_code}" target="_blank" rel="noopener">Ver</a>` : ""}</span>
+            <span class="row__sub">${fmtDateTime(x.sent_at)}${x.note ? `: ${x.note}` : ""}</span></div>`)}</div>` : ""}
+          <div class="btn-row"><button class="btn btn--primary" type="button" data-send-proposal ${order ? "" : "disabled"}>Mandar la propuesta ${(latestProposal?.number || 0) + 1} a la pareja</button></div>
+          <p class="small muted">Se manda una foto fija del borrador guardado (si hay cambios sin guardar, se guardan antes). La pareja recibe un email y la ve en su página de seguimiento.</p>
         </div></details>
 
         <details class="sec"><summary>Pareja y acceso a su panel <span class="summary-note">${couples.length ? couples.map((c) => c.name || c.email).join(", ") : "sin dar de alta"}</span></summary><div class="sec__body">
@@ -698,6 +724,54 @@ export default async function boda(ctx) {
       $("[data-ext-now]", el).textContent = now ? "activado" : "desactivado";
       toast("Hecho. La web lo aplica en menos de un minuto.");
     } catch (ex) { fail(ex); }
+  });
+
+  // ── Propuestas y cambios ──
+  $$("[data-req]", el).forEach((b) => b.addEventListener("click", async () => {
+    try {
+      await db.update("change_requests", { id: `eq.${b.dataset.req}` }, {
+        status: b.dataset.to, resolved_at: new Date().toISOString(), resolved_by: staff.id,
+      });
+      toast(b.dataset.to === "hecho" ? "Marcado como hecho. La pareja lo ve en su página." : "Marcado: no se hará.");
+      boda(ctx);
+    } catch (e) { fail(e); }
+  }));
+  $$("[data-reply]", el).forEach((b) => b.addEventListener("click", async () => {
+    const r = requests.find((x) => x.id === b.dataset.reply);
+    const data = await formDialog({
+      title: "Responder", submit: "Guardar respuesta",
+      text: "La pareja la verá debajo de su mensaje, en su página de seguimiento.",
+      body: html`<div class="field"><label for="rp">Respuesta</label><textarea id="rp" name="reply" rows="3">${r.reply || ""}</textarea></div>`,
+    });
+    if (!data) return;
+    try { await db.update("change_requests", { id: `eq.${r.id}` }, { reply: String(data.get("reply")).trim() || null }); boda(ctx); }
+    catch (e) { fail(e); }
+  }));
+  $("[data-send-proposal]", el)?.addEventListener("click", async () => {
+    if (dirty && !(await save({ quiet: true }))) return;
+    const n = (latestProposal?.number || 0) + 1;
+    const data = await formDialog({
+      title: `Mandar la propuesta ${n}`, submit: "Mandar",
+      text: "Les llega un email con el enlace a su página de seguimiento, donde la ven y pueden aprobarla o pedir cambios.",
+      body: html`<div class="form">
+        <div class="field"><label for="pn">Mensaje para la pareja (opcional)</label><textarea id="pn" name="note" rows="3" placeholder="Hemos puesto el programa antes que el lugar y la portada más grande."></textarea></div>
+        ${pendingReq.length ? html`<label class="check"><input type="checkbox" name="resolve" checked> Marcar como hechos los ${pendingReq.length} cambios pedidos</label>` : ""}</div>`,
+    });
+    if (!data) return;
+    try {
+      const r = await api("/api/pedido", { accion: "propuesta", wedding_id: id, nota: String(data.get("note") || "").trim() || null, resolver: pendingReq.length ? data.get("resolve") === "on" : true });
+      const sent = r.emails.filter((x) => x.status === "enviado").map((x) => x.email);
+      const msg = `¡Hola! Ya tenéis la propuesta ${r.number} de vuestra web. Miradla aquí y decidnos si os encanta o qué cambiaríais: ${r.url}`;
+      const dlg = showDialog(html`<div class="dlg"><h2>Propuesta ${r.number} mandada</h2>
+        <p class="muted">${sent.length ? `Email enviado a ${sent.join(", ")}.` : "No se ha enviado ningún email (aún no están configurados o no hay email): mándasela por WhatsApp."}</p>
+        <div class="link-box"><input readonly value="${r.url}"><button class="btn btn--small" type="button" data-copy>Copiar</button></div>
+        <div class="btn-row"><a class="btn btn--small btn--primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a></div>
+        <div class="dlg__actions"><button class="btn" type="button" data-close>Cerrar</button></div></div>`);
+      dlg.addEventListener("click", async (e) => {
+        if (e.target.closest("[data-copy]")) { await navigator.clipboard?.writeText(r.url).catch(() => {}); toast("Enlace copiado."); }
+      });
+      dlg.addEventListener("close", () => boda(ctx));
+    } catch (e) { fail(new Error(e.data?.message || e.message)); }
   });
 
   // Guardar con Ctrl/Cmd + S

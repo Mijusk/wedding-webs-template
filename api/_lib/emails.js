@@ -61,3 +61,50 @@ export function digestEmail({ couple, nuevas, stats, link }) {
     ], { url: link, label: "Ver todas las respuestas" }),
   };
 }
+
+const eur = (cents) => `${(cents / 100).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+const longDate = (d) => (d ? new Date(`${String(d).slice(0, 10)}T12:00:00Z`).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }) : "");
+
+// Confirmación del pago (es el «soporte duradero» de la contratación: lleva lo esencial y las condiciones).
+export function paymentEmail({ names, number, plan, amountCents, promised, trackingUrl, code, conditionsUrl, invoiceNumber }) {
+  const lines = [
+    `¡Hola${names ? `, ${names}` : ""}!`,
+    `Hemos recibido vuestro pago de ${eur(amountCents)}${plan ? ` por la web de boda «${plan}»` : ""}. Pedido ${number}.`,
+    promised ? `Os la entregamos como tarde el ${longDate(promised)} (cuenta desde que tenemos vuestros datos y fotos).` : "",
+    `En vuestra página de seguimiento veréis cómo va, las propuestas que os mandemos y podréis pedir cambios. Vuestro código es ${code}; no hace falta contraseña.`,
+    invoiceNumber ? `Os adjuntamos la factura ${invoiceNumber}.` : "La factura os llegará en un email aparte.",
+    `Las condiciones de contratación, por si las queréis guardar: ${conditionsUrl}`,
+  ].filter(Boolean);
+  return {
+    subject: `Pago recibido · pedido ${number}`,
+    text: `${lines.join("\n\n")}\n\nSeguimiento: ${trackingUrl}\n\nWeddingWebs`,
+    html: html(lines.map(esc), { url: trackingUrl, label: "Ver cómo va nuestra web" }),
+  };
+}
+
+export function proposalEmail({ names, number, note, trackingUrl }) {
+  const lines = [
+    `¡Hola${names ? `, ${names}` : ""}!`,
+    `Ya tenéis la propuesta ${number} de vuestra web. Miradla con calma, en el móvil y en el ordenador.`,
+    note ? `Nuestra nota: «${note}»` : "",
+    "Si os encanta, pulsad «¡Nos encanta, publicadla!». Si queréis cambiar algo, escribidlo en «Pedir cambios».",
+  ].filter(Boolean);
+  return {
+    subject: `Vuestra web: propuesta ${number} lista`,
+    text: `${lines.join("\n\n")}\n\n${trackingUrl}\n\nWeddingWebs`,
+    html: html(lines.map(esc), { url: trackingUrl, label: `Ver la propuesta ${number}` }),
+  };
+}
+
+export function refundEmail({ names, number, amountCents, invoiceNumber, trackingUrl }) {
+  const lines = [
+    `¡Hola${names ? `, ${names}` : ""}!`,
+    `Os hemos devuelto ${eur(amountCents)} del pedido ${number}. Según vuestro banco, puede tardar unos días en verse.`,
+    invoiceNumber ? `Os adjuntamos la factura rectificativa ${invoiceNumber}.` : "",
+  ].filter(Boolean);
+  return {
+    subject: `Devolución de ${eur(amountCents)} · pedido ${number}`,
+    text: `${lines.join("\n\n")}\n\n${trackingUrl}\n\nWeddingWebs`,
+    html: html(lines.map(esc), trackingUrl ? { url: trackingUrl, label: "Ver el pedido" } : null),
+  };
+}

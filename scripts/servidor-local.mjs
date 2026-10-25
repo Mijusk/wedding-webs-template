@@ -24,11 +24,13 @@ for (const file of [".env.local", ".env"]) {
 
 const vercel = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8"));
 
-// Patrones de vercel.json ("/b/:slug", "/(a|b)/:path*") -> expresión regular con grupos con nombre.
+// Patrones de vercel.json ("/b/:slug", "/(a|b)/:path*", "/s/:code([A-Z0-9-]{8,9})") -> expresión
+// regular con grupos con nombre.
 function compile(source) {
   const re = source
+    .replace(/:(\w+)\(([^)]*)\)/g, "(?<$1>$2)")
     .replace(/:(\w+)\*/g, "(?<$1>.*)")
-    .replace(/:(\w+)/g, "(?<$1>[^/]+)");
+    .replace(/:(\w+)(?![\w>])/g, "(?<$1>[^/]+)");
   return new RegExp(`^${re}$`);
 }
 const rules = (list = []) => list.map((r) => ({ ...r, re: compile(r.source) }));
@@ -59,7 +61,21 @@ async function runFunction(name, req, res) {
   if (!/^[a-z0-9-]+(\/[a-z0-9-]+)*$/.test(name) || !existsSync(file)) return false;
   const mod = await import(`${pathToFileURL(file).href}?v=${statSync(file).mtimeMs}`);
   // (Si cambias algo de api/_lib, reinicia el servidor: Node guarda esos módulos en memoria.)
-  await mod.default(req, res);
+  if (typeof mod.default === "function") { await mod.default(req, res); return true; }
+  // Funciones con la forma estándar de la web: export function POST(request) { return new Response(…) }
+  const web = mod[req.method] || mod.default?.fetch;
+  if (typeof web !== "function") { res.statusCode = 405; res.end(); return true; }
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  const headers = new Headers();
+  for (const [k, v] of Object.entries(req.headers)) for (const x of [].concat(v)) headers.append(k, x);
+  const request = new Request(`http://${req.headers.host}${req.url}`, {
+    method: req.method, headers, body: ["GET", "HEAD"].includes(req.method) ? undefined : Buffer.concat(chunks),
+  });
+  const response = await web(request);
+  res.statusCode = response.status;
+  response.headers.forEach((v, k) => res.setHeader(k, v));
+  res.end(Buffer.from(await response.arrayBuffer()));
   return true;
 }
 
