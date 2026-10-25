@@ -163,6 +163,45 @@ Se añaden `pedido.js` (pagar, seguimiento, propuestas y pagos a mano), `stripe.
 - **Condiciones:** cómo se contrata pagando al momento, formas de pago, factura, página de seguimiento y la casilla «Queremos que empecéis ya». Esa casilla es la que, según el art. 103 de la ley de consumidores, hace perder el desistimiento al entregar la web.
 - **Privacidad:** quién trata los datos (Supabase en la UE, Vercel, Resend y Stripe; Google durante la transición), cuánto se guardan las facturas y los datos de invitados alojados por encargo de la pareja.
 
+## 2026-10-25 · Fase 5: automatizaciones y plazos de los datos
+
+### Todas empiezan apagadas y solo cuentan desde que se activan
+En Panel › Automatizaciones, cada una se activa o se apaga y se le cambian los días, el asunto y el texto. Al activar una, solo cuenta lo que pase desde ese momento (con un día de margen): encender «recordatorio a los 2 días» no escribe a todos los leads antiguos de golpe. Los avisos «X días antes de algo» (fecha límite de confirmar, retirada de la web) sí se mandan si aún no ha pasado ese algo.
+
+### Cada envío se apunta y nunca se repite
+Antes de mandar un email se «reserva» en la base de datos para esa persona y ese motivo. Si dos avisos llegan a la vez, solo uno lo manda. Si los emails aún no están configurados, queda como «simulado» y no se mandará después: así, al conectar Resend no salen de golpe emails atrasados.
+
+### Emails comerciales: consentimiento y baja
+Los emails a leads (bienvenida, recordatorios, pago a medias) y la petición de reseña solo van a quien aceptó la casilla del escaparate o nos pidió una reserva, y nunca a quien se dio de baja.
+- **Baja:** llevan un enlace para darse de baja, que pide la LSSI. También van con las cabeceras de «darse de baja en un clic» que piden Gmail y Yahoo.
+- **El enlace no da de baja solo:** abre una página con un botón. Los antivirus del correo abren todos los enlaces, y no deben dar de baja a nadie.
+- **Las bajas se guardan siempre**, aunque el lead se anonimice, para no volver a escribirle.
+
+Los emails del servicio a las parejas que han contratado no son comerciales y no llevan baja.
+
+### La bienvenida lleva su web guardada
+El email de bienvenida enlaza a `/studio/?prueba=<clave>`, que vuelve a abrir la web que probaron con sus nombres, fecha, lugar y estilo. Lleva fotos de ejemplo: las suyas nunca salieron de su móvil.
+
+### «Qué necesitamos» va dentro del email del pago
+Para no mandar dos emails seguidos, el texto de «Qué necesitamos» (fotos y datos) se añade a la confirmación del pago cuando está activo. La confirmación sale siempre, porque lleva la factura y las condiciones.
+
+### Fotos: se piden por email, de momento
+El recordatorio «faltan las fotos» sale si la web aún no tiene fotos suyas. Les pide que contesten con las originales o con un enlace de WeTransfer o Google Drive. Subirlas desde la página de seguimiento sería una mejora para más adelante.
+
+### Retención: cumple la política de privacidad, y se activa a mano
+- **Webs:** se retiran cuando llega su fecha (12 meses tras la boda, con aviso antes).
+- **Invitados:** sus datos se borran a los 6 meses de la boda, con sus respuestas y las direcciones de los emails que se les mandaron.
+- **Contactos que no contratan:** se anonimizan cuando llevan sin moverse el plazo de Ajustes. Se cambia de 24 a **12 meses**, que es lo que dice la política de privacidad publicada. Se conservan las cifras para las estadísticas.
+- **Facturas:** no se borran nunca.
+
+Estas tres automatizaciones piden confirmación al activarlas, porque borran datos de verdad. Lo lógico es activarlas en producción.
+
+### Un solo aviso diario
+El plan Hobby de Vercel solo permite una tarea programada al día. El aviso de cada mañana hace el resumen de respuestas y todas las automatizaciones. Si hay más de 150 emails, el resto sale al día siguiente. El panel tiene «Revisar ahora» (solo administradores, una vez por minuto) para probarlo en las vistas previas, donde Vercel no lanza tareas programadas.
+
+### Sin funciones nuevas
+La baja y la web guardada van en `api/lead.js`, y el email «web publicada» en `api/pedido.js`. Siguen siendo 10 funciones de 12.
+
 ## Problemas encontrados que ya estaban en `main`
 
 - **La plantilla Clásica no se pinta** (estilos Olivar, Atardecer y Noche): `js/sections/hero.js` importa `longDate`, que no existe en `js/format.js`; además usa `t` sin definir y `js/main.js` no registra `story`, `gifts` ni `closing`. Parece un cambio a medias. No se ha tocado: hay que decidir cómo debía quedar.
@@ -179,3 +218,6 @@ Se añaden `pedido.js` (pagar, seguimiento, propuestas y pagos a mano), `stripe.
 8. ¿Valen las rondas de cambios de las condiciones (0 / las acordadas / 3)? Se cambian en Ajustes › Tarifas.
 9. Revisar los textos nuevos de condiciones y privacidad (`studio/legal.html`).
 10. Crear la cuenta de Stripe en modo de prueba: [STRIPE.md](STRIPE.md).
+11. Conectar los emails (Resend y tu dominio): [EMAILS.md](EMAILS.md). Necesita el punto 4.
+12. Leer y retocar los textos de los emails automáticos (Panel › Automatizaciones) y decidir cuáles activar.
+13. Enlaces de Google y Bodas.net para pedir reseñas (Panel › Ajustes › Reseñas).

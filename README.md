@@ -9,6 +9,7 @@ Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos*
 | [docs/SUPABASE.md](docs/SUPABASE.md) | Ponerlo en marcha: crear el proyecto, pegar la base de datos y las claves en Vercel. Sin terminal. |
 | [docs/STRIPE.md](docs/STRIPE.md) | Cobros: crear la cuenta de Stripe y conectarla. Sin terminal. |
 | [docs/FACTURACION.md](docs/FACTURACION.md) | Cómo factura la web, Verifactu y qué proveedor elegir. |
+| [docs/EMAILS.md](docs/EMAILS.md) | Que los emails salgan de verdad: Resend y tu dominio. Sin terminal. |
 | [docs/ARRANCAR.md](docs/ARRANCAR.md) | Trabajar en local y pasar las pruebas. |
 | [docs/DECISIONES.md](docs/DECISIONES.md) | Por qué está hecho así, y lo que falta por decidir. |
 | [docs/COSTES.md](docs/COSTES.md) | Cuánto cuesta al mes. |
@@ -82,7 +83,7 @@ El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si
 | `studio/legal.html` | Aviso legal, privacidad y condiciones. Los datos del titular y los plazos salen de `studio.json > legal` |
 | `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas. `vercel.json` además manda `/b/<slug>` a `api/boda.js` |
 | `api/` | Funciones de Vercel: `boda.js` (webs de boda desde la base de datos), `rsvp.js`, `lead.js`, `productos.js`, `panel-config.js`, `pareja.js` (acceso y recordatorios), `cron.js` (resumen diario), `pedido.js` (pagar y seguimiento), `stripe.js` (avisos de pago) y `factura.js` (PDF) |
-| `panel/` | Panel interno de Luis: leads, tareas, clientes, pedidos, bodas, propuestas, facturas y ajustes |
+| `panel/` | Panel interno de Luis: leads, tareas, clientes, pedidos, bodas, propuestas, facturas, automatizaciones y ajustes |
 | `seguimiento/` | Página de seguimiento de cada pedido, con su código y sin contraseña: pagar, propuestas, cambios y factura |
 | `pareja/` | Panel de cada pareja (entra sin contraseña): invitados, respuestas, datos prácticos y QR para imprimir |
 | `lib/` | Código compartido: validador del config, fotos, IBAN, NIF, QR, lector de Excel y el RSVP ampliado que cargan las plantillas |

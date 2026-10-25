@@ -8,8 +8,7 @@ Antes: haz primero lo de [SUPABASE.md](SUPABASE.md). Si ya lo hiciste antes de l
 
 ## 0. Actualizar la base de datos (solo si ya la instalaste antes)
 
-1. En GitHub, rama `saas/fases-0-1-2`, abre [`supabase/migrations/20261026000100_cobros.sql`](../supabase/migrations/20261026000100_cobros.sql), pulsa **Raw** y copia todo.
-2. Supabase › **SQL Editor** › **New query** › pega › **Run**. Debe salir **Success**.
+Pega los archivos nuevos como explica [SUPABASE.md](SUPABASE.md) (el recuadro «¿Ya lo instalaste antes?»).
 
 (Si instalas desde cero, `supabase/instalar.sql` ya lo lleva.)
 

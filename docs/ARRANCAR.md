@@ -48,13 +48,23 @@ STRIPE_API_BASE=http://127.0.0.1:12111
 
 Al pagar en el escaparate se abre su página «Pagar / Cancelar», que manda el aviso firmado a `/api/stripe` como lo haría Stripe. Pedido de ejemplo con propuesta y un cambio pedido: `/seguimiento/DEMA-2345`.
 
+## Automatizaciones en local
+
+En local no hay aviso diario: en Panel › Automatizaciones, «Revisar ahora». O con la clave de `.env.local`:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron?tarea=automatizaciones"
+```
+
+Sin `RESEND_API_KEY` los emails se apuntan como «simulado» en `email_log` y `automation_runs`.
+
 ## Pruebas
 
 ```bash
 npm test             # validador del config, fotos, CSV y que instalar.sql esté al día (sin base de datos)
 npm run test:db      # seguridad por filas, facturas y funciones de la base (necesita supabase db reset)
 npm run test:api     # funciones de /api contra el servidor local (npm run dev), cobros incluidos
-npm run test:e2e     # navegador real: flujo completo, panel, panel de la pareja, cobros y las 25 plantillas (necesita Playwright)
+npm run test:e2e     # navegador real: flujo completo, panel, panel de la pareja, cobros, automatizaciones y las 25 plantillas (necesita Playwright)
 ```
 
 Las de navegador usan Playwright (`npm i -g playwright && npx playwright install chromium`). `npm run test:e2e` deja capturas en `tests/e2e/capturas/`. Si `test:e2e` falla tras otras pruebas, vuelve a cargar los datos con `supabase db reset`.

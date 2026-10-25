@@ -22,7 +22,11 @@ Mañana haremos solo el **proyecto de pruebas (staging)**. El de producción, m�
 2. En Supabase, menú de la izquierda: **SQL Editor** › **New query**. Pega y pulsa **Run**.
 3. Abajo debe salir **Success**. Si sale un error rojo, cópiamelo tal cual.
 
-> **¿Ya lo instalaste antes del 26 de octubre?** No vuelvas a pegar `instalar.sql` (daría error). Pega solo el archivo nuevo de la fase 4: [`supabase/migrations/20261026000100_cobros.sql`](../supabase/migrations/20261026000100_cobros.sql), igual que arriba.
+> **¿Ya lo instalaste antes?** No vuelvas a pegar `instalar.sql` (daría error). Pega solo los archivos nuevos, en este orden y de uno en uno, igual que arriba:
+> 1. Fase 4 (cobros): [`supabase/migrations/20261026000100_cobros.sql`](../supabase/migrations/20261026000100_cobros.sql)
+> 2. Fase 5 (automatizaciones): [`supabase/migrations/20261027000100_automatizaciones.sql`](../supabase/migrations/20261027000100_automatizaciones.sql)
+>
+> Si ya habías pegado el de la fase 4, pega solo el de la fase 5.
 
 ## 3. (Recomendado) Cargar datos de ejemplo
 
@@ -117,7 +121,7 @@ No hace falta mañana. Cuando lo hagamos:
 1. Otro proyecto de Supabase, `weddingwebs`, en **plan Pro** (los proyectos gratis se pausan y no tienen copias de seguridad diarias). Mismos pasos 2, 4, 5 y 6 (sin datos de ejemplo).
 2. En Vercel, las mismas tres variables pero marcando **solo Production**.
 3. Opcionales para producción: `NOTIFY_EMAIL` (tu email, para los avisos de leads), `RESEND_API_KEY` y `EMAIL_FROM` (para enviar emails desde tu dominio), `LEADS_SHEET_ENDPOINT` (para seguir copiando los leads en tu hoja durante un tiempo) y `SITE_URL` (tu dominio).
-   - Sin `RESEND_API_KEY` no sale ningún email: ni el enlace de acceso que piden las parejas desde `/pareja/`, ni los recordatorios a invitados, ni los resúmenes. Todo sigue funcionando y queda apuntado como «simulado»; mientras tanto, el enlace de acceso se lo mandas tú por WhatsApp desde el panel.
+   - Para los emails, sigue [EMAILS.md](EMAILS.md). Sin `RESEND_API_KEY` no sale ningún email: ni el enlace de acceso que piden las parejas desde `/pareja/`, ni los recordatorios a invitados, ni los resúmenes. Todo sigue funcionando y queda apuntado como «simulado»; mientras tanto, el enlace de acceso se lo mandas tú por WhatsApp desde el panel.
    - `CRON_SECRET`: una contraseña larga inventada (al menos 16 caracteres). Con ella, Vercel manda cada mañana a las parejas el resumen de respuestas nuevas. Las tareas programadas solo funcionan en producción.
 4. En Supabase › **Authentication** › **URL Configuration**: **Site URL** = tu dominio, y en **Redirect URLs** añade `https://tudominio/panel/`. Sirve para el email de "He olvidado la contraseña".
 5. Repasa los costes en [COSTES.md](COSTES.md): para uso comercial, Vercel exige el plan Pro.
