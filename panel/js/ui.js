@@ -120,7 +120,7 @@ export function formDialog({ title, body, submit = "Guardar", danger = false, te
       done(new FormData(form));
     });
     dlg.showModal();
-    form.querySelector("input:not([type=hidden]), textarea, select")?.focus();
+    (form.querySelector("input:not([type=hidden]), textarea, select") || form.querySelector(".dlg__actions .btn--primary, .dlg__actions .btn--danger"))?.focus();
     onOpen?.(form);
   });
 }

@@ -1,7 +1,11 @@
 {
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "functions": {
-    "api/boda.js": { "includeFiles": "{index.html,404.html,plantillas/*/index.html}" }
+    "api/boda.js": {
+      "includeFiles": "{index.html,404.html,plantillas/*/index.html}"
+    }
   },
   "redirects": [
     {
@@ -56,6 +60,12 @@
           "value": "public, max-age=0, must-revalidate"
         }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 7 * * *"
     }
   ]
 }

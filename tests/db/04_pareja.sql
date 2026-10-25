@@ -148,7 +148,7 @@ begin
   assert (r ->> 'alergias')::int = 1, 'FALLO: alergias ' || r::text;
   raise notice 'OK totales: % personas, % niños, % pendientes', r ->> 'personas', r ->> 'ninos', r ->> 'pendientes';
 
-  assert jsonb_array_length(public.api_pending_groups('b0000000-0000-4000-8000-000000000001')) = 2, 'FALLO: grupos pendientes';
+  assert jsonb_array_length(public.api_pending_groups('b0000000-0000-4000-8000-000000000001') -> 'groups') = 2, 'FALLO: grupos pendientes';
   assert public.api_couple_access('LUCIA@example.com') ->> 'email' = 'lucia@example.com', 'FALLO: acceso de la pareja';
   assert public.api_couple_access('nadie@example.com') is null, 'FALLO: acceso de un desconocido';
   raise notice 'OK funciones del servidor para acceso y recordatorios';

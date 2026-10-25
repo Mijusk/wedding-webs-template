@@ -56,8 +56,9 @@ function staticFile(pathname) {
 
 async function runFunction(name, req, res) {
   const file = join(ROOT, "api", `${name}.js`);
-  if (!/^[a-z0-9-]+$/.test(name) || !existsSync(file)) return false;
+  if (!/^[a-z0-9-]+(\/[a-z0-9-]+)*$/.test(name) || !existsSync(file)) return false;
   const mod = await import(`${pathToFileURL(file).href}?v=${statSync(file).mtimeMs}`);
+  // (Si cambias algo de api/_lib, reinicia el servidor: Node guarda esos módulos en memoria.)
   await mod.default(req, res);
   return true;
 }

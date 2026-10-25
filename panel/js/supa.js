@@ -57,6 +57,7 @@ async function parse(res) {
 
 function translate(msg, code) {
   if (/invalid login credentials/i.test(msg)) return "Email o contraseña incorrectos.";
+  if (code === "otp_expired" || /invalid or has expired/i.test(msg)) return "Este enlace ya se ha usado o ha caducado.";
   if (/email not confirmed/i.test(msg)) return "Falta confirmar el email.";
   if (code === "42501" || /permission denied|row-level security/i.test(msg)) return "No tienes permiso para hacer esto.";
   if (code === "23505") return "Ya existe otro con ese valor (tiene que ser único).";
@@ -78,6 +79,25 @@ async function auth(path, body, { bearer = false } = {}) {
 export async function signIn(email, password) {
   saveSession(await auth("token?grant_type=password", { email, password }));
   return session;
+}
+
+// Enlace mágico de las parejas: canjea la clave del enlace (/pareja/#acceso=…) por una sesión.
+export async function verifyLink(tokenHash) {
+  saveSession(await auth("verify", { type: "email", token_hash: tokenHash }));
+  return session;
+}
+
+// Llamadas a nuestras funciones de /api con la sesión de quien está dentro.
+export async function api(path, body) {
+  await ensureFresh();
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) throw new ApiError(data.error || `Error ${res.status}`, res.status, data.error, data);
+  return data;
 }
 
 export async function signOut() {

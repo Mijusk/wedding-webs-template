@@ -37,6 +37,10 @@ export default async function ajustes(ctx) {
             </div>
             <div class="grid-2">
               <div class="field"><label for="s-e">Email de contacto</label><input id="s-e" name="email" type="email" value="${v.email || ""}"></div>
+              <div class="field"><label for="s-tel">Teléfono o WhatsApp</label><input id="s-tel" name="telefono" type="tel" value="${v.telefono || ""}">
+                <span class="hint">Lo ven las parejas en su panel para escribirte.</span></div>
+            </div>
+            <div class="grid-2">
               <div class="field"><label for="s-r">Régimen de IVA</label><select id="s-r" name="regimen_iva"><option value="">Sin decidir</option>
                 <option value="general" ${v.regimen_iva === "general" ? "selected" : ""}>General (21 %)</option></select>
                 <span class="hint">Confírmalo con tu gestoría.</span></div>
@@ -48,14 +52,15 @@ export default async function ajustes(ctx) {
 
         <section class="panel-block">
           <h2>Tarifas</h2>
-          <p class="small muted" style="margin-bottom:10px">Precio final con IVA. El escaparate las lee de aquí (si no responde, usa las de studio.json).</p>
+          <p class="small muted" style="margin-bottom:10px">Precio final con IVA. El escaparate las lee de aquí (si no responde, usa las de studio.json). «RSVP ampliado»: qué tarifas incluyen la lista de invitados con enlaces personales.</p>
           <form class="form" data-products>
             ${products.map((pr) => html`<div class="grid-3" data-product="${pr.id}" style="align-items:end">
               <div class="field"><label>Nombre</label><input name="name" value="${pr.name}"></div>
               <div class="field"><label>Precio con IVA (€)</label><input name="price" inputmode="decimal" value="${(pr.price_cents / 100).toFixed(2).replace(".", ",")}"></div>
               <div class="btn-row" style="padding-bottom:8px">
                 <label class="check"><input type="checkbox" name="from" ${pr.price_is_from ? "checked" : ""}> «desde»</label>
-                <label class="check"><input type="checkbox" name="active" ${pr.active ? "checked" : ""}> activa</label></div>
+                <label class="check"><input type="checkbox" name="active" ${pr.active ? "checked" : ""}> activa</label>
+                <label class="check" title="Lista de invitados con enlaces personales, acompañantes, niños, alergias y autobús"><input type="checkbox" name="ext" ${pr.features?.rsvp_ampliado ? "checked" : ""}> RSVP ampliado</label></div>
             </div>`)}
             <div><button class="btn btn--primary" type="submit">Guardar tarifas</button></div>
           </form>
@@ -112,6 +117,7 @@ export default async function ajustes(ctx) {
         await db.update("products", { id: `eq.${row.dataset.product}` }, {
           name: row.querySelector("[name=name]").value.trim(), price_cents: cents,
           price_is_from: row.querySelector("[name=from]").checked, active: row.querySelector("[name=active]").checked,
+          features: { ...(products.find((x) => x.id === row.dataset.product)?.features || {}), rsvp_ampliado: row.querySelector("[name=ext]").checked },
         });
       }
       toast("Tarifas guardadas. El escaparate las mostrará en unos minutos.");

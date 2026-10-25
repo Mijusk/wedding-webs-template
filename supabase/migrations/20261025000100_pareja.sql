@@ -87,6 +87,8 @@ language sql stable security definer set search_path = '' as $$
     'grupos', (select count(*) from g),
     'invitados', coalesce((select sum(people) from g), 0),
     'respondidos', (select count(*) from r where r.group_id is not null),
+    'grupos_si', (select count(*) from r where r.group_id is not null and r.attending),
+    'grupos_no', (select count(*) from r where r.group_id is not null and not r.attending),
     'pendientes', (select count(*) from g where g.id not in (select r.group_id from r where r.group_id is not null)),
     'si', (select count(*) from r where r.attending),
     'no', (select count(*) from r where not r.attending),
@@ -135,6 +137,8 @@ begin
     'stats', app.rsvp_stats(w.id),
     'me', case when me.id is null then null else jsonb_build_object('email', me.email, 'name', me.name, 'digest', me.digest) end,
     'staff', app.is_staff(),
+    'contacto', jsonb_strip_nulls(jsonb_build_object('email', nullif(app.setting('vendedor') ->> 'email', ''),
+                                                     'telefono', nullif(app.setting('vendedor') ->> 'telefono', ''))),
     'weddings', (select coalesce(jsonb_agg(jsonb_build_object('id', x.id, 'couple', x.config #> '{event,couple}', 'wedding_date', x.wedding_date)
                                            order by x.wedding_date), '[]'::jsonb)
                    from public.weddings x where x.id in (select app.couple_wedding_ids()))
@@ -478,14 +482,18 @@ begin
   return jsonb_build_object('email', c.email, 'name', c.name, 'user_id', c.user_id, 'couple', c.couple);
 end $$;
 
--- Grupos que aún no han contestado, con su email (recordatorio por email).
+-- Grupos que aún no han contestado, con su email (recordatorio por email), y los datos de la boda.
 create or replace function public.api_pending_groups(p_wedding_id uuid) returns jsonb
 language sql stable security definer set search_path = '' as $$
-  select case when not app.is_service() then null else coalesce(jsonb_agg(jsonb_build_object(
-           'id', g.id, 'name', g.name, 'email', g.email, 'token', g.token) order by g.sort, g.name), '[]'::jsonb) end
-  from public.guest_groups g
-  where g.wedding_id = p_wedding_id and g.token_revoked_at is null
-    and not exists (select 1 from public.rsvp_responses r where r.group_id = g.id)
+  select jsonb_build_object(
+    'slug', w.slug, 'status', w.status, 'couple', w.config #> '{event,couple}', 'deadline', w.config #>> '{rsvp,deadline}',
+    'groups', (select coalesce(jsonb_agg(jsonb_build_object('id', g.id, 'name', g.name, 'email', g.email, 'token', g.token)
+                                         order by g.sort, g.name), '[]'::jsonb)
+               from public.guest_groups g
+               where g.wedding_id = w.id and g.token_revoked_at is null
+                 and not exists (select 1 from public.rsvp_responses r where r.group_id = g.id)))
+  from public.weddings w
+  where w.id = p_wedding_id and app.is_service()
 $$;
 
 create or replace function public.puedo_gestionar_boda(p_wedding_id uuid) returns boolean

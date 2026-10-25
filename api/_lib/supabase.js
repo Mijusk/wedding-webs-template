@@ -32,19 +32,23 @@ export class SupabaseError extends Error {
   }
 }
 
-async function request(path, { method = "GET", body, prefer, timeoutMs = 8000 } = {}) {
-  const { url, serviceKey } = config();
+// asUser: el token de sesión de quien llama (para que la base de datos aplique SUS permisos).
+async function request(path, { method = "GET", body, prefer, timeoutMs = 8000, asUser } = {}) {
+  const { url, serviceKey, anonKey } = config();
   if (!url || !serviceKey) throw new SupabaseError("Supabase no está configurado (SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY).", 503);
+  const h = asUser
+    ? { apikey: anonKey, Authorization: `Bearer ${asUser}`, "Content-Type": "application/json" }
+    : headers(serviceKey, prefer ? { Prefer: prefer } : {});
   const res = await fetch(`${url}${path}`, {
     method,
-    headers: headers(serviceKey, prefer ? { Prefer: prefer } : {}),
+    headers: h,
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(timeoutMs),
   });
   const text = await res.text();
   let data = null;
   try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-  if (!res.ok) throw new SupabaseError(data?.message || `Supabase respondió ${res.status}`, res.status, data);
+  if (!res.ok) throw new SupabaseError(data?.message || data?.msg || `Supabase respondió ${res.status}`, res.status, data);
   return data;
 }
 
@@ -54,3 +58,9 @@ export const rpc = (name, args = {}) => request(`/rest/v1/rpc/${name}`, { method
 // Inserta filas en una tabla (p. ej. email_log). Devuelve las filas creadas.
 export const insert = (table, rows) =>
   request(`/rest/v1/${table}`, { method: "POST", body: rows, prefer: "return=representation" });
+
+// La misma llamada, pero con los permisos del usuario que hace la petición (su token de sesión).
+export const rpcAs = (token, name, args = {}) => request(`/rest/v1/rpc/${name}`, { method: "POST", body: args, asUser: token });
+
+// API de administración de usuarios de Supabase Auth (solo servidor).
+export const authAdmin = (path, body) => request(`/auth/v1/admin/${path}`, { method: "POST", body });

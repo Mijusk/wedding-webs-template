@@ -1,11 +1,12 @@
 // Editor de una boda: formulario a la izquierda y la web de verdad a la derecha, al momento.
 // Guardar = borrador (no cambia lo que ven los invitados). Publicar = versión nueva online.
-import { db, storage, siteUrl } from "../supa.js";
+import { db, storage, siteUrl, api } from "../supa.js";
 import { html, raw, render, $, $$, statusChip, fmtDate, fmtDateTime, formDialog, confirmDialog, toast, fail, debounce, downloadCsv, icons } from "../ui.js";
 import { styles, baseConfig, sectionInfo, livePreview, toConfig, utcOffset } from "../catalogo.js";
 import { validate } from "/lib/config-schema.js";
 import { prepare } from "/lib/fotos.js";
 import { loadSchema } from "./nueva-boda.js";
+import { formatIban, ibanOk } from "/lib/iban.js";
 
 const BUCKET = "wedding-assets";
 const TZS = [["Europe/Madrid", "Península y Baleares"], ["Atlantic/Canary", "Canarias"], ["Europe/Lisbon", "Portugal"], ["Europe/London", "Reino Unido"], ["Europe/Paris", "Francia, Italia, Alemania…"], ["America/Mexico_City", "México"], ["America/New_York", "Nueva York"]];
@@ -30,6 +31,11 @@ export default async function boda(ctx) {
     styles(), loadSchema(), sectionInfo(),
     db.select("clients", { select: "id,display_name", order: "display_name" }),
   ]);
+  const [couples, plan] = await Promise.all([
+    db.select("couple_users", { select: "*", wedding_id: `eq.${id}`, order: "created_at" }),
+    db.rpc("pareja_resumen", { p_wedding_id: id }).then((r) => r.features).catch(() => ({})),
+  ]);
+  let version = w?.updated_at; // para avisar si la pareja cambió la boda mientras se editaba aquí
   if (!w) return render(el, html`<p class="empty"><strong>Esta boda no existe.</strong><a href="#/bodas">Volver</a></p>`);
 
   let config = structuredClone(w.config);
@@ -162,6 +168,24 @@ export default async function boda(ctx) {
             <label class="btn btn--small">Subir icono (iniciales)<input type="file" accept="image/png" hidden data-share-file="icon"></label>
           </div>
           <p class="small" data-share-state>${config.share?.image ? html`Imagen: <a href="${config.share.image}" target="_blank" rel="noopener">ver</a>` : "Sin imagen propia."} ${config.share?.icon ? html`Icono: <a href="${config.share.icon}" target="_blank" rel="noopener">ver</a>` : ""}</p>
+        </div></details>
+
+        <details class="sec"><summary>Pareja y acceso a su panel <span class="summary-note">${couples.length ? couples.map((c) => c.name || c.email).join(", ") : "sin dar de alta"}</span></summary><div class="sec__body">
+          <p class="small muted">La pareja entra en ${siteUrl().replace(/^https?:\/\//, "")}/pareja/ sin contraseña: con un enlace que les llega por email o que les mandas tú por WhatsApp.</p>
+          ${couples.length ? html`<div class="rows">${couples.map((c) => html`<div class="row">
+            <span class="row__title">${c.name || c.email}</span>
+            <span class="row__side"><button class="btn btn--small" type="button" data-access="${c.email}">Enlace de acceso</button>
+              <button class="icon-btn" type="button" data-del-couple="${c.id}" aria-label="Quitar acceso">${raw(icons.trash)}</button></span>
+            <span class="row__sub">${c.email}${c.last_link_at ? ` · último enlace ${fmtDateTime(c.last_link_at)}` : ""} · resumen: ${c.digest}</span></div>`)}</div>` : ""}
+          <div class="grid-2"><input data-couple-email type="email" placeholder="Email de uno de los dos" aria-label="Email"><input data-couple-name placeholder="Nombre" aria-label="Nombre"></div>
+          <div class="btn-row"><button class="btn btn--small" type="button" data-add-couple>Dar acceso</button>
+            <a class="btn btn--small btn--quiet" href="/pareja/?boda=${id}" target="_blank" rel="noopener">Ver su panel</a></div>
+          <div class="field"><label for="f-ext">Lista de invitados y RSVP ampliado</label>
+            <select id="f-ext" data-ext style="max-width:420px">
+              <option value="" ${w.features?.rsvp_ampliado === undefined ? "selected" : ""}>Según su plan</option>
+              <option value="si" ${w.features?.rsvp_ampliado === true ? "selected" : ""}>Activado en esta boda</option>
+              <option value="no" ${w.features?.rsvp_ampliado === false ? "selected" : ""}>Desactivado en esta boda</option></select>
+            <span class="hint">Ahora mismo: <b data-ext-now>${plan.rsvp_ampliado ? "activado" : "desactivado"}</b>. Enlaces personales por grupo, acompañantes, niños, alergias y autobús. Se aplica al momento, sin publicar.</span></div>
         </div></details>
 
         <details class="sec"><summary>Datos internos</summary><div class="sec__body">
@@ -531,7 +555,12 @@ export default async function boda(ctx) {
     $$("[data-row]", el).forEach((i) => { row[i.dataset.row] = i.value.trim() || null; });
     if (row.custom_domain) row.custom_domain = row.custom_domain.toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     try {
-      await db.update("weddings", { id: `eq.${id}` }, row);
+      const saved = await db.update("weddings", { id: `eq.${id}`, updated_at: `eq.${version}` }, row);
+      if (!saved.length) {
+        fail(new Error("La pareja ha cambiado datos de esta boda (horario, regalo…) mientras la editabas. Para no borrar sus cambios, copia lo tuyo y recarga la página."));
+        return false;
+      }
+      version = saved[0].updated_at;
       dirty = false;
       state.className = "saved";
       state.textContent = `Borrador guardado a las ${new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
@@ -588,7 +617,9 @@ export default async function boda(ctx) {
     });
     dlg.showModal();
     if (dirty) toast("Ojo: tienes cambios sin guardar; la vista previa enseña lo último guardado.");
-    if (w.status === "borrador") db.update("weddings", { id: `eq.${id}` }, { status: "vista_previa" }).catch(() => {});
+    if (w.status === "borrador") {
+      db.update("weddings", { id: `eq.${id}` }, { status: "vista_previa" }).then((r) => { if (r[0]) version = r[0].updated_at; w.status = "vista_previa"; }).catch(() => {});
+    }
   });
 
   $$("[data-unpublish]", el).forEach((b) => b.addEventListener("click", async () => {
@@ -620,24 +651,59 @@ export default async function boda(ctx) {
   };
   $$(".editor-tabs [data-tab]", el).forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
 
+  // ── Pareja y acceso ──
+  $("[data-add-couple]", el).addEventListener("click", async () => {
+    const email = $("[data-couple-email]", el).value.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) return toast("Escribe un email válido.", { error: true });
+    try {
+      await db.insert("couple_users", { wedding_id: id, email, name: $("[data-couple-name]", el).value.trim() || null });
+      toast("Acceso dado. Ahora mándales el enlace."); boda(ctx);
+    } catch (e) { fail(e); }
+  });
+  $$("[data-del-couple]", el).forEach((b) => b.addEventListener("click", async () => {
+    if (!(await confirmDialog("¿Quitar el acceso?", "Ya no podrá entrar en el panel de esta boda.", "Quitar", true))) return;
+    try { await db.remove("couple_users", { id: `eq.${b.dataset.delCouple}` }); boda(ctx); } catch (e) { fail(e); }
+  }));
+  $$("[data-access]", el).forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true;
+    try {
+      const { link } = await api("/api/pareja", { accion: "enlace", wedding_id: id, email: b.dataset.access });
+      const c = couples.find((x) => x.email === b.dataset.access);
+      const msg = `¡Hola${c?.name ? `, ${c.name}` : ""}! Con este enlace entráis en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Sirve una vez y caduca en unas horas; después os quedáis dentro en ese móvil: ${link}`;
+      const dlg = document.createElement("dialog");
+      render(dlg, html`<div class="dlg"><h2>Enlace de acceso</h2>
+        <p class="muted">Para ${b.dataset.access}. Sirve una sola vez y caduca en unas horas. Si caduca, genera otro.</p>
+        <div class="link-box"><input readonly value="${link}"><button class="btn btn--small" type="button" data-copy-link>Copiar</button></div>
+        <div class="btn-row"><a class="btn btn--small btn--primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a></div>
+        <p class="small muted">No lo abras tú: se gastaría.</p>
+        <div class="dlg__actions"><button class="btn" type="button" data-close>Cerrar</button></div></div>`);
+      document.body.append(dlg);
+      dlg.addEventListener("close", () => dlg.remove());
+      dlg.addEventListener("click", async (e) => {
+        if (e.target.closest("[data-close]")) dlg.close();
+        if (e.target.closest("[data-copy-link]")) { await navigator.clipboard?.writeText(link).catch(() => {}); toast("Enlace copiado."); }
+      });
+      dlg.showModal();
+    } catch (e) { fail(new Error(e.code === "no_es_pareja" ? "Ese email no tiene acceso a ninguna boda activa." : e.message)); }
+    b.disabled = false;
+  }));
+  $("[data-ext]", el).addEventListener("change", async (e) => {
+    const features = { ...(w.features || {}) };
+    if (e.target.value === "") delete features.rsvp_ampliado; else features.rsvp_ampliado = e.target.value === "si";
+    try {
+      const r = await db.update("weddings", { id: `eq.${id}` }, { features });
+      w.features = features;
+      if (r[0]) version = r[0].updated_at;
+      const now = await db.rpc("pareja_resumen", { p_wedding_id: id }).then((x) => x.features?.rsvp_ampliado).catch(() => null);
+      $("[data-ext-now]", el).textContent = now ? "activado" : "desactivado";
+      toast("Hecho. La web lo aplica en menos de un minuto.");
+    } catch (ex) { fail(ex); }
+  });
+
   // Guardar con Ctrl/Cmd + S
   el.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); } });
 }
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o?.[k] !== undefined).map((k) => [k, o[k]]));
 
-export function formatIban(v) {
-  const s = String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  return s.replace(/(.{4})/g, "$1 ").trim();
-}
-
-// Comprobación del IBAN (módulo 97), para no publicar una cuenta con una errata.
-export function ibanOk(raw) {
-  const s = String(raw || "").toUpperCase().replace(/\s/g, "");
-  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
-  if (s.startsWith("ES") && s.length !== 24) return false;
-  const moved = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55));
-  let rest = 0;
-  for (const ch of moved) rest = (rest * 10 + Number(ch)) % 97;
-  return rest === 1;
-}
+export { formatIban, ibanOk };

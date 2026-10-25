@@ -98,3 +98,56 @@ test("carpetas internas no se sirven en la web pública", async () => {
     assert.ok([307, 308].includes(r.status), `${path} responde ${r.status}`);
   }
 });
+
+// ── Fase 3 ──
+import { env } from "../e2e/_util.mjs";
+const loginToken = async (email, password) => {
+  const e = env();
+  const r = await fetch(`${e.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST", headers: { apikey: e.SUPABASE_ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ email, password }),
+  });
+  return (await r.json()).access_token;
+};
+const asUser = (token, body) => fetch(`${SITE}/api/pareja`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+const LUCIA_WEDDING = "b0000000-0000-4000-8000-000000000001";
+
+test("/api/pareja acceso: responde igual exista o no el email (no revela quién es cliente)", async () => {
+  const a = await post("/api/pareja", { accion: "acceso", email: "lucia@example.com" }, { "X-Forwarded-For": "198.51.100.201" });
+  const b = await post("/api/pareja", { accion: "acceso", email: "nadie.nunca@example.com" }, { "X-Forwarded-For": "198.51.100.202" });
+  assert.equal(a.status, 200);
+  assert.deepEqual(await a.json(), await b.json());
+});
+
+test("/api/pareja enlace: solo el equipo puede generar el enlace de una pareja", async () => {
+  const body = { accion: "enlace", wedding_id: LUCIA_WEDDING, email: "lucia@example.com" };
+  assert.equal((await post("/api/pareja", body)).status, 403);
+  assert.equal((await asUser(await loginToken("lucia@example.com", "demo-pareja-1234"), body)).status, 403);
+  const r = await asUser(await loginToken("ayudante@example.com", "demo-ayudante-1234"), body);
+  assert.equal(r.status, 200);
+  assert.match((await r.json()).link, /\/pareja\/#acceso=[0-9a-f]{40,}/);
+  const nope = await asUser(await loginToken("luis@example.com", "demo-luis-1234"), { ...body, email: "desconocido@example.com" });
+  assert.equal(nope.status, 404);
+});
+
+test("/api/pareja recordatorio: la pareja solo puede en su boda", async () => {
+  const t = await loginToken("lucia@example.com", "demo-pareja-1234");
+  assert.equal((await asUser(t, { accion: "recordatorio", wedding_id: "b0000000-0000-4000-8000-000000000002" })).status, 403);
+  const r = await asUser(t, { accion: "recordatorio", wedding_id: LUCIA_WEDDING });
+  assert.ok([200, 429].includes(r.status), `responde ${r.status}`);
+});
+
+test("/b/<slug>?i=<clave>: el enlace personal no se guarda en la caché compartida", async () => {
+  const r = await fetch(`${SITE}/b/lucia-y-martin?i=demo-familia-ortega-0000000001`);
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get("cache-control"), /private, no-store/);
+  assert.match(await r.text(), /"name":"Familia Ortega"/);
+});
+
+test("/api/cron: sin la clave no hace nada; con ella, manda los resúmenes que tocan", async () => {
+  assert.equal((await fetch(`${SITE}/api/cron`)).status, 401);
+  const secret = env().CRON_SECRET;
+  if (!secret) return;
+  const r = await fetch(`${SITE}/api/cron`, { headers: { Authorization: `Bearer ${secret}` } });
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).ok, true);
+});
