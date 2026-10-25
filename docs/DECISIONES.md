@@ -57,13 +57,55 @@ La misma zona que la base de datos: menos espera en cada petición.
 ### Claves nuevas de Supabase
 El código acepta las claves nuevas (`sb_publishable_…`, `sb_secret_…`) y las antiguas (`anon`, `service_role`). Supabase retira las antiguas a finales de 2026.
 
+## 2026-10-25 · Fase 3: panel de la pareja y RSVP ampliado
+
+### Hecha antes de tener Supabase en la nube
+Luis lo pidió así. Todo está probado en una copia local de Supabase; la prueba de punta a punta (`tests/e2e/pareja.mjs`) cumple el «hecho cuando» del documento: una pareja importa 150 invitados, recibe respuestas y descarga el Excel del catering.
+
+### Enlace mágico que apunta a nuestra web, no a Supabase
+El enlace es `/pareja/#acceso=<clave>` y el navegador canjea la clave por la sesión. Ventajas sobre el enlace estándar de Supabase:
+- no hay que configurar las «Redirect URLs» de Supabase para cada dominio y cada vista previa;
+- WhatsApp y los correos abren los enlaces para hacer la vista previa; como la clave va detrás de «#», no llega a ningún servidor y no se gasta antes de que la pareja lo abra;
+- el email lo mandamos nosotros (Resend), con nuestro texto en español, sin depender del correo de Supabase.
+Luis puede generar el enlace desde el panel y mandarlo por WhatsApp (sin emails configurados también funciona).
+
+### La pareja no lee la tabla de bodas
+Tiene las notas internas de Luis. Ve su boda con `pareja_resumen()` y cambia solo lo permitido con `pareja_guardar()`.
+
+### Lo que cambia la pareja se publica solo
+Sobre la versión publicada, no sobre el borrador de Luis: si Luis tiene cambios a medias, no salen. El cambio queda en el historial de la boda y como versión nueva. Si Luis estaba editando la misma boda, al guardar se le avisa en vez de pisar los cambios de la pareja.
+
+### RSVP ampliado: módulo del plan, decidido con una casilla
+Pendiente de Luis si entra en el plan de 139 € o solo en el de 249 €. Mientras, no bloquea: en Panel › Ajustes › Tarifas hay una casilla «RSVP ampliado» por tarifa (la de 249 € ya la tiene, porque entra en las dos opciones), y en cada boda se puede activar o quitar como excepción. Sin el módulo, la web sigue con su RSVP sencillo de siempre.
+
+### El formulario ampliado vive fuera de las plantillas
+`lib/rsvp-ampliado.js`, cargado solo si el plan lo incluye. Usa las mismas clases que el formulario de cada plantilla, así se ve con su estilo (comprobado en Editorial, Verbena, Postal y Editorial Negro). Las 24 copias de `rsvp.js` solo cambian para cargarlo. La Clásica no lo tiene (su RSVP es distinto y está rota en `main`).
+
+### Los nombres de quien viene salen de la lista, nunca del formulario
+Con enlace personal, el servidor ignora los nombres que mande el navegador y guarda los de la lista de la pareja. Y no se pueden confirmar más plazas de las invitadas.
+
+### «En tiempo real» = se actualiza cada 30 segundos
+Más simple y robusto que una conexión permanente, y de sobra para respuestas de boda. Avisa cuando llega una nueva.
+
+### Excel: se lee .xlsx y se exporta CSV
+El lector de Excel es propio (`lib/xlsx.js`, sin dependencias) y está probado con archivos de Excel, LibreOffice y con cadenas en línea. Para descargar se usa CSV con «;», que Excel en español abre directamente.
+
+### Códigos QR propios
+`lib/qr.js`, sin dependencias. Comprobado leyendo 300 enlaces personales con el lector de OpenCV: los 300 se leen.
+
+### Resumen de respuestas por email
+Diario o los lunes (cada pareja elige; por defecto, semanal). Solo se manda si hay respuestas nuevas, y solo se marca como enviado si ha salido de verdad. Protegido contra ejecuciones dobles de Vercel.
+
+### Menos funciones de Vercel
+`/api/pareja` agrupa acceso, enlace y recordatorio. En total hay 7 funciones; el plan Hobby permite 12.
+
 ## Problemas encontrados que ya estaban en `main`
 
 - **La plantilla Clásica no se pinta** (estilos Olivar, Atardecer y Noche): `js/sections/hero.js` importa `longDate`, que no existe en `js/format.js`; además usa `t` sin definir y `js/main.js` no registra `story`, `gifts` ni `closing`. Parece un cambio a medias. No se ha tocado: hay que decidir cómo debía quedar.
 
 ## Pendiente de Luis
 
-1. ¿El RSVP ampliado (grupos, acompañantes, alergias, autobús) entra en el plan de 139 € o solo en el de 249 €? (antes de la fase 3)
+1. ¿El RSVP ampliado (grupos, acompañantes, alergias, autobús) entra en el plan de 139 € o solo en el de 249 €? Ya no bloquea: es una casilla en Panel › Ajustes › Tarifas.
 2. ¿Autónomo o sociedad? Cambia la fecha de Verifactu y los datos de las facturas. Se rellena en Panel › Ajustes.
 3. Proveedor de facturación (te traeré 3 opciones en la fase 4).
 4. Dominio definitivo, y si las bodas van en ruta (`/b/…`) o en subdominio.

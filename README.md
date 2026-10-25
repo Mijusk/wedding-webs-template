@@ -2,7 +2,7 @@
 
 Webs de boda configurables desde un único config. HTML, CSS y JS sin framework ni paso de build.
 
-Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 27 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`).
+Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 27 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
 
 | Documento | Para qué |
 | --- | --- |
@@ -79,9 +79,10 @@ El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
 | `studio/legal.html` | Aviso legal, privacidad y condiciones. Los datos del titular y los plazos salen de `studio.json > legal` |
 | `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas. `vercel.json` además manda `/b/<slug>` a `api/boda.js` |
-| `api/` | Funciones de Vercel: `boda.js` (webs de boda desde la base de datos), `rsvp.js`, `lead.js`, `productos.js`, `panel-config.js` |
+| `api/` | Funciones de Vercel: `boda.js` (webs de boda desde la base de datos), `rsvp.js`, `lead.js`, `productos.js`, `panel-config.js`, `pareja.js` (acceso y recordatorios) y `cron.js` (resumen diario) |
 | `panel/` | Panel interno de Luis: leads, tareas, clientes, pedidos, bodas y ajustes |
-| `lib/` | Código compartido por el panel, el servidor y las herramientas: validador del config y preparación de fotos |
+| `pareja/` | Panel de cada pareja (entra sin contraseña): invitados, respuestas, datos prácticos y QR para imprimir |
+| `lib/` | Código compartido: validador del config, fotos, IBAN, QR, lector de Excel y el RSVP ampliado que cargan las plantillas |
 | `schema/` | JSON Schema del config de boda |
 | `supabase/` | Migraciones de la base de datos, datos de ejemplo e `instalar.sql` (todo en uno para pegar en Supabase) |
 | `scripts/`, `tests/`, `docs/` | Utilidades, pruebas y documentación (no se publican en la web) |

@@ -11,6 +11,7 @@ Para quien programe (Luis no lo necesita para usar el panel).
 | Webs de boda | `/b/<slug>` → `api/boda.js` | Función de Vercel que pinta la plantilla con el config de la base de datos. |
 | API pública | `api/rsvp.js`, `api/lead.js`, `api/productos.js` | Funciones de Vercel. Hablan con Supabase con la clave secreta. |
 | Panel | `panel/` | Estático. Habla con Supabase desde el navegador con la clave publicable; la RLS decide qué ve cada uno. |
+| Panel de la pareja | `pareja/` | Estático, como el panel. Entra con `/pareja/#acceso=<clave>` (lo genera `api/pareja.js`). |
 | Base de datos | `supabase/migrations/` | Postgres en Supabase, con RLS en todas las tablas. |
 
 Nada necesita compilación ni `npm install`: solo Node 20 o superior.
@@ -26,7 +27,7 @@ cp .env.example .env.local # y pega ahí esas tres claves
 npm run dev                # http://localhost:3000/studio/ · panel: http://localhost:3000/panel/
 ```
 
-Usuarios de ejemplo del panel: `luis@example.com` / `demo-luis-1234` (dueño) y `ayudante@example.com` / `demo-ayudante-1234` (editor). Pareja: `lucia@example.com` / `demo-pareja-1234` (no entra en el panel).
+Usuarios de ejemplo del panel: `luis@example.com` / `demo-luis-1234` (dueño) y `ayudante@example.com` / `demo-ayudante-1234` (editor). Pareja: `lucia@example.com` (entra en `/pareja/` con el enlace que genera el panel; no entra en `/panel/`). Enlace personal de invitados de ejemplo: `/b/lucia-y-martin?i=demo-familia-ortega-0000000001`.
 
 ## Pruebas
 
@@ -34,7 +35,7 @@ Usuarios de ejemplo del panel: `luis@example.com` / `demo-luis-1234` (dueño) y 
 npm test             # validador del config, fotos, CSV y que instalar.sql esté al día (sin base de datos)
 npm run test:db      # seguridad por filas, facturas y funciones de la base (necesita supabase db reset)
 npm run test:api     # funciones de /api contra el servidor local (npm run dev)
-npm run test:e2e     # navegador real: flujo completo, panel y las 25 plantillas (necesita Playwright)
+npm run test:e2e     # navegador real: flujo completo, panel, panel de la pareja y las 25 plantillas (necesita Playwright)
 ```
 
 Las de navegador usan Playwright (`npm i -g playwright && npx playwright install chromium`). `npm run test:e2e` deja capturas en `tests/e2e/capturas/`. Si `test:e2e` falla tras otras pruebas, vuelve a cargar los datos con `supabase db reset`.

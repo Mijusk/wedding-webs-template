@@ -71,6 +71,13 @@ Si en vez de esas ves claves que empiezan por `eyJ…` llamadas **anon** y **ser
 
 > La **secret key** da acceso a todo. No la pegues en ningún chat, email ni documento: solo en Vercel.
 
+## 6 bis. Que el enlace de las parejas dure un día
+
+Las parejas entran en su panel con un enlace sin contraseña. Por defecto caduca en 1 hora, y si se lo mandas por WhatsApp puede que lo abran más tarde.
+
+1. **Authentication** › **Sign In / Providers** › **Email**.
+2. En **Email OTP expiration** pon `86400` (24 horas) y guarda.
+
 ## 7. Ponerlas en Vercel
 
 1. Entra en [vercel.com](https://vercel.com) › tu proyecto de la web › **Settings** › **Environment Variables**.
@@ -87,6 +94,14 @@ En el despliegue de vista previa que acabas de rehacer (el botón **Visit**):
 - `…/b/lucia-y-martin` → una boda de ejemplo publicada. Confirma asistencia y mira cómo aparece en el panel (Bodas › Lucía y Martín › Confirmación de asistencia).
 - En el panel: **Bodas** › **Nueva boda** → crea una, sube una foto, pulsa **Publicar** y ábrela.
 
+Y el panel de la pareja (fase 3):
+
+- Panel › **Bodas** › **Lucía y Martín** › **Pareja y acceso a su panel**: pon **tu propio email** (otro distinto del tuyo de Luis, por ejemplo uno personal) en «Dar acceso» y pulsa **Enlace de acceso**. Ábrelo **en el móvil** (o en una ventana de incógnito): entras como si fueras la pareja.
+- Ahí prueba a importar un Excel de invitados, cambiar el horario y descargar el Excel del catering.
+- `…/b/lucia-y-martin?i=demo-familia-ortega-0000000001` → la web como la ve la Familia Ortega con su enlace personal: les saluda y marcan uno a uno quién viene.
+
+> No abras tú el enlace de acceso que vayas a mandar a una pareja: solo sirve una vez.
+
 Si algo no va, mándame una captura y el texto del error.
 
 ---
@@ -98,6 +113,8 @@ No hace falta mañana. Cuando lo hagamos:
 1. Otro proyecto de Supabase, `weddingwebs`, en **plan Pro** (los proyectos gratis se pausan y no tienen copias de seguridad diarias). Mismos pasos 2, 4, 5 y 6 (sin datos de ejemplo).
 2. En Vercel, las mismas tres variables pero marcando **solo Production**.
 3. Opcionales para producción: `NOTIFY_EMAIL` (tu email, para los avisos de leads), `RESEND_API_KEY` y `EMAIL_FROM` (para enviar emails desde tu dominio), `LEADS_SHEET_ENDPOINT` (para seguir copiando los leads en tu hoja durante un tiempo) y `SITE_URL` (tu dominio).
+   - Sin `RESEND_API_KEY` no sale ningún email: ni el enlace de acceso que piden las parejas desde `/pareja/`, ni los recordatorios a invitados, ni los resúmenes. Todo sigue funcionando y queda apuntado como «simulado»; mientras tanto, el enlace de acceso se lo mandas tú por WhatsApp desde el panel.
+   - `CRON_SECRET`: una contraseña larga inventada (al menos 16 caracteres). Con ella, Vercel manda cada mañana a las parejas el resumen de respuestas nuevas. Las tareas programadas solo funcionan en producción.
 4. En Supabase › **Authentication** › **URL Configuration**: **Site URL** = tu dominio, y en **Redirect URLs** añade `https://tudominio/panel/`. Sirve para el email de "He olvidado la contraseña".
 5. Repasa los costes en [COSTES.md](COSTES.md): para uso comercial, Vercel exige el plan Pro.
 

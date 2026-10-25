@@ -13,6 +13,10 @@ export default async function handler(req, res) {
   const tarea = new URL(req.url, "http://x").searchParams.get("tarea") || "resumen";
   if (tarea !== "resumen") return sendJson(res, 400, { ok: false, error: "tarea" });
 
+  // Vercel avisa de que a veces lanza la misma tarea dos veces: solo una por hora.
+  if (!(await rpc("api_hit_rate_limit", { p_key: "cron:resumen", p_max: 1, p_window_seconds: 3600 }))) {
+    return sendJson(res, 200, { ok: true, repetida: true });
+  }
   const due = await rpc("api_digests_due");
   const sent = [];
   let simulados = 0, fallidos = 0;
