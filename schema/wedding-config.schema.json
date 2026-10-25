@@ -111,7 +111,9 @@
         "deadline": { "type": "string", "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$", "title": "Fecha límite (incluida)" },
         "buttonLabel": { "type": "string", "maxLength": 60, "title": "Texto del botón" },
         "endpoint": { "type": "string", "maxLength": 500, "title": "Dónde se guardan las respuestas (lo pone el servidor)" },
-        "closedText": { "type": "string", "maxLength": 300, "title": "Texto cuando ya está cerrado (Clásica)" }
+        "closedText": { "type": "string", "maxLength": 300, "title": "Texto cuando ya está cerrado (Clásica)" },
+        "bus": { "type": "boolean", "title": "Preguntar si necesitan autobús (RSVP ampliado)" },
+        "dietary": { "type": "boolean", "title": "Preguntar por alergias e intolerancias (RSVP ampliado; sí por defecto)" }
       }
     },
     "cities": {

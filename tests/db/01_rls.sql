@@ -28,25 +28,32 @@ reset role;
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
 do $$ begin
-  assert (select count(*) from public.weddings) = 1, 'FALLO: la pareja debería ver solo su boda';
-  assert (select slug from public.weddings) = 'lucia-y-martin', 'FALLO: la pareja ve una boda que no es suya';
+  assert (select count(*) from public.weddings) = 0, 'FALLO: la pareja lee la tabla de bodas (con notas internas)';
+  assert public.pareja_resumen() #>> '{wedding,slug}' = 'lucia-y-martin', 'FALLO: la pareja no ve su boda en su resumen';
+  begin
+    perform public.pareja_resumen('b0000000-0000-4000-8000-000000000002');
+    raise exception 'FALLO: la pareja ve el resumen de otra boda';
+  exception when insufficient_privilege then null;
+  end;
   assert (select count(*) from public.leads) = 0, 'FALLO: la pareja ve leads';
   assert (select count(*) from public.clients) = 0, 'FALLO: la pareja ve clientes';
   assert (select count(*) from public.settings) = 0, 'FALLO: la pareja ve ajustes';
-  assert (select count(*) from public.rsvp_responses) = 6, 'FALLO: la pareja debería ver sus 6 respuestas';
-  assert (select count(*) from public.rsvp_current) = 5, 'FALLO: la vista de respuestas vigentes debería dar 5';
-  assert (select count(*) from public.guest_groups) = 2, 'FALLO: la pareja debería ver sus grupos de invitados';
-  -- No puede cambiar la boda directamente (eso irá por su panel, con campos limitados).
+  assert (select count(*) from public.rsvp_responses) = 7, 'FALLO: la pareja debería ver sus 7 respuestas';
+  assert (select count(*) from public.rsvp_current) = 6, 'FALLO: la vista de respuestas vigentes debería dar 6';
+  assert (select count(*) from public.guest_groups) = 3, 'FALLO: la pareja debería ver sus grupos de invitados';
+  -- No puede cambiar la boda directamente (va por pareja_guardar, con campos limitados).
   update public.weddings set notes = 'hackeo' where slug = 'lucia-y-martin';
-  assert (select notes from public.weddings where slug = 'lucia-y-martin') is distinct from 'hackeo', 'FALLO: la pareja ha cambiado su boda';
   begin
     perform public.dashboard_summary();
     raise exception 'FALLO: la pareja ha abierto el resumen del panel';
   exception when insufficient_privilege then null;
   end;
-  raise notice 'OK pareja: solo ve su boda, sus invitados y sus respuestas';
+  raise notice 'OK pareja: solo ve su boda (sin notas internas), sus invitados y sus respuestas';
 end $$;
 reset role;
+do $$ begin
+  assert (select notes from public.weddings where slug = 'lucia-y-martin') is distinct from 'hackeo', 'FALLO: la pareja ha cambiado su boda directamente';
+end $$;
 
 -- Otra persona con cuenta pero sin boda ni equipo: nada.
 set local role authenticated;

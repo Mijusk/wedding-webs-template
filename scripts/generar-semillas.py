@@ -17,6 +17,7 @@ def lit(obj):
 
 # Bodas de ejemplo (las fotos de ejemplo de cada plantilla siguen valiendo: rutas relativas a la plantilla).
 lucia = cfg('editorial'); lucia['theme'] = 'editorial'
+lucia['rsvp']['bus'] = True  # Lucía y Martín tienen el RSVP ampliado (con autobús)
 ana = cfg('clasica'); ana['theme'] = 'olivar'
 ana['event'].update({'couple': ['Ana', 'Pablo'], 'date': '2027-09-18T18:30:00+02:00', 'end': '2027-09-19T03:30:00+02:00',
                      'photoAlt': 'Ana y Pablo'})
@@ -133,9 +134,21 @@ insert into public.rsvp_responses (wedding_id, name, attending, song, source, cr
   ('b0000000-0000-4000-8000-000000000001', 'iñaki prieto', true, 'Vivir mi vida', 'web', now() - interval '1 day'),
   ('b0000000-0000-4000-8000-000000000001', 'Rosa Martín', true, null, 'web', now() - interval '2 hours');
 
-insert into public.guest_groups (wedding_id, name, seats, children_seats) values
-  ('b0000000-0000-4000-8000-000000000001', 'Familia Ortega', 4, 2),
-  ('b0000000-0000-4000-8000-000000000001', 'Amigos de la uni', 6, 0);
+-- Lucía y Martín: RSVP ampliado regalado (su plan no lo incluye) con grupos y enlaces personales.
+update public.weddings set features = '{{"rsvp_ampliado": true}}' where id = 'b0000000-0000-4000-8000-000000000001';
+insert into public.guest_groups (id, wedding_id, name, seats, children_seats, token, phone, email, sort) values
+  ('f0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'Familia Ortega', 4, 2, 'demo-familia-ortega-0000000001', '600000101', 'ortega@example.com', 1),
+  ('f0000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000001', 'Amigos de la uni', 6, 0, 'demo-amigos-uni-00000000000002', null, null, 2),
+  ('f0000000-0000-4000-8000-000000000003', 'b0000000-0000-4000-8000-000000000001', 'Tíos de Martín', 2, 0, 'demo-tios-martin-0000000000003', '600000103', null, 3);
+insert into public.guests (wedding_id, group_id, first_name, last_name, is_child) values
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000001', 'Carmen', 'Ortega', false),
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000001', 'Luis', 'Ortega', false),
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000001', 'Pablo', 'Ortega', true),
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000001', 'Inés', 'Ortega', true),
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000003', 'Antonio', 'Sanz', false),
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000003', 'Mari Carmen', 'López', false);
+insert into public.rsvp_responses (wedding_id, group_id, name, attending, adults, children, dietary, bus, song, source, created_at) values
+  ('b0000000-0000-4000-8000-000000000001', 'f0000000-0000-4000-8000-000000000002', 'Amigos de la uni', true, 5, 0, 'Una persona celíaca', true, 'Mr. Brightside', 'web', now() - interval '20 hours');
 
 -- Pedidos y pagos
 insert into public.orders (id, client_id, wedding_id, lead_id, status, promised_delivery_at, paid_at) values
