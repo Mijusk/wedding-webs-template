@@ -101,7 +101,7 @@ insert into public.activities (lead_id, kind, title, body, created_at) values
 
 insert into public.tasks (title, due_at, status, lead_id, wedding_id) values
   ('Pedir las fotos a Lucía y Martín', now() - interval '1 day', 'pendiente', 'a0000000-0000-4000-8000-000000000006', null),
-  ('Llamar a Nuria y Álex', now() + interval '3 hours', 'pendiente', 'a0000000-0000-4000-8000-000000000003', null),
+  ('Llamar a Nuria y Álex', ((now() at time zone 'Europe/Madrid')::date + time '20:00') at time zone 'Europe/Madrid', 'pendiente', 'a0000000-0000-4000-8000-000000000003', null),
   ('Preparar propuesta de Carmen y Luis', now() + interval '2 days', 'pendiente', 'a0000000-0000-4000-8000-000000000004', null),
   ('Revisar textos de Sara y Jon', now() - interval '60 days', 'hecha', 'a0000000-0000-4000-8000-000000000011', null);
 

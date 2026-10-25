@@ -8,7 +8,8 @@
 import { insert } from "./supabase.js";
 
 // attachments: [{ filename, content: Buffer }] (p. ej. la factura en PDF). meta: datos para el registro.
-export async function sendEmail({ to, subject, text, html, template, leadId, clientId, weddingId, attachments, meta }) {
+// replyTo: a quién van las respuestas (p. ej. el email de Luis). headers: cabeceras extra (baja en un clic).
+export async function sendEmail({ to, subject, text, html, template, leadId, clientId, weddingId, attachments, meta, replyTo, headers }) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   let status = "simulado", providerId = null, error = null;
@@ -19,6 +20,8 @@ export async function sendEmail({ to, subject, text, html, template, leadId, cli
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from, to: [to], subject, text, html,
+          ...(replyTo ? { reply_to: replyTo } : {}),
+          ...(headers ? { headers } : {}),
           ...(attachments?.length ? { attachments: attachments.map((a) => ({ filename: a.filename, content: Buffer.from(a.content).toString("base64") })) } : {}),
         }),
         signal: AbortSignal.timeout(attachments?.length ? 10000 : 5000),

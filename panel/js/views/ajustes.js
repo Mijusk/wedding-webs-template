@@ -12,7 +12,7 @@ export default async function ajustes(ctx) {
     db.select("staff", { select: "*", order: "created_at" }),
   ]);
   const get = (k) => settings.find((s) => s.key === k)?.value || {};
-  const v = get("vendedor"), p = get("plazos");
+  const v = get("vendedor"), p = get("plazos"), rv = get("resenas");
   const sellerDone = v.nombre && v.nif && v.direccion;
 
   render(el, html`
@@ -76,8 +76,19 @@ export default async function ajustes(ctx) {
             <div class="field"><label for="p-e">Días laborables para entregar una web</label><input id="p-e" name="entrega_dias" type="number" min="1" value="${p.entrega_dias ?? 3}"></div>
             <div class="field"><label for="p-w">Meses online después de la boda</label><input id="p-w" name="web_meses_tras_boda" type="number" min="1" value="${p.web_meses_tras_boda ?? 12}"></div>
             <div class="field"><label for="p-i">Meses hasta borrar los datos de invitados</label><input id="p-i" name="invitados_meses_tras_boda" type="number" min="1" value="${p.invitados_meses_tras_boda ?? 6}"></div>
-            <div class="field"><label for="p-l">Meses hasta anonimizar leads perdidos</label><input id="p-l" name="leads_perdidos_anonimizar_meses" type="number" min="1" value="${p.leads_perdidos_anonimizar_meses ?? 24}"></div>
+            <div class="field"><label for="p-l">Meses hasta anonimizar los contactos que no contratan</label><input id="p-l" name="leads_perdidos_anonimizar_meses" type="number" min="1" value="${p.leads_perdidos_anonimizar_meses ?? 12}">
+              <span class="hint">La política de privacidad publicada dice 12. Si lo cambias, cambia también el texto de privacidad.</span></div>
             <div><button class="btn" type="submit">Guardar plazos</button></div>
+          </form>
+        </section>
+
+        <section class="panel-block">
+          <h2>Reseñas</h2>
+          <p class="small muted" style="margin-bottom:10px">Para el email del día después de la boda (Automatizaciones). Si no pones ninguno, ese email no se manda.</p>
+          <form class="form" data-reviews>
+            <div class="field"><label for="r-g">Enlace para dejar una reseña en Google</label><input id="r-g" name="google" type="url" placeholder="https://g.page/r/…/review" value="${rv.google || ""}"></div>
+            <div class="field"><label for="r-b">Enlace a tu ficha de Bodas.net</label><input id="r-b" name="bodas_net" type="url" placeholder="https://www.bodas.net/…" value="${rv.bodas_net || ""}"></div>
+            <div><button class="btn" type="submit">Guardar enlaces</button></div>
           </form>
         </section>
 
@@ -104,6 +115,12 @@ export default async function ajustes(ctx) {
     if (d.nif) d.nif = d.nif.toUpperCase().replace(/[\s-]/g, "");
     if (d.nif && !validNif(d.nif)) { $("[data-err]", el).textContent = "El NIF no parece correcto (revisa la letra)."; return; }
     try { await saveSetting("vendedor", { ...v, ...d, pais: "ES" }); toast("Datos fiscales guardados."); ajustes(ctx); } catch (ex) { fail(ex); }
+  });
+  $("[data-reviews]", el).addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries([...new FormData(e.target)].map(([k, x]) => [k, String(x).trim()]));
+    if (Object.values(d).some((x) => x && !/^https:\/\//.test(x))) return toast("Los enlaces tienen que empezar por https://", { error: true });
+    try { await saveSetting("resenas", d); toast("Enlaces guardados."); } catch (ex) { fail(ex); }
   });
   $("[data-plazos]", el).addEventListener("submit", async (e) => {
     e.preventDefault();

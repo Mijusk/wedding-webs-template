@@ -5,6 +5,13 @@
   "functions": {
     "api/boda.js": {
       "includeFiles": "{index.html,404.html,plantillas/*/index.html}"
+    },
+    "api/cron.js": {
+      "maxDuration": 60,
+      "includeFiles": "studio/studio.json"
+    },
+    "api/lead.js": {
+      "includeFiles": "studio/studio.json"
     }
   },
   "redirects": [

@@ -28,6 +28,7 @@ export async function init() {
 }
 
 export const siteUrl = () => cfg?.siteUrl || location.origin;
+export const connected = () => ({ emails: Boolean(cfg?.emails), pagos: Boolean(cfg?.pagos) });
 export const currentSession = () => session;
 export const onAuthChange = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
 

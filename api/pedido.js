@@ -8,6 +8,7 @@
 //   POST {accion: "aprobar", c, propuesta}                la pareja aprueba una propuesta
 //   POST {accion: "panel", c}                             manda a la pareja el enlace a su panel de invitados
 //   POST {accion: "propuesta", wedding_id, nota, resolver}  solo el equipo: manda una propuesta y avisa
+//   POST {accion: "publicada", wedding_id}  solo el equipo: tras publicar, el email «web publicada» si toca
 //   POST {accion: "pago", order_id, importe, forma, fecha}  solo el equipo: apunta un pago (Bizum,
 //        transferencia…); si queda pagado, la pareja recibe la confirmación con la factura
 //
@@ -19,6 +20,7 @@ import { callerToken, isStaff, magicLink } from "./_lib/acceso.js";
 import { sendEmail, notifyLuis } from "./_lib/avisos.js";
 import { accessEmail, proposalEmail } from "./_lib/emails.js";
 import { trackingUrl, afterPayment } from "./_lib/cobros.js";
+import { runEvent } from "./_lib/automatizaciones.js";
 import { validNif } from "../lib/nif.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -45,6 +47,7 @@ export default async function handler(req, res) {
       case "panel": return await panel(req, res, body);
       case "propuesta": return await propuesta(req, res, body);
       case "pago": return await pago(req, res, body);
+      case "publicada": return await publicada(req, res, body);
       default: return sendJson(res, 400, { ok: false, error: "accion" });
     }
   } catch (e) {
@@ -212,4 +215,12 @@ async function pago(req, res, body) {
   if (!r?.ok) return sendJson(res, 400, r || { ok: false });
   await afterPayment(r, origin(req), { amountCents: cents });
   return sendJson(res, 200, { ok: true, status: r.status, became_paid: r.became_paid, invoice: r.invoice, promised: r.promised_delivery_at });
+}
+
+async function publicada(req, res, body) {
+  const token = await callerToken(req);
+  if (!token || !(await isStaff(token))) return sendJson(res, 403, { ok: false, error: "permiso" });
+  if (!UUID.test(body.wedding_id || "")) return sendJson(res, 400, { ok: false, error: "datos" });
+  const r = await runEvent("web_publicada", body.wedding_id, origin(req));
+  return sendJson(res, 200, { ok: true, emails: r });
 }

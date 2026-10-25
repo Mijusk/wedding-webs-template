@@ -1,15 +1,8 @@
 // Textos de los emails que manda la web a las parejas y a sus invitados.
 // Texto plano + un HTML sencillo (se ve bien en cualquier cliente de correo).
-import { esc } from "./http.js";
+import { esc, emailHtml, fill } from "../../lib/email.js";
 
-const html = (paragraphs, button) => `<!doctype html><html lang="es"><body style="margin:0;background:#f6f4f1;padding:24px 12px;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#1f1a24">
-<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:28px">
-${paragraphs.map((p) => `<p style="margin:0 0 14px">${p}</p>`).join("\n")}
-${button ? `<p style="margin:22px 0"><a href="${esc(button.url)}" style="display:inline-block;background:#7d2a4b;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600">${esc(button.label)}</a></p>
-<p style="margin:0;font-size:13px;color:#675f6d">Si el botón no funciona, copia este enlace: ${esc(button.url)}</p>` : ""}
-</div>
-<p style="text-align:center;font-size:12px;color:#958d99;margin-top:16px">WeddingWebs</p>
-</body></html>`;
+const html = (paragraphs, button) => emailHtml(paragraphs, button);
 
 const names = (couple) => (Array.isArray(couple) ? couple.filter(Boolean).join(" y ") : "");
 
@@ -66,19 +59,22 @@ const eur = (cents) => `${(cents / 100).toLocaleString("es-ES", { minimumFractio
 const longDate = (d) => (d ? new Date(`${String(d).slice(0, 10)}T12:00:00Z`).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }) : "");
 
 // Confirmación del pago (es el «soporte duradero» de la contratación: lleva lo esencial y las condiciones).
-export function paymentEmail({ names, number, plan, amountCents, promised, trackingUrl, code, conditionsUrl, invoiceNumber }) {
+// extra: el bloque «Qué necesitamos» de Panel › Automatizaciones, si está activo.
+export function paymentEmail({ names, number, plan, amountCents, promised, trackingUrl, code, conditionsUrl, invoiceNumber, extra }) {
+  const extraParagraphs = extra ? fill(extra, { nombres: names, pedido: number }).trim().split(/\n\s*\n/) : [];
   const lines = [
     `¡Hola${names ? `, ${names}` : ""}!`,
     `Hemos recibido vuestro pago de ${eur(amountCents)}${plan ? ` por la web de boda «${plan}»` : ""}. Pedido ${number}.`,
     promised ? `Os la entregamos como tarde el ${longDate(promised)} (cuenta desde que tenemos vuestros datos y fotos).` : "",
     `En vuestra página de seguimiento veréis cómo va, las propuestas que os mandemos y podréis pedir cambios. Vuestro código es ${code}; no hace falta contraseña.`,
+    ...extraParagraphs,
     invoiceNumber ? `Os adjuntamos la factura ${invoiceNumber}.` : "La factura os llegará en un email aparte.",
     `Las condiciones de contratación, por si las queréis guardar: ${conditionsUrl}`,
   ].filter(Boolean);
   return {
     subject: `Pago recibido · pedido ${number}`,
     text: `${lines.join("\n\n")}\n\nSeguimiento: ${trackingUrl}\n\nWeddingWebs`,
-    html: html(lines.map(esc), { url: trackingUrl, label: "Ver cómo va nuestra web" }),
+    html: html(lines.map((l) => esc(l).replace(/\n/g, "<br>")), { url: trackingUrl, label: "Ver cómo va nuestra web" }),
   };
 }
 

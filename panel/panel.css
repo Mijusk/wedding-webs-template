@@ -399,3 +399,19 @@ dialog::backdrop { background: rgb(31 26 36 / .45); }
   .toast { animation: toast-in .2s ease-out; }
   @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
 }
+
+/* ── Automatizaciones ──────────────────────────────────────── */
+.auto__group { font: 400 24px/1.1 var(--display); margin: 8px 0 8px; }
+.auto__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.auto__head h3 { font-size: 15.5px; margin-bottom: 4px; }
+.auto__toggle { flex: none; padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: 999px; font-size: 13.5px; font-weight: 600; }
+.auto__toggle:has(input:checked) { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.auto__edit { margin-top: 12px; }
+.auto__edit > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); }
+.auto__runs { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.auto__run { white-space: nowrap; }
+.auto__frame { display: block; width: 100%; height: min(460px, 55vh); border: 1px solid var(--line); border-radius: var(--r-sm); background: #f6f4f1; }
+dialog:has(.dlg--wide) { width: min(680px, calc(100vw - 24px)); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+button.tag { cursor: pointer; background: var(--surface); font: inherit; font-size: 12px; }
+button.tag:hover { border-color: var(--accent); color: var(--accent); }

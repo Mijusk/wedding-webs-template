@@ -29,13 +29,14 @@ export async function afterPayment(r, origin, { amountCents } = {}) {
   const tasks = [];
   if (r.became_paid && r.email) {
     const inv = r.invoice?.ok ? await invoiceAttachment(r.invoice.id) : null;
+    const extra = await rpc("api_automation_block", { p_code: "pago_bienvenida" }).catch(() => null);
     tasks.push(sendEmail({
       to: r.email, template: "pago_recibido", clientId: r.client_id, weddingId: r.wedding_id, meta: { pedido: r.number },
       attachments: inv ? [inv.attachment] : [],
       ...paymentEmail({
         names: r.names, number: r.number, plan: r.plan, amountCents: amountCents ?? r.paid_cents,
         promised: r.promised_delivery_at, trackingUrl: trackingUrl(origin, r.tracking_code), code: formatCode(r.tracking_code),
-        conditionsUrl: `${origin}/studio/legal.html#condiciones`, invoiceNumber: inv ? r.invoice.number : null,
+        conditionsUrl: `${origin}/studio/legal.html#condiciones`, invoiceNumber: inv ? r.invoice.number : null, extra,
       }),
     }));
   }

@@ -80,7 +80,22 @@ async function start() {
   const pick = (id) => available.find((s) => s.id === id);
   if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
   else if (pick(params.get("ver"))) { prepareStage(null, pick(params.get("ver"))); openStage(); }
-  if (params.has("probar") || params.has("ver")) history.replaceState(null, "", location.pathname + location.hash);
+  else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
+  if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
+}
+
+// Desde el email de bienvenida (?prueba=<clave>): la web que probaron, con sus datos y fotos de
+// ejemplo (las suyas nunca salieron de su móvil).
+async function openSavedTrial(token, styleFor) {
+  try {
+    const res = await fetch(`/api/lead?prueba=${encodeURIComponent(token)}`);
+    if (!res.ok) return;
+    const { prueba: p } = await res.json();
+    const wedding = { couple: p.couple, date: p.date, time: p.time, venue: p.venue, city: p.city, email: p.email, photos: [] };
+    setupPricing.prefill(wedding);
+    await prepareStage(wedding, styleFor(p.style));
+    openStage();
+  } catch { /* sin la prueba guardada, el escaparate de siempre */ }
 }
 
 function leadFromTrial(w, style) {

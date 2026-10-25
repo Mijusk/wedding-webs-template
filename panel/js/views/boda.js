@@ -614,6 +614,8 @@ export default async function boda(ctx) {
     if (!(await save({ quiet: true }))) return;
     try {
       const r = await db.rpc("publish_wedding", { p_wedding_id: id, p_note: String(data.get("note")).trim() || null });
+      // Email «web publicada» a la pareja, si está activo en Automatizaciones (solo la primera vez).
+      api("/api/pedido", { accion: "publicada", wedding_id: id }).catch(() => {});
       toast(`Publicada (versión ${r.version}).`, { action: "Abrir la web", onAction: () => window.open(publicUrl, "_blank", "noopener") });
       boda(ctx);
     } catch (e) { fail(e); }
