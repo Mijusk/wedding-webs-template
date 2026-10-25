@@ -22,6 +22,8 @@ Mañana haremos solo el **proyecto de pruebas (staging)**. El de producción, m�
 2. En Supabase, menú de la izquierda: **SQL Editor** › **New query**. Pega y pulsa **Run**.
 3. Abajo debe salir **Success**. Si sale un error rojo, cópiamelo tal cual.
 
+> **¿Ya lo instalaste antes del 26 de octubre?** No vuelvas a pegar `instalar.sql` (daría error). Pega solo el archivo nuevo de la fase 4: [`supabase/migrations/20261026000100_cobros.sql`](../supabase/migrations/20261026000100_cobros.sql), igual que arriba.
+
 ## 3. (Recomendado) Cargar datos de ejemplo
 
 Así mañana tendrás leads, clientes y bodas inventadas para probar el panel.
@@ -101,6 +103,8 @@ Y el panel de la pareja (fase 3):
 - `…/b/lucia-y-martin?i=demo-familia-ortega-0000000001` → la web como la ve la Familia Ortega con su enlace personal: les saluda y marcan uno a uno quién viene.
 
 > No abras tú el enlace de acceso que vayas a mandar a una pareja: solo sirve una vez.
+
+Y la página de seguimiento (fase 4): `…/seguimiento/DEMA-2345` es el pedido de ejemplo de Lucía y Martín, con una propuesta y un cambio pedido. Para probar los cobros, sigue [STRIPE.md](STRIPE.md).
 
 Si algo no va, mándame una captura y el texto del error.
 

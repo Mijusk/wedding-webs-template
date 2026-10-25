@@ -7,6 +7,8 @@ Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos*
 | Documento | Para qué |
 | --- | --- |
 | [docs/SUPABASE.md](docs/SUPABASE.md) | Ponerlo en marcha: crear el proyecto, pegar la base de datos y las claves en Vercel. Sin terminal. |
+| [docs/STRIPE.md](docs/STRIPE.md) | Cobros: crear la cuenta de Stripe y conectarla. Sin terminal. |
+| [docs/FACTURACION.md](docs/FACTURACION.md) | Cómo factura la web, Verifactu y qué proveedor elegir. |
 | [docs/ARRANCAR.md](docs/ARRANCAR.md) | Trabajar en local y pasar las pruebas. |
 | [docs/DECISIONES.md](docs/DECISIONES.md) | Por qué está hecho así, y lo que falta por decidir. |
 | [docs/COSTES.md](docs/COSTES.md) | Cuánto cuesta al mes. |
@@ -79,10 +81,11 @@ El tono de cada hora se calcula a partir de `schedule[].time` (`js/tone.js`). Si
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
 | `studio/legal.html` | Aviso legal, privacidad y condiciones. Los datos del titular y los plazos salen de `studio.json > legal` |
 | `vercel.json`, `_headers` | Cabeceras para Vercel y Netlify: ninguna otra web puede incrustar estas páginas. `vercel.json` además manda `/b/<slug>` a `api/boda.js` |
-| `api/` | Funciones de Vercel: `boda.js` (webs de boda desde la base de datos), `rsvp.js`, `lead.js`, `productos.js`, `panel-config.js`, `pareja.js` (acceso y recordatorios) y `cron.js` (resumen diario) |
-| `panel/` | Panel interno de Luis: leads, tareas, clientes, pedidos, bodas y ajustes |
+| `api/` | Funciones de Vercel: `boda.js` (webs de boda desde la base de datos), `rsvp.js`, `lead.js`, `productos.js`, `panel-config.js`, `pareja.js` (acceso y recordatorios), `cron.js` (resumen diario), `pedido.js` (pagar y seguimiento), `stripe.js` (avisos de pago) y `factura.js` (PDF) |
+| `panel/` | Panel interno de Luis: leads, tareas, clientes, pedidos, bodas, propuestas, facturas y ajustes |
+| `seguimiento/` | Página de seguimiento de cada pedido, con su código y sin contraseña: pagar, propuestas, cambios y factura |
 | `pareja/` | Panel de cada pareja (entra sin contraseña): invitados, respuestas, datos prácticos y QR para imprimir |
-| `lib/` | Código compartido: validador del config, fotos, IBAN, QR, lector de Excel y el RSVP ampliado que cargan las plantillas |
+| `lib/` | Código compartido: validador del config, fotos, IBAN, NIF, QR, lector de Excel y el RSVP ampliado que cargan las plantillas |
 | `schema/` | JSON Schema del config de boda |
 | `supabase/` | Migraciones de la base de datos, datos de ejemplo e `instalar.sql` (todo en uno para pegar en Supabase) |
 | `scripts/`, `tests/`, `docs/` | Utilidades, pruebas y documentación (no se publican en la web) |

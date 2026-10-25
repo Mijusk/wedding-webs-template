@@ -99,6 +99,70 @@ Diario o los lunes (cada pareja elige; por defecto, semanal). Solo se manda si h
 ### Menos funciones de Vercel
 `/api/pareja` agrupa acceso, enlace y recordatorio. En total hay 7 funciones; el plan Hobby permite 12.
 
+## 2026-10-26 · Fase 4: cobros, facturas y página de seguimiento
+
+### Se paga al momento solo en las tarifas de precio cerrado
+Tal cual y Con cambios se pagan desde el escaparate. A medida no, porque su precio es «desde»: Luis pone el precio en el pedido y le manda a la pareja el enlace de seguimiento, que tiene el botón de pagar. Se puede cambiar por tarifa en Panel › Ajustes › Tarifas («pago en la web»). Si Stripe no está configurado, el escaparate reserva sin pagar, como antes.
+
+### Pago del 100 % por adelantado (pendiente de confirmar por Luis)
+Es lo que hay programado. El pedido admite varios pagos (lo que falta por pagar sale siempre en el enlace), así que una señal se puede añadir sin rehacer nada.
+
+### Página de seguimiento con código, sin contraseña (idea de Luis)
+`/seguimiento/K7M3-Q9TX`, o escribir el código en `/seguimiento/`. La pareja ve:
+- en qué paso está su web;
+- el plan, el estilo y las secciones;
+- cada propuesta, tal como se mandó;
+- la factura.
+
+Desde ahí también puede pagar, pedir cambios y aprobar.
+- **El código:** 8 letras y números, sin 0, O, 1, I ni L para que se pueda dictar. Hay 850.000 millones de combinaciones y un límite de intentos por conexión.
+- **Protección de la página:** no la indexan los buscadores y no pasa la dirección a otras webs al salir.
+- **La lista de invitados no se abre con el código:** tiene alergias (datos de salud) y nombres de otras personas, y un código se reenvía fácilmente. Desde el seguimiento, un botón manda el enlace de acceso al email de la pareja, sin contraseña.
+
+### Propuestas = foto fija del borrador
+«Mandar propuesta» guarda una copia del borrador tal como está y avisa a la pareja por email. Así la pareja ve exactamente lo que se le mandó, aunque Luis siga trabajando en la web. Las propuestas se abren con el código del pedido, nunca con la clave de vista previa del borrador.
+
+### Rondas de cambios: las de las condiciones de contratación
+Tal cual 0, Con cambios «las acordadas» (sin contador) y A medida 3. Corregir datos y erratas siempre está incluido y no cuenta. Una ronda es una propuesta sobre la que piden cambios de diseño: varios mensajes sobre la misma propuesta cuentan como una. Antes de la primera propuesta pueden contar lo que quieran sin gastar ronda. Se cambia por tarifa en Ajustes.
+
+### Entrega en días laborables
+Lo dicen las condiciones («3 días laborables»). Se saltan sábados, domingos y los festivos nacionales de fecha fija. No los autonómicos ni locales, ni Viernes Santo: si hace falta, Luis cambia la fecha en el pedido.
+
+### La web no se crea sola al pagar
+Hace falta su dirección (`/b/…`) y, sobre todo, sus fotos, que en la prueba del escaparate no salen del navegador de la pareja. Al pagar le sale a Luis la tarea «Preparar la web». «Crear su web» desde la ficha del cliente la crea con lo que probaron y la deja enlazada al pedido. Al enlazarla, el email del cliente recibe acceso al panel de la pareja.
+
+### Publicar es entregar
+Al publicar la web, sus pedidos pagados pasan a «Entregado» y se cierran solas las tareas de preparar y publicar.
+
+### Tareas automáticas que se cierran solas
+Preparar la web, cambios pedidos, publicar tras la aprobación, hacer una factura que falló y revisar un pago de más. Hay una tarea abierta como mucho por motivo y pedido, y se cierra sola cuando se hace lo que pide.
+
+### Facturas
+- **Simplificada para particulares:** si no piden factura a nombre de alguien y no pasa de 400 € (serie WS). Si dan NIF y dirección o pasa de 400 €, completa (serie WW).
+- **Rectificativas por diferencias:** serie R, también por devoluciones parciales. La rectificativa de una simplificada (R5) no necesita el NIF del cliente.
+- **Fecha de operación:** la del pago.
+- **Sin Stripe Invoicing ni Stripe Tax:** las facturas salen de nuestra base de datos, que es la que cumple las reglas de numeración y Verifactu.
+- **PDF propio, sin librerías:** se genera siempre desde los datos guardados, que no cambian, así que es idéntico cada vez.
+- **Proveedor de Hacienda:** de momento «manual» (no se envía nada; legal hasta que Verifactu sea obligatorio). Ver [FACTURACION.md](FACTURACION.md).
+
+### Un solo camino para todos los pagos
+Stripe y lo que apunta Luis a mano (Bizum, transferencia, efectivo) pasan por la misma función de la base de datos. Las dos cosas hacen igual el pedido, la fecha de entrega, la tarea, la factura y el email a la pareja. Las devoluciones de Stripe se hacen en Stripe y llegan solas. Las demás se apuntan en el panel.
+
+### Stripe sin librerías
+- **Página de pago:** se usa la de Stripe (Checkout). Sin elegir métodos de pago en el código: salen los que Luis active en su panel de Stripe (tarjeta, Bizum, Apple Pay…).
+- **Avisos firmados:** se comprueban con su firma, se guardan una vez cada uno (si Stripe repite un aviso no se cobra dos veces) y, si algo falla, Stripe los reintenta.
+- **Función de los avisos:** `api/stripe.js` usa la forma estándar de la web (Request/Response) para recibir el cuerpo exacto que firma Stripe.
+
+### Funciones de Vercel: 10 de 12
+Se añaden `pedido.js` (pagar, seguimiento, propuestas y pagos a mano), `stripe.js` (avisos) y `factura.js` (PDF). El plan Hobby permite 12; Pro, más.
+
+### Pruebas sin Stripe ni internet
+`tests/stripe-falso.mjs` imita la página de pago y los avisos firmados. Con él se prueba todo de punta a punta en local (`tests/e2e/cobros.mjs`).
+
+### Textos legales actualizados (pendiente de que Luis los revise)
+- **Condiciones:** cómo se contrata pagando al momento, formas de pago, factura, página de seguimiento y la casilla «Queremos que empecéis ya». Esa casilla es la que, según el art. 103 de la ley de consumidores, hace perder el desistimiento al entregar la web.
+- **Privacidad:** quién trata los datos (Supabase en la UE, Vercel, Resend y Stripe; Google durante la transición), cuánto se guardan las facturas y los datos de invitados alojados por encargo de la pareja.
+
 ## Problemas encontrados que ya estaban en `main`
 
 - **La plantilla Clásica no se pinta** (estilos Olivar, Atardecer y Noche): `js/sections/hero.js` importa `longDate`, que no existe en `js/format.js`; además usa `t` sin definir y `js/main.js` no registra `story`, `gifts` ni `closing`. Parece un cambio a medias. No se ha tocado: hay que decidir cómo debía quedar.
@@ -107,7 +171,11 @@ Diario o los lunes (cada pareja elige; por defecto, semanal). Solo se manda si h
 
 1. ¿El RSVP ampliado (grupos, acompañantes, alergias, autobús) entra en el plan de 139 € o solo en el de 249 €? Ya no bloquea: es una casilla en Panel › Ajustes › Tarifas.
 2. ¿Autónomo o sociedad? Cambia la fecha de Verifactu y los datos de las facturas. Se rellena en Panel › Ajustes.
-3. Proveedor de facturación (te traeré 3 opciones en la fase 4).
+3. Proveedor de facturación para Verifactu: tres opciones y mi recomendación en [FACTURACION.md](FACTURACION.md). No corre prisa.
 4. Dominio definitivo, y si las bodas van en ruta (`/b/…`) o en subdominio.
 5. Datos fiscales del vendedor (Panel › Ajustes) para la página legal y las facturas.
 6. Qué hacer con la Clásica.
+7. ¿Cobro del 100 % por adelantado en todas las tarifas, o señal en A medida?
+8. ¿Valen las rondas de cambios de las condiciones (0 / las acordadas / 3)? Se cambian en Ajustes › Tarifas.
+9. Revisar los textos nuevos de condiciones y privacidad (`studio/legal.html`).
+10. Crear la cuenta de Stripe en modo de prueba: [STRIPE.md](STRIPE.md).
