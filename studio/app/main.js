@@ -6,8 +6,10 @@ import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } 
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll } from "./entrance.js";
+import { captureAttribution } from "./attribution.js";
 
 async function start() {
+  captureAttribution();
   const catalog = await loadCatalog();
   const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
@@ -78,7 +80,22 @@ async function start() {
   const pick = (id) => available.find((s) => s.id === id);
   if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
   else if (pick(params.get("ver"))) { prepareStage(null, pick(params.get("ver"))); openStage(); }
-  if (params.has("probar") || params.has("ver")) history.replaceState(null, "", location.pathname + location.hash);
+  else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
+  if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
+}
+
+// Desde el email de bienvenida (?prueba=<clave>): la web que probaron, con sus datos y fotos de
+// ejemplo (las suyas nunca salieron de su móvil).
+async function openSavedTrial(token, styleFor) {
+  try {
+    const res = await fetch(`/api/lead?prueba=${encodeURIComponent(token)}`);
+    if (!res.ok) return;
+    const { prueba: p } = await res.json();
+    const wedding = { couple: p.couple, date: p.date, time: p.time, venue: p.venue, city: p.city, email: p.email, photos: [] };
+    setupPricing.prefill(wedding);
+    await prepareStage(wedding, styleFor(p.style));
+    openStage();
+  } catch { /* sin la prueba guardada, el escaparate de siempre */ }
 }
 
 function leadFromTrial(w, style) {
@@ -86,10 +103,16 @@ function leadFromTrial(w, style) {
     type: "prueba",
     email: w.email,
     name: w.couple.join(" y "),
+    nameA: w.couple[0],
+    nameB: w.couple[1],
     weddingDate: `${w.date} ${w.time}`,
     venue: [w.venue, w.city].filter(Boolean).join(", "),
+    city: w.city,
     style: style.id,
     photos: w.photos.length,
+    // El texto exacto que aceptaron (prueba del consentimiento, RGPD).
+    consent: true,
+    consentText: document.querySelector("label[for=b-consent] span")?.textContent.replace(/\s+/g, " ").trim(),
   };
 }
 
@@ -101,8 +124,12 @@ function setupNudge() {
   const onScroll = () => {
     const trigger = $("#estilos").offsetTop - innerHeight * 0.4;
     const busy = !$("#builder").hidden || !$("#stage").hidden || !$("#loading").hidden;
+    // Si ya están en las tarifas (o reservando), el aviso estorbaría: tapa el botón de pagar en el móvil.
+    const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.8;
+    if (atPricing) return;
     if (scrollY > trigger && !busy) { nudge.hidden = false; removeEventListener("scroll", onScroll); }
   };
+  $("#contact-form").addEventListener("focusin", () => { if (!nudge.hidden) done(); });
   addEventListener("scroll", onScroll, { passive: true });
   $("#nudge-yes").addEventListener("click", () => { done(); openBuilder(); });
   $("#nudge-no").addEventListener("click", done);

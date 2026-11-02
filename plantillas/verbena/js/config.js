@@ -1,5 +1,9 @@
-// Carga config.json: la única fuente de verdad de cada boda.
+// Carga el config de la boda: la única fuente de verdad de cada boda.
+// En las webs servidas desde la base de datos (/b/<slug>) el servidor lo deja dentro de la página
+// (<script type="application/json" id="wedding-config">) y no hace falta pedir config.json.
 export async function loadConfig(url = "config.json") {
+  const inline = document.getElementById("wedding-config");
+  if (inline) return JSON.parse(inline.textContent);
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`No se pudo cargar ${url} (${res.status})`);
   return res.json();

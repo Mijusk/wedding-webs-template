@@ -158,8 +158,29 @@
           <label for="c-message">Algo más que debamos saber <span class="opt">opcional</span></label>
           <textarea id="c-message" name="message" rows="3"></textarea>
         </div>
+        <div class="checkout" id="c-checkout" hidden>
+          <label class="consent" for="c-invoice">
+            <input type="checkbox" id="c-invoice" name="invoice">
+            <span>Necesitamos la factura a nombre de alguien, con NIF</span>
+          </label>
+          <div class="billing" id="c-billing" hidden>
+            <div class="field-row">
+              <div class="field"><label for="c-bname">Nombre o razón social</label><input type="text" id="c-bname" name="bname" autocomplete="name"></div>
+              <div class="field"><label for="c-nif">NIF / NIE</label><input type="text" id="c-nif" name="nif" autocapitalize="characters" spellcheck="false"></div>
+            </div>
+            <div class="field"><label for="c-addr">Dirección</label><input type="text" id="c-addr" name="addr" autocomplete="street-address"></div>
+            <div class="field-row">
+              <div class="field"><label for="c-cp">Código postal</label><input type="text" id="c-cp" name="cp" autocomplete="postal-code" inputmode="numeric"></div>
+              <div class="field"><label for="c-city">Ciudad</label><input type="text" id="c-city" name="bcity" autocomplete="address-level2"></div>
+            </div>
+          </div>
+          <label class="consent" for="c-start">
+            <input type="checkbox" id="c-start" name="startNow" value="si">
+            <span id="c-start-text">Queremos que empecéis ya. Sabemos que, cuando nos entreguéis la web, ya no podremos desistir del contrato.</span>
+          </label>
+        </div>
         <p class="error" id="c-error" role="alert"></p>
-        <p class="fineprint">Al reservar no se cobra nada: os escribimos para cerrar detalles y pago. Ver <a href="legal.html#condiciones" target="_blank">condiciones</a>.</p>
+        <p class="fineprint" id="c-fine">Al reservar no se cobra nada: os escribimos para cerrar detalles y pago. Ver <a href="legal.html#condiciones" target="_blank">condiciones</a>.</p>
         <button class="btn" type="submit" id="c-submit">Enviar reserva</button>
       </form>
       <div class="contact__thanks" id="contact-thanks" hidden></div>

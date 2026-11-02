@@ -1,0 +1,90 @@
+/* Panel de la pareja: mismas bases que el panel de Luis (panel.css), en una sola columna pensada
+   para el móvil. Lo memorable es el recuento de invitados, en números grandes con la serif. */
+
+.couple { min-height: 100vh; display: flex; flex-direction: column; }
+.couple__head { padding: 28px var(--gutter) 0; background: var(--paper); }
+.couple__inner { width: 100%; max-width: 940px; margin: 0 auto; }
+.couple__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; font-size: 13px; color: var(--muted); }
+.couple__top a, .couple__top button { color: var(--muted); background: none; border: 0; padding: 0; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.couple__brand { display: flex; align-items: center; gap: 8px; text-decoration: none !important; color: var(--ink) !important; font: 400 16px/1 var(--display); }
+.couple__brand img { width: 24px; height: 24px; border-radius: 6px; }
+.couple__names { font: 400 clamp(38px, 8vw, 64px)/0.98 var(--display); letter-spacing: -0.01em; text-wrap: balance; }
+.couple__names .amp { color: var(--accent); }
+.couple__when { margin-top: 10px; color: var(--muted); font-size: 16px; }
+.couple__when b { color: var(--ink); font-weight: 600; }
+
+.couple__nav { display: flex; gap: 4px; margin-top: 22px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.couple__nav a { padding: 10px 14px 12px; text-decoration: none; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.couple__nav a:hover { color: var(--ink); }
+.couple__nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+.couple__body { flex: 1; padding: 24px var(--gutter) 72px; }
+
+@media (max-width: 860px) {
+  .couple__nav { display: none; }
+  .couple__body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .couple .tabs { grid-template-columns: repeat(var(--tabs, 4), 1fr); }
+}
+
+/* Recuento */
+.headcount { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 24px; align-items: end; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.headcount__big { font: 400 clamp(64px, 14vw, 104px)/0.85 var(--display); color: var(--ink); font-variant-numeric: lining-nums; }
+.headcount__label { font-size: 15px; color: var(--muted); padding-bottom: 8px; }
+.headcount__label b { display: block; color: var(--ink); font-size: 18px; font-weight: 600; }
+.headcount__bar { grid-column: 1 / -1; display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: var(--line); margin-top: 14px; }
+.headcount__bar span { display: block; height: 100%; }
+.headcount__legend { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--muted); }
+.headcount__legend b { color: var(--ink); font-weight: 600; }
+.figures { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; margin-top: 12px; }
+/* Líneas a la derecha y abajo de cada cifra; las del borde las recorta el contenedor. */
+.figures div { padding: 12px 14px; box-shadow: 1px 1px 0 var(--line); }
+.figures b { display: block; font: 400 28px/1.1 var(--display); }
+.figures span { font-size: 13px; color: var(--muted); }
+
+.web-card { display: grid; gap: 12px; }
+.web-card .link-box input { font-size: 14px; }
+
+/* Invitados */
+.groups { display: grid; gap: 10px; }
+.group { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: start; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.group__name { font-weight: 600; font-size: 16px; overflow-wrap: anywhere; }
+.group__people { grid-column: 1; font-size: 14px; color: var(--muted); }
+.group__people .is-yes { color: var(--ok); }
+.group__people .is-no { text-decoration: line-through; color: var(--faint); }
+.group__side { grid-row: span 2; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.group__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.group__extra { grid-column: 1 / -1; font-size: 13.5px; color: var(--muted); }
+.people-edit { display: grid; gap: 8px; }
+.people-edit__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+@media (max-width: 600px) { .people-edit__row { grid-template-columns: minmax(0, 1fr) auto auto; } .people-edit__row input[name=last] { display: none; } }
+
+/* Respuestas */
+.answer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 13px 0; border-top: 1px solid var(--line); }
+.answer:first-child { border-top: 0; }
+.answer__who { font-weight: 600; }
+.answer__detail { grid-column: 1 / -1; font-size: 14px; color: var(--muted); }
+.answer__detail q { quotes: "«" "»"; }
+.live { font-size: 13px; color: var(--muted); }
+.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; }
+@media (prefers-reduced-motion: no-preference) { .live::before { animation: pulse 2s ease-in-out infinite; } @keyframes pulse { 50% { opacity: .3; } } }
+
+/* Hoja de QR para imprimir */
+.print-sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.qr-card { display: grid; justify-items: center; gap: 6px; padding: 18px 14px; text-align: center; border: 1px dashed var(--line-strong); border-radius: 8px; background: #fff; break-inside: avoid; }
+.qr-card__couple { font: 400 15px/1.2 var(--display); color: var(--muted); }
+.qr-card__group { font: 400 22px/1.15 var(--display); }
+.qr-card svg { width: 132px; height: 132px; }
+.qr-card__hint { font-size: 12px; color: var(--muted); }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body { background: #fff; }
+  .couple__head, .tabs, .no-print, .toasts { display: none !important; }
+  .couple__body { padding: 0; }
+  .print-sheet { gap: 6mm; }
+  .qr-card { height: 64mm; padding: 4mm; border-color: #bbb; }
+  .qr-card svg { width: 34mm; height: 34mm; }
+}
+
+@media (max-width: 600px) {
+  .couple .repeat__row { grid-template-columns: 108px minmax(0, 1fr) auto; }
+  .couple .repeat__row > .icon-btn { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+}

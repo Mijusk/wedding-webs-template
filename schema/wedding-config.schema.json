@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "wedding-config.schema.json",
+  "title": "Config de una web de boda",
+  "description": "El config.json que pintan las 27 plantillas (24 maquetaciones + la Clásica con 3 estilos). Es la fuente única de verdad de cada boda: en la base de datos vive en weddings.config. Lo comprueban scripts/validar-configs.mjs, el panel antes de guardar y la API.",
+  "type": "object",
+  "required": ["locale", "event", "venue", "rsvp", "copy", "sections"],
+  "additionalProperties": false,
+  "properties": {
+    "locale": { "type": "string", "pattern": "^[a-z]{2}-[A-Z]{2}$", "title": "Idioma y formato de fechas", "default": "es-ES" },
+    "locale_en": { "type": "string", "pattern": "^[a-z]{2}-[A-Z]{2}$", "title": "Formato de fechas en inglés (Dos ciudades)" },
+    "theme": { "type": "string", "pattern": "^[a-z0-9-]+$", "title": "Estilo (archivo de css/themes/ de la plantilla)" },
+    "timeZone": { "type": "string", "pattern": "^[A-Za-z_]+/[A-Za-z_/+-]+$", "title": "Zona horaria del lugar", "default": "Europe/Madrid" },
+    "event": {
+      "type": "object",
+      "title": "La boda",
+      "required": ["couple", "date"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["boda", "aniversario", "otra"], "default": "boda" },
+        "couple": {
+          "type": "array", "title": "Nombres de la pareja", "minItems": 2, "maxItems": 2,
+          "items": { "type": "string", "minLength": 1, "maxLength": 60 }
+        },
+        "date": {
+          "type": "string", "title": "Fecha y hora de la ceremonia, con zona horaria",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?([+-]\\d{2}:\\d{2}|Z)$",
+          "description": "Ejemplo: 2027-06-12T18:00:00+02:00. Sin la zona, la cuenta atrás y el calendario usarían la hora del invitado."
+        },
+        "end": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?([+-]\\d{2}:\\d{2}|Z)$", "title": "Fin aproximado" },
+        "tagline": { "type": "string", "maxLength": 200, "title": "Frase de portada" },
+        "photo": { "type": "string", "maxLength": 1000, "pattern": "^(?!data:)", "title": "Foto de portada (URL)" },
+        "photoFocus": { "type": "string", "pattern": "^\\d{1,3}(\\.\\d+)?% \\d{1,3}(\\.\\d+)?%$", "title": "Encuadre de la portada (x% y%)" },
+        "photoAlt": { "type": "string", "maxLength": 200, "title": "Descripción de la foto" }
+      }
+    },
+    "venue": {
+      "type": "object",
+      "title": "Lugar",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120, "title": "Nombre del lugar" },
+        "address": { "type": "string", "maxLength": 300, "title": "Dirección" },
+        "city": { "type": "string", "maxLength": 120, "title": "Ciudad" },
+        "mapsUrl": { "type": "string", "maxLength": 1000, "pattern": "^https://", "title": "Enlace a Google Maps" },
+        "lat": { "type": "number", "minimum": -90, "maximum": 90, "title": "Latitud (Costa, Noche estrellada)" },
+        "lon": { "type": "number", "minimum": -180, "maximum": 180, "title": "Longitud" },
+        "timeZone": { "type": "string", "pattern": "^[A-Za-z_]+/[A-Za-z_/+-]+$" }
+      }
+    },
+    "schedule": {
+      "type": "array",
+      "title": "Programa del día",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "required": ["time", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "time": { "type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$", "title": "Hora (HH:MM)" },
+          "label": { "type": "string", "minLength": 1, "maxLength": 80, "title": "Qué" },
+          "place": { "type": "string", "maxLength": 120, "title": "Dónde" },
+          "tone": { "type": "string", "enum": ["day", "dusk", "blue", "night"], "title": "Tono forzado (Clásica, Editorial)" }
+        }
+      }
+    },
+    "story": {
+      "type": "object",
+      "title": "Vuestra historia",
+      "additionalProperties": false,
+      "properties": {
+        "chapters": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["text"],
+            "additionalProperties": false,
+            "properties": {
+              "meta": { "type": "string", "maxLength": 120 },
+              "text": { "type": "string", "minLength": 1, "maxLength": 2000 },
+              "photo": { "type": "string", "maxLength": 1000, "pattern": "^(?!data:)" },
+              "photoAlt": { "type": "string", "maxLength": 200 },
+              "photoFocus": { "type": "string", "pattern": "^\\d{1,3}(\\.\\d+)?% \\d{1,3}(\\.\\d+)?%$" }
+            }
+          }
+        }
+      }
+    },
+    "gallery": {
+      "type": "array",
+      "title": "Fotos (URLs)",
+      "maxItems": 40,
+      "items": { "type": "string", "maxLength": 1000, "pattern": "^(?!data:)" }
+    },
+    "gifts": {
+      "type": "object",
+      "title": "Regalo",
+      "additionalProperties": false,
+      "properties": {
+        "holder": { "type": "string", "maxLength": 120, "title": "Titular de la cuenta" },
+        "iban": { "type": "string", "pattern": "^[A-Z]{2}\\d{2}[A-Z0-9 ]{10,40}$", "title": "IBAN" }
+      }
+    },
+    "rsvp": {
+      "type": "object",
+      "title": "Confirmación de asistencia",
+      "additionalProperties": false,
+      "properties": {
+        "deadline": { "type": "string", "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$", "title": "Fecha límite (incluida)" },
+        "buttonLabel": { "type": "string", "maxLength": 60, "title": "Texto del botón" },
+        "endpoint": { "type": "string", "maxLength": 500, "title": "Dónde se guardan las respuestas (lo pone el servidor)" },
+        "closedText": { "type": "string", "maxLength": 300, "title": "Texto cuando ya está cerrado (Clásica)" },
+        "bus": { "type": "boolean", "title": "Preguntar si necesitan autobús (RSVP ampliado)" },
+        "dietary": { "type": "boolean", "title": "Preguntar por alergias e intolerancias (RSVP ampliado; sí por defecto)" }
+      }
+    },
+    "cities": {
+      "type": "array",
+      "title": "Las dos ciudades (Dos ciudades)",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["name", "tz"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "name_en": { "type": "string", "maxLength": 60 },
+          "country": { "type": "string", "maxLength": 60 },
+          "country_en": { "type": "string", "maxLength": 60 },
+          "tz": { "type": "string", "pattern": "^[A-Za-z_]+/[A-Za-z_/+-]+$" },
+          "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+          "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+        }
+      }
+    },
+    "share": {
+      "type": "object",
+      "title": "Tarjeta para WhatsApp e icono",
+      "additionalProperties": false,
+      "properties": {
+        "image": { "type": "string", "maxLength": 1000, "pattern": "^https?://", "title": "Imagen 1200×630 para compartir" },
+        "icon": { "type": "string", "maxLength": 1000, "pattern": "^https?://", "title": "Icono con las iniciales" }
+      }
+    },
+    "copy": { "type": "object", "title": "Textos de la plantilla (por sección)" },
+    "copy_en": { "type": "object", "title": "Textos en inglés (Dos ciudades)" },
+    "sections": {
+      "type": "array",
+      "title": "Secciones visibles, en orden",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["hero", "card", "details", "travel", "story", "liturgy", "gallery", "schedule", "dresscode", "gifts", "closing", "rsvp"]
+      }
+    }
+  }
+}

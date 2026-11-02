@@ -60,7 +60,7 @@ export function mountRsvp(root, config) {
       if (!d || d.open) return;
       d.showModal();
       const f = document.getElementById("rsvp-form");
-      if (f && !f.hidden) document.getElementById("rsvp-name").focus();
+      if (f && !f.hidden) f.querySelector("input:not([type=hidden]):not([name=website])")?.focus();
     });
   }
   $("rsvp-close").addEventListener("click", () => dialog.close());
@@ -69,6 +69,15 @@ export function mountRsvp(root, config) {
 
   watchPill(root.querySelector(".rsvp-pill"));
 
+  // RSVP ampliado (acompañantes, alergias, autobús, enlace personal): módulo opcional que solo
+  // se carga si el servidor lo activa para esta boda. Si no, el formulario sencillo de siempre.
+  let ext = null;
+  if (rsvp.extended && !closed) {
+    import("/lib/rsvp-ampliado.js")
+      .then((m) => { ext = m.enhance(form, config, { esc, fill, dateParts }); })
+      .catch(() => { /* sin el módulo: sigue el formulario sencillo */ });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
@@ -76,17 +85,24 @@ export function mountRsvp(root, config) {
     const song = (data.song || "").trim();
     const err = $("rsvp-error");
     if (data.website) { form.hidden = true; return; } // campo trampa: un bot
-    if (name.length < 2) { err.textContent = t.errorName; return $("rsvp-name").focus(); }
-    if (!data.attending) { err.textContent = t.errorAttending; return; }
+    let entry = { name, attending: data.attending, song };
+    if (ext) {
+      const r = ext.collect();
+      if (r.error) { err.textContent = r.error; r.focus?.focus(); return; }
+      entry = r.entry;
+    } else {
+      if (name.length < 2) { err.textContent = t.errorName; return $("rsvp-name").focus(); }
+      if (!data.attending) { err.textContent = t.errorAttending; return; }
+    }
     err.textContent = "";
 
     const btn = $("rsvp-submit");
     btn.disabled = true; btn.textContent = t.sending;
     try {
-      await saveRsvp({ name, attending: data.attending, song }, rsvp);
+      await saveRsvp(entry, rsvp);
       const first = name.split(" ")[0];
       const thanks = $("rsvp-thanks");
-      thanks.innerHTML = data.attending === "si"
+      thanks.innerHTML = ext ? ext.thanks(entry) : data.attending === "si"
         ? `<h3>${fill(t.thanksYesTitle, { name: first })}</h3><p>${fill(t.thanksYesText)} ${song && t.thanksSong ? fill(t.thanksSong, { song }) : ""}</p>`
         : `<h3>${fill(t.thanksNoTitle)}</h3><p>${fill(t.thanksNoText, { name: first })}</p>`;
       form.hidden = true;

@@ -1,9 +1,52 @@
 {
+  "regions": [
+    "fra1"
+  ],
+  "functions": {
+    "api/boda.js": {
+      "includeFiles": "{index.html,404.html,plantillas/*/index.html}"
+    },
+    "api/cron.js": {
+      "maxDuration": 60,
+      "includeFiles": "studio/studio.json"
+    },
+    "api/lead.js": {
+      "includeFiles": "studio/studio.json"
+    }
+  },
   "redirects": [
     {
       "source": "/",
       "destination": "/studio/",
       "permanent": false
+    },
+    {
+      "source": "/(supabase|scripts|tests|docs)/:path*",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/(package\\.json|README\\.md|\\.env.*|\\.gitignore)",
+      "destination": "/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/b/:slug",
+      "destination": "/api/boda?slug=:slug"
+    },
+    {
+      "source": "/b/:slug/",
+      "destination": "/api/boda?slug=:slug"
+    },
+    {
+      "source": "/seguimiento/:code([A-Za-z0-9]{4}-?[A-Za-z0-9]{4})",
+      "destination": "/seguimiento/index.html"
+    },
+    {
+      "source": "/pagar/:code([A-Za-z0-9]{4}-?[A-Za-z0-9]{4})",
+      "destination": "/api/pedido?c=:code&pagar=1"
     }
   ],
   "headers": [
@@ -19,6 +62,42 @@
           "value": "strict-origin-when-cross-origin"
         }
       ]
+    },
+    {
+      "source": "/panel/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/seguimiento/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 7 * * *"
     }
   ]
 }
