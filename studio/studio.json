@@ -566,5 +566,11 @@
     "deliveryDays": 3,
     "onlineMonths": 12,
     "guestDataMonths": 6
+  },
+  "analytics": {
+    "_nota": "Analítica anónima sin cookies (Umami). Pon aquí el id de la web en Umami para activarla; vacío = apagada. No se carga en localhost.",
+    "src": "https://cloud.umami.is/script.js",
+    "websiteId": "b2cf399c-8ab3-456c-a6e9-1513c2f85660",
+    "domains": ""
   }
 }

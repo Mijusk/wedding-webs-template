@@ -43,6 +43,7 @@
     <a href="legal.html#aviso-legal">Aviso legal</a>
     <a href="legal.html#privacidad">Privacidad</a>
     <a href="legal.html#condiciones">Condiciones de contratación</a>
+    <a href="legal.html#cookies" data-cookies>Cookies</a>
   </nav>
 </footer>
 
@@ -50,9 +51,13 @@
   import { loadCatalog, renderStyleCards } from "./app/catalog.js";
   import { revealOnScroll } from "./app/entrance.js";
   import { captureAttribution } from "./app/attribution.js";
+  import { setupConsent } from "./app/consent.js";
+  import { initAnalytics } from "./app/analytics.js";
+  setupConsent();
   captureAttribution();
   try {
     const catalog = await loadCatalog();
+    initAnalytics(catalog.studio);
     document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = catalog.studio.brand.name; });
     document.title = `Plantillas · ${catalog.studio.brand.name}`;
     renderStyleCards(document.getElementById("catalog-grid"), catalog, { links: true });

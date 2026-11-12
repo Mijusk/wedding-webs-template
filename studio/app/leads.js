@@ -1,5 +1,7 @@
 import { postToSheet } from "../../js/storage.js";
 import { attribution } from "./attribution.js";
+import { consentForLead } from "./consent.js";
+import { track } from "./analytics.js";
 
 // Guardado de contactos (pruebas del generador y reservas). Si studio.json tiene
 // contact.endpoint (/api/lead: nuestra base de datos), se envía ahí y se espera a que confirme.
@@ -8,7 +10,8 @@ import { attribution } from "./attribution.js";
 const KEY = "studio-leads-demo";
 
 export async function saveLead(lead, contactConfig = {}) {
-  const payload = { ...lead, attribution: attribution(), page: location.pathname, sentAt: new Date().toISOString() };
+  track(lead.type === "reserva" ? "reserva_enviada" : "lead_prueba", lead.style ? { estilo: lead.style } : undefined);
+  const payload = { ...lead, attribution: attribution(), cookieConsent: consentForLead(), page: location.pathname, sentAt: new Date().toISOString() };
 
   if (contactConfig.endpoint) {
     try {

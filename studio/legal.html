@@ -52,6 +52,14 @@
     <p><strong>Cookies.</strong> Esta web no usa cookies de publicidad ni de analítica. Solo guarda en vuestro navegador si ya habéis visto el aviso de prueba, para no repetirlo. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
   </section>
 
+  <section id="cookies">
+    <h2>Cookies</h2>
+    <p><strong>Analítica, sin cookies.</strong> Contamos las visitas con Umami de forma anónima: qué páginas se ven, desde qué web o anuncio se llega y qué botones se pulsan (por ejemplo, abrir el generador). No guarda nada en vuestro navegador, no usa vuestra IP para identificaros y no nos dice quiénes sois, así que no os pedimos permiso para eso.</p>
+    <p><strong>Publicidad (opcional).</strong> Si lo aceptáis en el aviso, guardamos en vuestro navegador (localStorage, «ww-attribution») de qué anuncio o web llegasteis la primera vez, durante 90 días. Si después nos escribís o probáis el generador, ese dato va con vuestro contacto para saber qué publicidad funciona. Si lo rechazáis, solo lo recordamos mientras tengáis la pestaña abierta.</p>
+    <p><strong>Lo que es necesario.</strong> Guardamos vuestra elección sobre este aviso («ww-consent») y si ya habéis visto el aviso de prueba, para no repetirlos. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
+    <p><strong>Cambiar de opinión.</strong> <a href="#cookies" data-cookies>Volver a abrir el aviso de cookies</a>. Si lo rechazáis, borramos lo guardado.</p>
+  </section>
+
   <section id="condiciones">
     <h2>Condiciones de contratación</h2>
     <ul>
@@ -73,9 +81,13 @@
 </footer>
 
 <script type="module">
+  import { setupConsent } from "./app/consent.js";
+  import { initAnalytics } from "./app/analytics.js";
   // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como
   // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
   const studio = await fetch("studio.json", { cache: "no-store" }).then((r) => r.json());
+  setupConsent();
+  initAnalytics(studio);
   const legal = studio.legal || {};
   document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = studio.brand.name; });
   document.querySelectorAll("[data-field]").forEach((el) => {

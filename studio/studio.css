@@ -289,3 +289,14 @@ main section, .contact { scroll-margin-top: 80px; }
   .switch small { display: none; }
   @keyframes sheet-up { from { transform: translateY(100%); } }
 }
+
+/* Aviso de cookies */
+.cookies {
+  position: fixed; z-index: 70; display: grid; gap: 12px;
+  right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(420px, calc(100vw - 32px)); padding: 18px 20px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--line); box-shadow: 0 18px 50px var(--shadow);
+  font-size: 14px; color: var(--muted); animation: rise .35s ease-out;
+}
+.cookies a { color: var(--ink); }
+.cookies__actions { display: flex; gap: 8px; justify-content: flex-end; }

@@ -11,7 +11,7 @@ import { notifyLead } from "./_lib/avisos.js";
 import { runEvent, unsubscribeEmail } from "./_lib/automatizaciones.js";
 
 const FIELDS = ["type", "email", "name", "nameA", "nameB", "weddingDate", "venue", "city", "style", "photos", "tier",
-  "phone", "message", "wedding", "sections", "consent", "consentText", "page", "attribution", "sentAt"];
+  "phone", "message", "wedding", "sections", "consent", "consentText", "page", "attribution", "cookieConsent", "sentAt"];
 
 export default async function handler(req, res) {
   const q = queryOf(req);
@@ -51,6 +51,14 @@ export default async function handler(req, res) {
     if (!r?.ok) return sendJson(res, 400, { ok: false, error: r?.error || "error" });
 
     const tasks = [forwardToSheet(sheet, body)];
+    // Elección del aviso de cookies (publicidad): constancia en consents, como el consentimiento comercial.
+    const cc = payload.cookieConsent;
+    if (cc && typeof cc.granted === "boolean" && cc.text) {
+      tasks.push(rpc("api_record_cookie_consent", {
+        p_lead_id: r.lead_id, p_granted: cc.granted, p_text: String(cc.text).slice(0, 2000),
+        p_page: payload.page || null, p_ip: ipRaw || null, p_user_agent: String(req.headers["user-agent"] || "").slice(0, 300),
+      }).catch((e) => console.error("cookies", e.message)));
+    }
     // Aviso a Luis: lead nuevo o reserva (una pareja que repite la prueba no vuelve a avisar).
     if (r.is_new || r.type === "reserva") {
       tasks.push(notifyLead({ lead: r, payload, panelUrl: `${origin(req)}/panel/#/leads/${r.lead_id}` })

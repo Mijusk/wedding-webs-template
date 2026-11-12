@@ -7,10 +7,14 @@ import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll } from "./entrance.js";
 import { captureAttribution } from "./attribution.js";
+import { setupConsent } from "./consent.js";
+import { initAnalytics, track } from "./analytics.js";
 
 async function start() {
+  setupConsent();
   captureAttribution();
   const catalog = await loadCatalog();
+  initAnalytics(catalog.studio);
   const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
@@ -34,7 +38,8 @@ async function start() {
   $("#styles-grid").addEventListener("click", (e) => {
     const t = e.target.closest("[data-try], [data-demo]");
     if (!t) return;
-    if (t.dataset.try) return openBuilder(t.dataset.try);
+    if (t.dataset.try) { track("probar_abierto", { estilo: t.dataset.try, desde: "estilos" }); return openBuilder(t.dataset.try); }
+    track("ejemplo_visto", { estilo: t.dataset.demo });
     prepareStage(null, styles.find((s) => s.id === t.dataset.demo));
     openStage();
   });
@@ -58,13 +63,14 @@ async function start() {
         session.set(key, "1");
         saveLead(leadFromTrial(wedding, style), studio.contact).catch(() => session.set(key, ""));
       }
+      track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length });
       setupPricing.prefill(wedding);
       const ready = prepareStage(wedding, style);
       await Promise.all([ready, playLoading(wedding, studio.generator)]);
       openStage();
     },
   });
-  document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => openBuilder()));
+  document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder(); }));
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
