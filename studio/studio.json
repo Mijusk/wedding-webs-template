@@ -561,6 +561,19 @@
     "title": "Si la primera versión no os gusta, os devolvemos el dinero",
     "conditions": "Vale para las tres tarifas. Basta con pedírnoslo en los {days} días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo."
   },
+  "about": {
+    "_nota": "Sección «Quiénes somos», antes de las preguntas frecuentes. photo es relativa a studio/ (480×480, recortada desde equipo/luis.jpg).",
+    "eyebrow": "Quiénes somos",
+    "title": "Las hacemos nosotros, una a una",
+    "text": [
+      "Somos WeddingWebs. Diseñamos y montamos cada web nosotros, y la revisamos con vuestros datos antes de entregarla.",
+      "Hablamos con cada pareja para entender cómo queréis vuestra web. Y si nos escribís, os respondemos rápido."
+    ],
+    "name": "Luis Ochoteco",
+    "role": "Diseño y desarrollo de las webs",
+    "photo": "equipo/luis-cuadrada.jpg",
+    "photoAlt": "Luis Ochoteco, de WeddingWebs"
+  },
   "contact": {
     "endpoint": "/api/lead",
     "fallbackEndpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"

@@ -1,4 +1,4 @@
-import { $, session, friendlyError } from "./util.js";
+import { $, esc, session, friendlyError } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
 import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoRows } from "./catalog.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
@@ -89,6 +89,7 @@ async function start() {
     else if (!$("#stage").hidden) closeStage();
   });
 
+  renderAbout(studio.about);
   setupNudge();
   // Si se llegó con un enlace a una sección (#tarifas), ahora que ya está pintada.
   scrollToHash();
@@ -109,6 +110,19 @@ async function start() {
   else if (pick(params.get("ver"))) await showExample(pick(params.get("ver")));
   else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
   if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
+}
+
+// «Quiénes somos» (studio.json > about). Sin datos, la sección no sale.
+function renderAbout(about) {
+  const el = $("#quienes-somos");
+  if (!about?.title || !about.text?.length) return;
+  const set = (key, value) => { const n = el.querySelector(`[data-about="${key}"]`); if (n) n.textContent = value || ""; };
+  ["eyebrow", "title", "name", "role"].forEach((k) => set(k, about[k]));
+  el.querySelector("[data-about=text]").innerHTML = about.text.map((p) => `<p>${esc(p)}</p>`).join("");
+  const img = el.querySelector(".about__photo");
+  if (about.photo) { img.src = about.photo; img.alt = about.photoAlt || about.name || ""; } else img.remove();
+  el.hidden = false;
+  revealOnScroll(".about");
 }
 
 async function showExample(style) {

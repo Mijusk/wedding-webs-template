@@ -348,3 +348,16 @@ body.has-nudge { padding-bottom: 64px; }
   border-radius: var(--radius); background: var(--surface); color: var(--muted); max-width: 640px; }
 .load-error strong { color: var(--ink); font-weight: 600; }
 .load-error .btn { margin-left: 6px; vertical-align: middle; }
+
+/* Quiénes somos */
+.about { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 40px; align-items: center; }
+.about__photo { width: 168px; height: 168px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 18px 40px var(--shadow); }
+.about__text { display: grid; gap: 12px; max-width: 62ch; }
+.about__text h2 { font-size: clamp(30px, 4vw, 42px); }
+.about__body { display: grid; gap: 10px; color: var(--muted); }
+.about__sign { font-size: 15px; color: var(--muted); }
+.about__sign strong { color: var(--ink); font-weight: 600; margin-right: 6px; }
+@media (max-width: 600px) {
+  .about { grid-template-columns: 1fr; gap: 20px; justify-items: start; }
+  .about__photo { width: 128px; height: 128px; }
+}
