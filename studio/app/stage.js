@@ -94,9 +94,9 @@ export function toggleSectionsPanel(open = $("#sections-panel").hidden) {
 
 // Carga el iframe antes de mostrarlo, para que la web ya esté pintada al acabar la barra.
 // wedding = null muestra el ejemplo de la plantilla.
-export function prepareStage(wedding, style) {
+export async function prepareStage(wedding, style) {
   const demo = !wedding;
-  state = { wedding, style, config: withSections(ctx.configFor(style, wedding)) };
+  state = { wedding, style, config: withSections(await ctx.configFor(style, wedding)) };
   renderSectionsList();
   const ready = showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
   const [a, b] = state.config.event.couple;
@@ -141,7 +141,15 @@ async function switchStyle(id) {
   const overlay = $("#switching");
   $("#switching-msg").textContent = `Aplicando estilo ${style.name}…`;
   overlay.hidden = false;
-  state = { ...state, style, config: withSections(ctx.configFor(style, state.wedding)) };
+  try {
+    state = { ...state, style, config: withSections(await ctx.configFor(style, state.wedding)) };
+  } catch (e) {
+    console.error("[WeddingWebs] estilo", id, e);
+    $("#switching-msg").textContent = "No hemos podido cargar este estilo. Probad otra vez en un momento.";
+    await sleep(2200);
+    overlay.hidden = true;
+    return;
+  }
   renderSectionsList();
   markStyle();
   const ready = showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);

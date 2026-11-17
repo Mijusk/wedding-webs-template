@@ -1,33 +1,35 @@
 import { $, session, friendlyError } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
-import { loadCatalog, renderStyleCards, limitToTwoRows } from "./catalog.js";
+import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoRows } from "./catalog.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
 import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } from "./stage.js";
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
-import { startEntrance, revealOnScroll } from "./entrance.js";
+import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
 import { captureAttribution } from "./attribution.js";
 import { setupConsent } from "./consent.js";
 import { initAnalytics, track } from "./analytics.js";
 import { addStructuredData } from "./seo.js";
 
+// La portada (textos y fotos) ya está en el HTML y la cortina la levanta un script de la propia
+// página, sin esperar a nada. Aquí solo hace falta studio.json para el resto; los precios de la
+// base de datos y el config de cada plantilla llegan después, sin bloquear.
+startEntrance();
+
 async function start() {
   setupConsent();
   captureAttribution();
-  const catalog = await loadCatalog();
-  initAnalytics(catalog.studio);
-  const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
+  const studio = await loadStudio();
+  const catalog = makeCatalog(studio);
+  initAnalytics(studio);
+  const { styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
   addStructuredData(studio);
-  $("#brand-name").textContent = studio.brand.name;
-  $("#foot-brand").textContent = studio.brand.name;
-  $("#brand-tagline").textContent = studio.brand.tagline;
-  startEntrance();
-
-  // Móvil de la portada
-  fitScaled($(".phone .scaled"));
-  showInFrame($("#intro-frame"), urlOf(available[0]), withTheme(available[0]));
+  // El HTML ya trae la marca y el titular; solo se tocan si studio.json dice otra cosa.
+  if ($("#brand-name").textContent !== studio.brand.name) $("#brand-name").textContent = studio.brand.name;
+  if ($("#foot-brand").textContent !== studio.brand.name) $("#foot-brand").textContent = studio.brand.name;
+  if ($("#brand-tagline").getAttribute("aria-label") !== studio.brand.tagline) $("#brand-tagline").textContent = studio.brand.tagline;
 
   // Estilos
   const templates = new Set(templateIds);
@@ -37,13 +39,12 @@ async function start() {
     + (soon.length ? ` ${soon.join(", ")} está en camino.` : "");
   renderStyleCards($("#styles-grid"), catalog);
   limitToTwoRows($("#styles-grid"), $("#styles-more"));
-  $("#styles-grid").addEventListener("click", (e) => {
+  $("#styles-grid").addEventListener("click", async (e) => {
     const t = e.target.closest("[data-try], [data-demo]");
     if (!t) return;
     if (t.dataset.try) { track("probar_abierto", { estilo: t.dataset.try, desde: "estilos" }); return openBuilder(t.dataset.try); }
     track("ejemplo_visto", { estilo: t.dataset.demo });
-    prepareStage(null, styles.find((s) => s.id === t.dataset.demo));
-    openStage();
+    await showExample(styles.find((s) => s.id === t.dataset.demo));
   });
 
   revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact, .foot");
@@ -67,9 +68,16 @@ async function start() {
       }
       track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length });
       setupPricing.prefill(wedding);
-      const ready = prepareStage(wedding, style);
-      await Promise.all([ready, playLoading(wedding, studio.generator)]);
-      openStage();
+      const loading = playLoading(wedding, studio.generator);
+      try {
+        await Promise.all([prepareStage(wedding, style), loading]);
+        openStage();
+      } catch (e) {
+        console.error("[WeddingWebs] vista previa:", e);
+        await loading;
+        openBuilder(style.id);
+        $("#b-error").textContent = "No hemos podido preparar la vista previa. Revisad la conexión y volved a pulsar «Crear nuestra web».";
+      }
     },
   });
   document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder(); }));
@@ -82,14 +90,40 @@ async function start() {
   });
 
   setupNudge();
+  // Si se llegó con un enlace a una sección (#tarifas), ahora que ya está pintada.
+  scrollToHash();
+
+  // Móvil de la portada: la web de ejemplo, en cuanto la página ha cargado lo suyo.
+  fitScaled($(".phone .scaled"));
+  afterLoad(() => withTheme(available[0])
+    .then((config) => showInFrame($("#intro-frame"), urlOf(available[0]), config))
+    .catch((e) => console.error("[WeddingWebs] móvil de la portada:", e)));
+
+  // Precios de la base de datos, cuando lleguen.
+  applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); addStructuredData(studio); } });
 
   // Desde plantillas.html: ?probar=<estilo> abre el generador y ?ver=<estilo> el ejemplo.
   const params = new URLSearchParams(location.search);
   const pick = (id) => available.find((s) => s.id === id);
   if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
-  else if (pick(params.get("ver"))) { prepareStage(null, pick(params.get("ver"))); openStage(); }
+  else if (pick(params.get("ver"))) await showExample(pick(params.get("ver")));
   else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
   if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
+}
+
+async function showExample(style) {
+  try {
+    await prepareStage(null, style);
+    openStage();
+  } catch (e) {
+    console.error("[WeddingWebs] ejemplo:", e);
+  }
+}
+
+// Después del evento load (fotos de la portada ya bajadas), o enseguida si ya pasó.
+function afterLoad(fn) {
+  if (document.readyState === "complete") setTimeout(fn, 0);
+  else addEventListener("load", () => setTimeout(fn, 0), { once: true });
 }
 
 // Desde el email de bienvenida (?prueba=<clave>): la web que probaron, con sus datos y fotos de
@@ -145,6 +179,5 @@ function setupNudge() {
 }
 
 start().catch((e) => {
-  startEntrance();
   $("#styles-grid").innerHTML = friendlyError("los estilos", e);
 });

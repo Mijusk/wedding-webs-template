@@ -23,6 +23,7 @@
 <meta property="og:image:alt" content="WeddingWebs studio: vuestra web de boda, lista antes que las invitaciones.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preload" href="fonts/gloock-latin-d8b731.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="studio.css">
 <link rel="stylesheet" href="entrance.css">
@@ -41,11 +42,11 @@
     const seen = sessionStorage.getItem("ww-entrance");
     document.documentElement.classList.add(calm ? "no-motion" : seen ? "is-entering" : "is-loading");
   } catch { document.documentElement.classList.add("is-entering"); }
-  // Por si el JavaScript de la página fallara: nunca dejar la cortina puesta.
+  // Por si fallara el script de la entrada (al final de la página): nunca dejar la cortina puesta.
   setTimeout(() => {
     const el = document.documentElement;
     if (!el.classList.contains("is-ready")) { el.classList.add("is-ready"); document.getElementById("preloader")?.remove(); }
-  }, 6000);
+  }, 1500);
 </script>
 </head>
 <body>
@@ -332,6 +333,47 @@
   </div>
 </div>
 
+<script>
+  // Entrada: cortina con el monograma, el nombre y un contador. Corre en cuanto se lee la página,
+  // sin esperar a ningún archivo, y como mucho dura 1 s (sube a los 0,56 s y tarda 0,44 s).
+  // Una vez por visita y nunca con «reducir movimiento» (lo decide el script del <head>).
+  (() => {
+    const root = document.documentElement;
+    const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+    // Cada palabra del titular en su caja, para que suba desde detrás de su línea.
+    const title = document.querySelector("[data-words]");
+    if (title) {
+      const words = title.textContent.trim().split(/s+/);
+      title.setAttribute("aria-label", words.join(" "));
+      title.innerHTML = words.map((w, i) => `<span class="w" aria-hidden="true"><span style="--wi:${i}">${esc(w)}</span></span>`).join(" ");
+    }
+    const letters = document.querySelector("[data-brand-letters]");
+    if (letters) {
+      letters.setAttribute("aria-label", letters.textContent);
+      letters.innerHTML = [...letters.textContent].map((c, i) => `<span aria-hidden="true" style="--li:${i}">${esc(c)}</span>`).join("");
+    }
+    try { sessionStorage.setItem("ww-entrance", "1"); } catch { /* sin almacenamiento */ }
+    if (!location.hash) scrollTo(0, 0);
+    const ready = () => {
+      root.classList.add("is-ready");
+      setTimeout(() => root.classList.remove("is-loading", "is-entering"), 2600);
+    };
+    if (!root.classList.contains("is-loading")) return requestAnimationFrame(ready);
+    const HOLD = 560, t0 = performance.now(), out = document.getElementById("preloader-count");
+    const tick = (now) => {
+      const p = Math.min(1, (now - t0) / HOLD);
+      out.textContent = String(Math.round(100 * (1 - Math.pow(1 - p, 2)))).padStart(3, "0");
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    setTimeout(() => {
+      const curtain = document.getElementById("preloader");
+      curtain?.classList.add("is-leaving");
+      ready();
+      setTimeout(() => curtain?.remove(), 480);
+    }, HOLD);
+  })();
+</script>
 <script type="module" src="app/main.js"></script>
 <!-- artifact:end -->
 </body>

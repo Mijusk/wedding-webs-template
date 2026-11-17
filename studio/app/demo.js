@@ -1,13 +1,8 @@
-// Fotos de ejemplo (studio/demo/, lista en studio.json > demoPhotos). Son opcionales:
-// solo se usan las que existen.
-export async function findDemoPhotos({ folder, files } = {}) {
+// Fotos de ejemplo (studio/demo/, lista en studio.json > demoPhotos). Están en el propio
+// repositorio, así que no se comprueba una a una por la red: se usan las de la lista.
+export function demoPhotoUrls({ folder, files } = {}) {
   if (!files?.length) return [];
-  const urls = files.map((f) => new URL(folder + f, location.href).href);
-  const found = await Promise.all(urls.map(async (url) => {
-    try { return (await fetch(url, { method: "HEAD", cache: "no-store" })).ok ? url : null; }
-    catch { return null; }
-  }));
-  return found.filter(Boolean);
+  return files.map((f) => new URL(folder + f, location.href).href);
 }
 
 // Pone las fotos de ejemplo en el config de demo de cada plantilla:

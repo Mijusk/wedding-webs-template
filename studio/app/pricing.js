@@ -69,6 +69,17 @@ export function setupPricing({ studio, templateUrl }) {
   });
   markTier();
 
+  // Los precios de la base de datos llegan después de pintar la página: se cambian en su sitio.
+  setupPricing.refresh = () => {
+    for (const t of tiers) {
+      const price = $(`.tier[data-tier="${CSS.escape(t.id)}"] .tier__price`);
+      if (price) price.textContent = priceLabel(t.price, currency);
+      const opt = tierSel.querySelector(`option[value="${CSS.escape(t.id)}"]`);
+      if (opt) opt.textContent = `${t.name} · ${priceLabel(t.price, currency)}`;
+    }
+    syncCheckout();
+  };
+
   const form = $("#contact-form"), err = $("#c-error");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
