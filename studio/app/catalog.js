@@ -66,12 +66,12 @@ export async function loadCatalog() {
 export function renderStyleCards(grid, { studio, styles, urlOf, withTheme }, { links = false } = {}) {
   const actions = (s) => links ? `
         <a class="btn btn--small" href="./?probar=${encodeURIComponent(s.id)}">Probar con vuestra boda</a>
-        <a class="btn btn--small btn--ghost" href="./?ver=${encodeURIComponent(s.id)}">Ver ejemplo</a>` : `
+        <a class="btn btn--small btn--ghost" href="./?ver=${encodeURIComponent(s.id)}">Ver en vivo</a>` : `
         <button class="btn btn--small" type="button" data-try="${esc(s.id)}">Probar con vuestra boda</button>
-        <button class="btn btn--small btn--ghost" type="button" data-demo="${esc(s.id)}">Ver ejemplo</button>`;
+        <button class="btn btn--small btn--ghost" type="button" data-demo="${esc(s.id)}">Ver en vivo</button>`;
   grid.innerHTML = styles.map((s) => s.status === "available" ? `
     <article class="style-card">
-      <div class="scaled" data-base-width="1280" data-base-height="960" data-style="${esc(s.id)}">
+      <div class="scaled" data-style="${esc(s.id)}">
         <iframe title="Ejemplo del estilo ${esc(s.name)}" tabindex="-1" aria-hidden="true"></iframe>
       </div>
       <div><h3>${esc(s.name)}</h3><p class="style-card__meta">Plantilla ${esc(studio.templates[s.template].name)}</p></div>
@@ -94,12 +94,20 @@ export function renderStyleCards(grid, { studio, styles, urlOf, withTheme }, { l
       .then((config) => showInFrame(box.querySelector("iframe"), urlOf(style), config))
       .catch((e) => { delete box.dataset.loaded; console.error("[WeddingWebs] ejemplo", style.id, e); });
   };
+  // En móvil, la web en su vista de móvil (390 px de ancho, casi a tamaño real y legible); en
+  // pantallas grandes, la de escritorio. Si se cruza el límite, se cambia sin recargar.
   const boxes = [...grid.querySelectorAll(".scaled")];
-  boxes.forEach(fitScaled);
+  const small = matchMedia("(max-width: 600px)");
+  const size = () => boxes.forEach((box) => {
+    [box.dataset.baseWidth, box.dataset.baseHeight] = small.matches ? [390, 520] : [1280, 960];
+    fitScaled(box);
+  });
+  size();
+  small.addEventListener?.("change", size);
   if (!("IntersectionObserver" in window)) return boxes.forEach(load);
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) { load(e.target); io.unobserve(e.target); }
-  }, { rootMargin: "400px 0px" });
+  }, { rootMargin: "250px 0px" });
   boxes.forEach((b) => io.observe(b));
 }
 

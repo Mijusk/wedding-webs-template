@@ -85,6 +85,7 @@ main section, .contact { scroll-margin-top: 80px; }
 .styles__more { display: flex; justify-content: center; margin-top: 40px; }
 .style-card { display: grid; gap: 14px; align-content: start; min-width: 0; }
 .style-card .scaled { aspect-ratio: 4 / 3; border-radius: var(--radius); border: 1px solid var(--line); }
+@media (max-width: 600px) { .style-card .scaled { aspect-ratio: 3 / 4; } } /* vista móvil (catalog.js) */
 .style-card h3 { font-size: 26px; }
 .style-card__meta { font-size: 13px; color: var(--muted); }
 .style-card__desc { color: var(--muted); font-size: 15px; }
