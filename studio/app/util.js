@@ -5,6 +5,20 @@ export const esc = (s) =>
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Contacto para los mensajes de error: el de studio.json > legal.email, o este si ni eso carga.
+export const CONTACT_EMAIL = "weddingwebstudios@gmail.com";
+
+// Error amable para la persona; el detalle técnico, solo a la consola.
+export function friendlyError(what, error, email = CONTACT_EMAIL) {
+  console.error(`[WeddingWebs] ${what}:`, error);
+  const mail = esc(email);
+  return `<div class="load-error" role="alert">
+    <p><strong>Vaya, no hemos podido cargar ${esc(what)}.</strong></p>
+    <p>Suele ser un problema pasajero de conexión. <button class="btn btn--small btn--ghost" type="button" onclick="location.reload()">Recargar la página</button></p>
+    <p>Si sigue sin salir, escribidnos a <a href="mailto:${mail}">${mail}</a> y os ayudamos.</p>
+  </div>`;
+}
+
 // sessionStorage puede no existir o lanzar (modo privado, vista previa): todo es opcional.
 export const session = {
   get(k) { try { return sessionStorage.getItem(k); } catch { return null; } },

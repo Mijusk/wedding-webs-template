@@ -1,8 +1,9 @@
-import { $, esc, priceLabel, fill, roundsLine } from "./util.js";
+import { $, esc, priceLabel, fill, roundsLine, CONTACT_EMAIL } from "./util.js";
 import { saveLead } from "./leads.js";
 import { attribution } from "./attribution.js";
 import { validNif } from "../../lib/nif.js";
 
+const writeUs = (studio) => `escribidnos a ${studio.legal?.email || CONTACT_EMAIL}`;
 let chosen = null; // { config, style } de la web generada, si la hay
 
 export function setupPricing({ studio, templateUrl }) {
@@ -89,8 +90,9 @@ export function setupPricing({ studio, templateUrl }) {
         <p>Hemos apuntado la tarifa ${esc(tier.name)} (${esc(priceLabel(tier.price, currency))}). Os escribimos a ${esc(d.email)} para cerrar los detalles y el pago.</p>
         ${simulated ? '<p class="note">Esto es una demo: la reserva se ha guardado solo en este navegador y no se ha cobrado nada.</p>' : ""}`;
       $("#contact-thanks").hidden = false;
-    } catch {
-      err.textContent = "No se ha podido enviar la reserva. Revisad la conexión y volved a intentarlo; si sigue fallando, escribidnos y lo vemos.";
+    } catch (e) {
+      console.error("[WeddingWebs] reserva:", e);
+      err.textContent = `No se ha podido enviar la reserva. Revisad la conexión y volved a intentarlo; si sigue fallando, ${writeUs(studio)} y lo vemos.`;
       btn.disabled = false; btn.textContent = "Enviar reserva";
     }
   });
@@ -124,10 +126,11 @@ export function setupPricing({ studio, templateUrl }) {
         email: "Revisad el email: lo necesitamos para escribiros.",
         demasiadas: "Demasiados intentos seguidos. Esperad unos minutos.",
         sin_pagos: "Ahora mismo no podemos cobrar en la web. Elegid otra vez la tarifa y enviad la reserva: os escribimos.",
-      }[r.error] || "No se ha podido preparar el pago. Volved a intentarlo; si sigue fallando, escribidnos.";
+      }[r.error] || `No se ha podido preparar el pago. Volved a intentarlo; si sigue fallando, ${writeUs(studio)}.`;
       if (r.error === "sin_pagos") tiers.forEach((t) => { t.checkout = false; });
-    } catch {
-      err.textContent = "No se ha podido preparar el pago. Revisad la conexión y volved a intentarlo.";
+    } catch (e) {
+      console.error("[WeddingWebs] pago:", e);
+      err.textContent = `No se ha podido preparar el pago. Revisad la conexión y volved a intentarlo; si sigue fallando, ${writeUs(studio)}.`;
     }
     btn.disabled = false;
     syncCheckout();

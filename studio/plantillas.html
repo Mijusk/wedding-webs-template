@@ -61,6 +61,7 @@
 <script type="module">
   import { loadCatalog, renderStyleCards } from "./app/catalog.js";
   import { revealOnScroll } from "./app/entrance.js";
+  import { friendlyError } from "./app/util.js";
   import { captureAttribution } from "./app/attribution.js";
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
@@ -74,7 +75,7 @@
     renderStyleCards(document.getElementById("catalog-grid"), catalog, { links: true });
     revealOnScroll(".section-head, .style-card, .foot");
   } catch (e) {
-    document.getElementById("catalog-grid").innerHTML = `<p class="error">No se pudieron cargar las plantillas: ${e.message}</p>`;
+    document.getElementById("catalog-grid").innerHTML = friendlyError("las plantillas", e);
   }
 </script>
 </body>

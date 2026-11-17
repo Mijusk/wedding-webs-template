@@ -341,3 +341,9 @@ main section, .contact { scroll-margin-top: 80px; }
   font-size: .62em; letter-spacing: .05em; color: var(--accent); line-height: 1; }
 .preloader .brand__studio { color: #d6a1b4; }
 .foot .brand__studio { font-size: .8em; }
+
+/* Error amable (si algo no carga): sin detalles técnicos, con recargar y el email. */
+.load-error { grid-column: 1 / -1; display: grid; gap: 8px; justify-items: start; padding: 22px 24px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--surface); color: var(--muted); max-width: 640px; }
+.load-error strong { color: var(--ink); font-weight: 600; }
+.load-error .btn { margin-left: 6px; vertical-align: middle; }

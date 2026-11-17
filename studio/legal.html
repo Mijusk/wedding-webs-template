@@ -110,9 +110,19 @@
 <script type="module">
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
+  import { friendlyError, CONTACT_EMAIL } from "./app/util.js";
   // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como
   // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
-  const studio = await fetch("studio.json", { cache: "no-store" }).then((r) => r.json());
+  let studio;
+  try {
+    const res = await fetch("studio.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`studio.json ${res.status}`);
+    studio = await res.json();
+  } catch (e) {
+    // Sin studio.json, la página se lee igual: se avisa con calma y se deja el email de contacto.
+    document.querySelector(".legal h1").insertAdjacentHTML("afterend", friendlyError("todos los datos de esta página", e));
+    studio = { brand: { name: "WeddingWebs" }, legal: { email: CONTACT_EMAIL } };
+  }
   setupConsent();
   initAnalytics(studio);
   const legal = studio.legal || {};

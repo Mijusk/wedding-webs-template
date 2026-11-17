@@ -1,4 +1,4 @@
-import { $, esc, session } from "./util.js";
+import { $, session, friendlyError } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
 import { loadCatalog, renderStyleCards, limitToTwoRows } from "./catalog.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
@@ -146,5 +146,5 @@ function setupNudge() {
 
 start().catch((e) => {
   startEntrance();
-  $("#styles-grid").innerHTML = `<p class="error">No se pudo cargar el escaparate: ${esc(e.message)}</p>`;
+  $("#styles-grid").innerHTML = friendlyError("los estilos", e);
 });
