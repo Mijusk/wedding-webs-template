@@ -212,15 +212,8 @@
   </nav>
 </footer>
 
-<!-- Aviso tras hacer scroll -->
-<aside class="nudge" id="nudge" aria-labelledby="nudge-title" hidden>
-  <p class="nudge__title" id="nudge-title">¿Probamos con vuestra boda?</p>
-  <p>Poned vuestros nombres, la fecha y tres fotos, y en unos segundos veis vuestra web.</p>
-  <div class="nudge__actions">
-    <button class="btn btn--small" type="button" id="nudge-yes">Sí, probar</button>
-    <button class="btn btn--small btn--ghost" type="button" id="nudge-no">Ahora no</button>
-  </div>
-</aside>
+<!-- Botón fijo abajo mientras se ven los estilos (app/main.js > setupNudge) -->
+<button class="btn btn--small nudge" id="nudge" type="button" hidden>Probar con vuestra boda</button>
 
 <!-- Formulario del generador -->
 <div class="overlay" id="builder" role="dialog" aria-modal="true" aria-labelledby="builder-title" hidden>

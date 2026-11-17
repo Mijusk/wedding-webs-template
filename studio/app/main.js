@@ -158,24 +158,25 @@ function leadFromTrial(w, style) {
   };
 }
 
-// Aviso "¿Probamos con vuestra boda?" al llegar a los estilos. Una vez por visita.
+// Botón pequeño fijo abajo, «Probar con vuestra boda», mientras miran los estilos. No sale con el
+// aviso de cookies puesto, con una capa abierta ni al llegar a las tarifas (tapaba el botón de pagar).
 function setupNudge() {
-  const nudge = $("#nudge"), KEY = "studio-nudge-done";
-  if (session.get(KEY)) return;
-  const done = () => { session.set(KEY, "1"); nudge.hidden = true; removeEventListener("scroll", onScroll); };
-  const onScroll = () => {
-    const trigger = $("#estilos").offsetTop - innerHeight * 0.4;
-    const busy = !$("#builder").hidden || !$("#stage").hidden || !$("#loading").hidden;
-    // Si ya están en las tarifas (o reservando), el aviso estorbaría: tapa el botón de pagar en el móvil.
-    const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.8;
-    if (atPricing) return;
-    if (scrollY > trigger && !busy) { nudge.hidden = false; removeEventListener("scroll", onScroll); }
+  const nudge = $("#nudge");
+  const update = () => {
+    const pastHero = $("#estilos").getBoundingClientRect().top < innerHeight * 0.6;
+    const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.9;
+    const busy = ["#builder", "#stage", "#loading"].some((id) => !$(id).hidden);
+    const show = pastHero && !atPricing && !busy && !document.querySelector(".cookies");
+    nudge.hidden = !show;
+    document.body.classList.toggle("has-nudge", show);
   };
-  $("#contact-form").addEventListener("focusin", () => { if (!nudge.hidden) done(); });
-  addEventListener("scroll", onScroll, { passive: true });
-  $("#nudge-yes").addEventListener("click", () => { done(); openBuilder(); });
-  $("#nudge-no").addEventListener("click", done);
-  document.querySelectorAll("[data-open-builder], [data-try]").forEach((b) => b.addEventListener("click", done));
+  addEventListener("scroll", update, { passive: true });
+  addEventListener("resize", update);
+  // El aviso de cookies entra y sale del <body>; las capas cambian su atributo hidden.
+  new MutationObserver(update).observe(document.body, { childList: true });
+  ["#builder", "#stage", "#loading"].forEach((id) => new MutationObserver(update).observe($(id), { attributes: true, attributeFilter: ["hidden"] }));
+  nudge.addEventListener("click", () => { track("probar_abierto", { desde: "boton_fijo" }); openBuilder(); });
+  update();
 }
 
 start().catch((e) => {
