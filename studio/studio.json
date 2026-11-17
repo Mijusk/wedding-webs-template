@@ -548,6 +548,19 @@
     ],
     "note": "Entrega en {deliveryDays} días laborables (A medida, en la fecha que acordemos) · Online hasta {onlineMonths} meses después de la boda · Pago único, sin cuotas ni permanencia."
   },
+  "guarantee": {
+    "_nota": "Garantía comercial propia, que se suma al desistimiento legal. days = plazo desde que reciben la primera versión. tiers = ids de las tarifas a las que se aplica. En los textos, {days} se rellena solo.",
+    "enabled": true,
+    "days": 7,
+    "tiers": [
+      "tal-cual",
+      "con-cambios",
+      "a-medida"
+    ],
+    "refund": "completa",
+    "title": "Si la primera versión no os gusta, os devolvemos el dinero",
+    "conditions": "Vale para las tres tarifas. Basta con pedírnoslo en los {days} días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo."
+  },
   "contact": {
     "endpoint": "/api/lead",
     "fallbackEndpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"

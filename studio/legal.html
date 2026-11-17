@@ -25,7 +25,8 @@
 <link rel="stylesheet" href="studio.css">
 <style>
   .legal { max-width: 760px; padding-block: 48px 80px; display: grid; gap: 40px; }
-  .legal section { display: grid; gap: 12px; scroll-margin-top: 24px; }
+  .legal section { display: grid; gap: 12px; scroll-margin-top: 80px; }
+  .legal li[id] { scroll-margin-top: 80px; }
   .legal h1 { font-size: clamp(34px, 5vw, 48px); }
   .legal h2 { font-size: 28px; }
   .legal ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
@@ -97,6 +98,7 @@
       <li><strong>Entrega.</strong> En <span data-field="deliveryDays"></span> días laborables desde que tenemos vuestros datos y fotos en las tarifas con plantilla; en la tarifa a medida, la fecha que acordemos.</li>
       <li><strong>Cambios.</strong> Corrección de erratas y datos siempre incluida. Rondas de cambios de diseño según la tarifa: <span data-rounds>ninguna en Tal cual (se entrega tal cual se ha probado), 2 en Con cambios y 3 en A medida</span>.</li>
       <li><strong>Cuánto tiempo sigue online.</strong> Hasta <span data-field="onlineMonths"></span> meses después de la boda.</li>
+      <li id="garantia" data-guarantee><strong>Garantía: si la primera versión no os gusta, os devolvemos el dinero.</strong> <span data-guarantee-text>Vale para las tres tarifas. Basta con pedírnoslo en los 7 días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo.</span> Para pedirlo, escribidnos a <span data-field="email"></span>. Es una garantía comercial nuestra: se suma a vuestro derecho de desistimiento (justo debajo) y no lo sustituye ni lo limita.</li>
       <li><strong>Desistimiento.</strong> Tenéis 14 días naturales desde el pago para desistir sin dar motivos y os devolvemos el importe. Si al pagar nos pedís expresamente empezar antes de que acabe ese plazo (la casilla «Queremos que empecéis ya») y la web ya está entregada, se pierde ese derecho (artículo 103 del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios).</li>
       <li><strong>Lo que ponéis vosotros.</strong> Necesitamos que las fotos y textos sean vuestros o tengáis permiso para usarlos.</li>
     </ul>
@@ -133,6 +135,10 @@
     else if (value === "" || value == null) { el.textContent = "pendiente"; el.className = "pending"; }
     else el.textContent = value;
   });
+  // Garantía: studio.json > guarantee (si está apagada, no se muestra)
+  const g = studio.guarantee;
+  if (g && !g.enabled) document.querySelector("[data-guarantee]")?.remove();
+  else if (g?.conditions) document.querySelectorAll("[data-guarantee-text]").forEach((el) => { el.textContent = g.conditions.replace("{days}", g.days); });
   // Rondas de cambios de cada tarifa: studio.json > pricing.tiers[].rounds
   const tiers = (studio.pricing?.tiers || []).filter((t) => t.rounds != null);
   if (tiers.length) document.querySelectorAll("[data-rounds]").forEach((el) => {

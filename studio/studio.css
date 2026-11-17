@@ -260,6 +260,9 @@ body.has-nudge { padding-bottom: 64px; }
 .foot__legal a { color: var(--muted); }
 .foot { display: grid; gap: 10px; }
 .tiers__note { margin-top: 14px; }
+.tiers__guarantee { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15px; font-weight: 600; color: var(--ink); }
+.tiers__guarantee::before { content: ""; flex: none; width: 10px; height: 6px; margin: 0 4px 3px 2px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+.tiers__guarantee a { font-weight: 400; color: var(--muted); }
 
 /* Secciones que la pareja enciende y apaga en la vista previa (app/stage.js) */
 .stage__view { position: relative; }
