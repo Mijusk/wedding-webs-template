@@ -576,6 +576,44 @@
   },
   "_testimonialsNota": "Testimonios reales de parejas, cada uno { \"name\": \"Lucía y Martín\", \"text\": \"…\", \"photo\": \"testimonios/lucia-martin.jpg\" (opcional, relativa a studio/) }. Lista vacía = la sección no sale.",
   "testimonials": [],
+  "faq": {
+    "_nota": "Preguntas frecuentes (antes del pie y en los datos para buscadores). Huecos: {onlineMonths}, {deliveryDays}, {guestDataMonths} (de legal), {guarantee} (las condiciones de guarantee; con needs: \"guarantee\" la pregunta solo sale si la garantía está activa) y {rounds} (rondas de cada tarifa). Solo lo que ya dice legal.html.",
+    "items": [
+      {
+        "q": "¿Cuánto tiempo sigue online la web?",
+        "a": "Hasta {onlineMonths} meses después de la boda."
+      },
+      {
+        "q": "¿Los invitados tienen que instalar algo?",
+        "a": "No. Es una web: la abren con el enlace que les mandéis, desde el móvil o el ordenador, sin instalar nada ni crear una cuenta."
+      },
+      {
+        "q": "¿Cómo confirman la asistencia los invitados?",
+        "a": "Desde la propia web, con un formulario: ponen su nombre, si vienen y lo que vosotros queráis preguntar, como una canción que no puede faltar. Vosotros veis las respuestas al momento en vuestro panel y podéis descargarlas en Excel."
+      },
+      {
+        "q": "¿Podemos cambiar datos después?",
+        "a": "Sí. Corregir erratas y datos siempre está incluido. Las rondas de cambios de diseño dependen de la tarifa: {rounds}."
+      },
+      {
+        "q": "¿Cuándo nos la entregáis?",
+        "a": "En {deliveryDays} días laborables desde que tenemos vuestros datos y fotos. En la tarifa A medida, en la fecha que acordemos."
+      },
+      {
+        "q": "¿Cómo se paga?",
+        "a": "Un pago único, con el precio final e IVA incluido, sin cuotas ni permanencia. Con tarjeta o Bizum (a través de Stripe) o por transferencia."
+      },
+      {
+        "q": "¿Y si la primera versión no nos gusta?",
+        "a": "Os devolvemos el dinero. {guarantee}",
+        "needs": "guarantee"
+      },
+      {
+        "q": "¿Qué pasa con los datos de los invitados?",
+        "a": "Las respuestas de los invitados se guardan solo para vosotros, que decidís sobre ellas. Nosotros las alojamos por encargo vuestro y se borran a los {guestDataMonths} meses de la boda."
+      }
+    ]
+  },
   "contact": {
     "endpoint": "/api/lead",
     "fallbackEndpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"

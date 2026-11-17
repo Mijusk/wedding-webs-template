@@ -368,3 +368,13 @@ body.has-nudge { padding-bottom: 64px; }
 .testimonial blockquote { margin: 0; font-family: var(--font-display); font-size: 21px; line-height: 1.35; }
 .testimonial figcaption { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
 .testimonial img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+
+/* Preguntas frecuentes */
+.faq__list { display: grid; max-width: 820px; border-top: 1px solid var(--line); }
+.faq__item { border-bottom: 1px solid var(--line); }
+.faq__item summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; cursor: pointer; list-style: none;
+  font-size: 18px; font-weight: 600; }
+.faq__item summary::-webkit-details-marker { display: none; }
+.faq__item summary::after { content: "+"; flex: none; font: 400 26px/1 var(--font-body); color: var(--accent); transition: transform .2s ease; }
+.faq__item[open] summary::after { transform: rotate(45deg); }
+.faq__item p { padding: 0 0 18px; color: var(--muted); max-width: 68ch; }

@@ -1,4 +1,4 @@
-import { $, esc, session, friendlyError } from "./util.js";
+import { $, esc, session, friendlyError, faqItems } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
 import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoRows } from "./catalog.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
@@ -25,7 +25,8 @@ async function start() {
   const { styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
-  addStructuredData(studio);
+  const faq = faqItems(studio);
+  addStructuredData(studio, { faq });
   // El HTML ya trae la marca y el titular; solo se tocan si studio.json dice otra cosa.
   if ($("#brand-name").textContent !== studio.brand.name) $("#brand-name").textContent = studio.brand.name;
   if ($("#foot-brand").textContent !== studio.brand.name) $("#foot-brand").textContent = studio.brand.name;
@@ -91,6 +92,7 @@ async function start() {
 
   renderAbout(studio.about);
   renderTestimonials(studio.testimonials);
+  renderFaq(faq);
   setupNudge();
   // Si se llegó con un enlace a una sección (#tarifas), ahora que ya está pintada.
   scrollToHash();
@@ -102,7 +104,7 @@ async function start() {
     .catch((e) => console.error("[WeddingWebs] móvil de la portada:", e)));
 
   // Precios de la base de datos, cuando lleguen.
-  applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); addStructuredData(studio); } });
+  applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); addStructuredData(studio, { faq }); } });
 
   // Desde plantillas.html: ?probar=<estilo> abre el generador y ?ver=<estilo> el ejemplo.
   const params = new URLSearchParams(location.search);
@@ -124,6 +126,15 @@ function renderTestimonials(list) {
     </figure>`).join("");
   $("#testimonios").hidden = false;
   revealOnScroll(".testimonial");
+}
+
+// Preguntas frecuentes, desplegables (<details>: funcionan con teclado y sin JavaScript extra).
+function renderFaq(items) {
+  if (!items.length) return;
+  $("#faq-list").innerHTML = items.map((i) => `
+    <details class="faq__item"><summary>${esc(i.q)}</summary><p>${esc(i.a)}</p></details>`).join("");
+  $("#preguntas").hidden = false;
+  $("#faq-list").addEventListener("toggle", (e) => { if (e.target.open) track("faq_abierta", { pregunta: e.target.querySelector("summary").textContent.slice(0, 60) }); }, true);
 }
 
 // «Quiénes somos» (studio.json > about). Sin datos, la sección no sale.

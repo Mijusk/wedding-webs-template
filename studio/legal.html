@@ -112,7 +112,7 @@
 <script type="module">
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
-  import { friendlyError, CONTACT_EMAIL } from "./app/util.js";
+  import { friendlyError, CONTACT_EMAIL, roundsSummary, fill } from "./app/util.js";
   // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como
   // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
   let studio;
@@ -138,13 +138,10 @@
   // Garantía: studio.json > guarantee (si está apagada, no se muestra)
   const g = studio.guarantee;
   if (g && !g.enabled) document.querySelector("[data-guarantee]")?.remove();
-  else if (g?.conditions) document.querySelectorAll("[data-guarantee-text]").forEach((el) => { el.textContent = g.conditions.replace("{days}", g.days); });
+  else if (g?.conditions) document.querySelectorAll("[data-guarantee-text]").forEach((el) => { el.textContent = fill(g.conditions, { days: g.days }); });
   // Rondas de cambios de cada tarifa: studio.json > pricing.tiers[].rounds
-  const tiers = (studio.pricing?.tiers || []).filter((t) => t.rounds != null);
-  if (tiers.length) document.querySelectorAll("[data-rounds]").forEach((el) => {
-    const parts = tiers.map((t) => t.rounds === 0 ? `ninguna en ${t.name} (se entrega tal cual se ha probado)` : `${t.rounds} en ${t.name}`);
-    el.textContent = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts.at(-1)}` : parts[0];
-  });
+  const rounds = roundsSummary(studio.pricing?.tiers);
+  if (rounds) document.querySelectorAll("[data-rounds]").forEach((el) => { el.textContent = rounds; });
 </script>
 </body>
 </html>

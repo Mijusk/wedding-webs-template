@@ -33,6 +33,26 @@ export const fill = (text, vars = {}) =>
 export const roundsLine = (n, texts = {}) =>
   n == null ? "" : n === 0 ? texts.none || "" : n === 1 ? texts.one || "" : fill(texts.many, { n });
 
+// «ninguna en Tal cual (se entrega tal cual se ha probado), 2 en Con cambios y 3 en A medida»
+export function roundsSummary(tiers = []) {
+  const parts = tiers.filter((t) => t.rounds != null)
+    .map((t) => t.rounds === 0 ? `ninguna en ${t.name} (se entrega tal cual se ha probado)` : `${t.rounds} en ${t.name}`);
+  return parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts.at(-1)}` : parts[0] || "";
+}
+
+// Preguntas frecuentes de studio.json > faq, con los huecos rellenos ({onlineMonths}, {rounds}…).
+export function faqItems(studio) {
+  const g = studio.guarantee;
+  const vars = {
+    ...studio.legal,
+    rounds: roundsSummary(studio.pricing?.tiers),
+    guarantee: g?.enabled ? fill(g.conditions, { days: g.days }) : "",
+  };
+  return (studio.faq?.items || [])
+    .filter((i) => i.q && i.a && (i.needs !== "guarantee" || g?.enabled))
+    .map((i) => ({ q: fill(i.q, vars), a: fill(i.a, vars) }));
+}
+
 // [79, 79] → "79 €" · [60, 80] → "60 – 80 €" · [249, null] → "desde 249 €"
 export const priceLabel = ([min, max], currency) =>
   max == null ? `desde ${min} ${currency}` : min === max ? `${min} ${currency}` : `${min} – ${max} ${currency}`;
