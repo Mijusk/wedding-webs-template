@@ -44,6 +44,10 @@ En `studio/studio.json`, bloque `ads`:
 
 Se puede poner solo uno de los dos (solo Meta o solo Google).
 
+Antes de activar Meta, acepta en el Administrador de eventos las condiciones de las herramientas para
+empresas de Meta: incluyen el acuerdo de corresponsabilidad que cita la página legal («Meta,
+corresponsable»).
+
 Haz commit, súbelo y espera a la vista previa de Vercel.
 
 ## 2. Comprobar que funciona
