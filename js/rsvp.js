@@ -1,8 +1,6 @@
 import { saveRsvp } from "./storage.js";
 import { esc, dayMonth, weddingPhase, rsvpClosed } from "./format.js";
 
-// Formulario de confirmación en un <dialog>. Lo abre cualquier [data-rsvp-open]:
-// el botón flotante (visible entre la portada y el cierre) y el del cierre.
 export function mountRsvp(root, config) {
   const { rsvp = {}, event } = config;
   // Después de la boda no hay nada que confirmar.
@@ -57,7 +55,6 @@ export function mountRsvp(root, config) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
     const name = (data.name || "").trim();
-    const song = (data.song || "").trim();
     const err = $("rsvp-error");
     if (data.website) { form.hidden = true; return; } // campo trampa: un bot
     if (name.length < 2) { err.textContent = "Escribe tu nombre para saber quién eres."; return $("rsvp-name").focus(); }
@@ -65,37 +62,18 @@ export function mountRsvp(root, config) {
     err.textContent = "";
 
     const btn = $("rsvp-submit");
-    btn.disabled = true; btn.textContent = t.sending;
+    btn.disabled = true; btn.textContent = "Enviando…";
     try {
-      await saveRsvp({ name, attending: data.attending, song }, rsvp);
-      const first = name.split(" ")[0];
+      await saveRsvp({ name, attending: data.attending, song: (data.song || "").trim() }, rsvp);
+      form.hidden = true;
       const thanks = $("rsvp-thanks");
       thanks.innerHTML = data.attending === "si"
-        ? `<h3>${fill(t.thanksYesTitle, { name: first })}</h3><p>${fill(t.thanksYesText)} ${song && t.thanksSong ? fill(t.thanksSong, { song }) : ""}</p>`
-        : `<h3>${fill(t.thanksNoTitle)}</h3><p>${fill(t.thanksNoText, { name: first })}</p>`;
-      form.hidden = true;
+        ? `<h2>¡Gracias, ${esc(name.split(" ")[0])}!</h2><p>Te esperamos. ${data.song ? `Tomamos nota de «${esc(data.song)}».` : ""}</p>`
+        : `<h2>Te echaremos de menos</h2><p>Gracias por avisarnos, ${esc(name.split(" ")[0])}.</p>`;
       thanks.hidden = false;
-      $("rsvp-close").focus();
     } catch {
       err.textContent = "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.";
       btn.disabled = false; btn.textContent = "Enviar respuesta";
     }
   });
-}
-
-// El botón flotante solo aparece cuando no se ve ni la portada ni el cierre.
-function watchPill(pill) {
-  const blockers = document.querySelectorAll(".hero, .closing");
-  const visible = new Set();
-  const set = (shown) => {
-    pill.classList.toggle("is-shown", shown);
-    pill.tabIndex = shown ? 0 : -1;
-    pill.setAttribute("aria-hidden", String(!shown));
-  };
-  if (!blockers.length || !("IntersectionObserver" in window)) return set(true);
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) e.isIntersecting ? visible.add(e.target) : visible.delete(e.target);
-    set(visible.size === 0);
-  }, { threshold: 0.12 });
-  blockers.forEach((el) => io.observe(el));
 }

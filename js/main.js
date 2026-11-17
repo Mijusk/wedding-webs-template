@@ -1,17 +1,9 @@
 import { loadConfig, isPreview, onPreviewConfig } from "./config.js";
 import { hero } from "./sections/hero.js";
-import { story } from "./sections/story.js";
 import { details } from "./sections/details.js";
 import { gallery } from "./sections/gallery.js";
 import { schedule } from "./sections/schedule.js";
-import { gifts } from "./sections/gifts.js";
-import { closing } from "./sections/closing.js";
 import { mountRsvp } from "./rsvp.js";
-import { watchTone } from "./tone.js";
-import { reveal } from "./reveal.js";
-import { fitText } from "./fit.js";
-import { bindCopy } from "./copy.js";
-import { heroShape } from "./hero-shape.js";
 
 // Registro de secciones: añadir galería, regalos, etc. es crear un archivo y registrarlo aquí.
 const SECTIONS = { hero, details, gallery, schedule };
