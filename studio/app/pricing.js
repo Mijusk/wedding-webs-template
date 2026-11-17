@@ -1,4 +1,4 @@
-import { $, esc, priceLabel } from "./util.js";
+import { $, esc, priceLabel, fill, roundsLine } from "./util.js";
 import { saveLead } from "./leads.js";
 import { attribution } from "./attribution.js";
 import { validNif } from "../../lib/nif.js";
@@ -6,16 +6,24 @@ import { validNif } from "../../lib/nif.js";
 let chosen = null; // { config, style } de la web generada, si la hay
 
 export function setupPricing({ studio, templateUrl }) {
-  const { tiers, currency } = studio.pricing;
-  $("#tiers").innerHTML = tiers.map((t) => `
-    <article class="tier" data-tier="${esc(t.id)}">
+  const { tiers, currency, recommended, roundsText } = studio.pricing;
+  const badge = studio.pricing.recommendedLabel || "Recomendada";
+  // La recomendada (studio.json > pricing.recommended) lleva distintivo. La elegida en el
+  // formulario se marca aparte (.is-selected), y solo cuando la pareja elige.
+  $("#tiers").innerHTML = tiers.map((t) => {
+    const rec = t.id === recommended;
+    const items = [...t.includes, roundsLine(t.rounds, roundsText)].filter(Boolean);
+    return `
+    <article class="tier${rec ? " tier--recommended" : ""}" data-tier="${esc(t.id)}">
+      ${rec ? `<p class="tier__badge">${esc(badge)}</p>` : ""}
       <h3>${esc(t.name)}</h3>
       <p class="tier__price">${esc(priceLabel(t.price, currency))}</p>
       <p class="tier__summary">${esc(t.summary)}</p>
-      <ul>${t.includes.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
-      <button class="btn btn--ghost" type="button" data-pick="${esc(t.id)}">Elegir ${esc(t.name)}</button>
-    </article>`).join("");
-  if (studio.pricing.note) $("#tiers").insertAdjacentHTML("afterend", `<p class="fineprint tiers__note">${esc(studio.pricing.note)}</p>`);
+      <ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
+      <button class="btn${rec ? "" : " btn--ghost"}" type="button" data-pick="${esc(t.id)}" aria-pressed="false">Elegir ${esc(t.name)}</button>
+    </article>`;
+  }).join("");
+  if (studio.pricing.note) $("#tiers").insertAdjacentHTML("afterend", `<p class="fineprint tiers__note">${esc(fill(studio.pricing.note, studio.legal))}</p>`);
 
   const tierSel = $("#c-tier"), styleSel = $("#c-style");
   tierSel.innerHTML = tiers.map((t) => `<option value="${esc(t.id)}">${esc(t.name)} · ${esc(priceLabel(t.price, currency))}</option>`).join("");
@@ -36,14 +44,22 @@ export function setupPricing({ studio, templateUrl }) {
       : FINE_RESERVE;
   };
   $("#c-invoice").addEventListener("change", (e) => { $("#c-billing").hidden = !e.target.checked; });
+  let picked = false; // hasta que eligen una, ninguna tarjeta sale marcada
   const markTier = () => {
-    document.querySelectorAll(".tier").forEach((el) => el.classList.toggle("is-selected", el.dataset.tier === tierSel.value));
+    document.querySelectorAll(".tier").forEach((el) => {
+      const on = picked && el.dataset.tier === tierSel.value;
+      const btn = el.querySelector("[data-pick]");
+      el.classList.toggle("is-selected", on);
+      btn.setAttribute("aria-pressed", String(on));
+      btn.textContent = on ? "Elegida ✓" : `Elegir ${tiers.find((t) => t.id === el.dataset.tier).name}`;
+    });
     syncCheckout();
   };
-  tierSel.addEventListener("change", markTier);
+  tierSel.addEventListener("change", () => { picked = true; markTier(); });
   $("#tiers").addEventListener("click", (e) => {
     const id = e.target.closest("[data-pick]")?.dataset.pick;
     if (!id) return;
+    picked = true;
     tierSel.value = id;
     if (id === "a-medida") styleSel.value = "a-medida";
     markTier();

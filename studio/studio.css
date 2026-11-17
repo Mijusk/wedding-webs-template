@@ -112,7 +112,16 @@ main section, .contact { scroll-margin-top: 80px; }
 .tier ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; align-content: start; font-size: 15px; }
 .tier li { padding-left: 22px; position: relative; }
 .tier li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 10px; height: 6px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
-.tier.is-selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+/* Recomendada (studio.json > pricing.recommended): fondo suave, borde de color y distintivo. */
+.tier { position: relative; }
+.tier--recommended { border-color: var(--accent); background: linear-gradient(180deg, var(--accent-soft), var(--surface) 46%); }
+.tier__badge { position: absolute; top: 0; left: 28px; transform: translateY(-50%); margin: 0;
+  background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 5px 12px;
+  font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; line-height: 1.2; }
+/* Elegida en el formulario: marco de tinta y el botón relleno, distinto de la recomendada. */
+.tier.is-selected { outline: 2px solid var(--ink); outline-offset: 3px; }
+.tier.is-selected [data-pick] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+@media (max-width: 900px) { .tier--recommended { margin-top: 10px; } }
 
 /* Contacto */
 .contact { margin-top: 56px; display: grid; grid-template-columns: 1fr 1.3fr; gap: 48px; padding-top: 48px; border-top: 1px solid var(--line); }

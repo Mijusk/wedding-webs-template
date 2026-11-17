@@ -491,7 +491,15 @@
     ]
   },
   "pricing": {
+    "_nota": "rounds = rondas de cambios de diseño de cada tarifa (salen en la tarjeta y en las condiciones). recommended = id de la tarifa con el distintivo. En note, {deliveryDays} y {onlineMonths} salen de legal.",
     "currency": "€",
+    "recommended": "con-cambios",
+    "recommendedLabel": "Recomendada",
+    "roundsText": {
+      "none": "Sin rondas de cambios: se entrega tal cual la habéis probado",
+      "one": "1 ronda de cambios de diseño",
+      "many": "{n} rondas de cambios de diseño"
+    },
     "tiers": [
       {
         "id": "tal-cual",
@@ -505,7 +513,8 @@
           "Vuestros datos, fotos y programa del día",
           "Panel con las confirmaciones al momento y descarga en Excel",
           "Publicada y lista para compartir"
-        ]
+        ],
+        "rounds": 0
       },
       {
         "id": "con-cambios",
@@ -517,9 +526,9 @@
         "summary": "Partimos de una plantilla y la ajustamos a vuestro gusto.",
         "includes": [
           "Todo lo de Tal cual",
-          "Colores, tipografías y textos a medida",
-          "Secciones extra: galería, regalos, alojamiento"
-        ]
+          "Colores, tipografías y textos a medida"
+        ],
+        "rounds": 2
       },
       {
         "id": "a-medida",
@@ -532,11 +541,12 @@
         "includes": [
           "Todo lo de Con cambios",
           "Diseño único, sin plantilla de partida",
-          "Hasta 3 rondas de revisiones"
-        ]
+          "Lista de invitados con un enlace personal por familia o grupo"
+        ],
+        "rounds": 3
       }
     ],
-    "note": "Precio final, pago único: sin cuotas ni permanencia."
+    "note": "Entrega en {deliveryDays} días laborables (A medida, en la fecha que acordemos) · Online hasta {onlineMonths} meses después de la boda · Pago único, sin cuotas ni permanencia."
   },
   "contact": {
     "endpoint": "/api/lead",

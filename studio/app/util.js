@@ -11,6 +11,14 @@ export const session = {
   set(k, v) { try { sessionStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
 };
 
+// "Entrega en {deliveryDays} días" + { deliveryDays: 3 } → "Entrega en 3 días". Lo que no está, se deja igual.
+export const fill = (text, vars = {}) =>
+  String(text ?? "").replace(/\{(\w+)\}/g, (m, k) => (vars[k] ?? "") !== "" ? String(vars[k]) : m);
+
+// Rondas de cambios de una tarifa (studio.json > pricing.roundsText).
+export const roundsLine = (n, texts = {}) =>
+  n == null ? "" : n === 0 ? texts.none || "" : n === 1 ? texts.one || "" : fill(texts.many, { n });
+
 // [79, 79] → "79 €" · [60, 80] → "60 – 80 €" · [249, null] → "desde 249 €"
 export const priceLabel = ([min, max], currency) =>
   max == null ? `desde ${min} ${currency}` : min === max ? `${min} ${currency}` : `${min} – ${max} ${currency}`;

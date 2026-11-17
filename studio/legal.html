@@ -68,7 +68,7 @@
       <li><strong>Factura.</strong> Os la mandamos por email al pagar. Si no nos pedís factura a nombre de alguien con NIF, es una factura simplificada.</li>
       <li><strong>Seguimiento.</strong> Con el código de vuestro pedido veis cómo va, las propuestas que os mandamos, y podéis pedir cambios o aprobarlas, sin cuenta ni contraseña.</li>
       <li><strong>Entrega.</strong> En <span data-field="deliveryDays"></span> días laborables desde que tenemos vuestros datos y fotos en las tarifas con plantilla; en la tarifa a medida, la fecha que acordemos.</li>
-      <li><strong>Cambios.</strong> Corrección de erratas y datos siempre incluida. Cambios de diseño según la tarifa: ninguno en Tal cual, los acordados en Con cambios y hasta 3 rondas en A medida.</li>
+      <li><strong>Cambios.</strong> Corrección de erratas y datos siempre incluida. Rondas de cambios de diseño según la tarifa: <span data-rounds>ninguna en Tal cual (se entrega tal cual se ha probado), 2 en Con cambios y 3 en A medida</span>.</li>
       <li><strong>Cuánto tiempo sigue online.</strong> Hasta <span data-field="onlineMonths"></span> meses después de la boda.</li>
       <li><strong>Desistimiento.</strong> Tenéis 14 días naturales desde el pago para desistir sin dar motivos y os devolvemos el importe. Si al pagar nos pedís expresamente empezar antes de que acabe ese plazo (la casilla «Queremos que empecéis ya») y la web ya está entregada, se pierde ese derecho (artículo 103 del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios).</li>
       <li><strong>Lo que ponéis vosotros.</strong> Necesitamos que las fotos y textos sean vuestros o tengáis permiso para usarlos.</li>
@@ -95,6 +95,12 @@
     if ((value === "" || value == null) && el.closest("[data-optional]")) el.closest("[data-optional]").remove();
     else if (value === "" || value == null) { el.textContent = "pendiente"; el.className = "pending"; }
     else el.textContent = value;
+  });
+  // Rondas de cambios de cada tarifa: studio.json > pricing.tiers[].rounds
+  const tiers = (studio.pricing?.tiers || []).filter((t) => t.rounds != null);
+  if (tiers.length) document.querySelectorAll("[data-rounds]").forEach((el) => {
+    const parts = tiers.map((t) => t.rounds === 0 ? `ninguna en ${t.name} (se entrega tal cual se ha probado)` : `${t.rounds} en ${t.name}`);
+    el.textContent = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} y ${parts.at(-1)}` : parts[0];
   });
 </script>
 </body>
