@@ -90,6 +90,7 @@ async function start() {
   });
 
   renderAbout(studio.about);
+  renderTestimonials(studio.testimonials);
   setupNudge();
   // Si se llegó con un enlace a una sección (#tarifas), ahora que ya está pintada.
   scrollToHash();
@@ -110,6 +111,19 @@ async function start() {
   else if (pick(params.get("ver"))) await showExample(pick(params.get("ver")));
   else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
   if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
+}
+
+// Testimonios (studio.json > testimonials): solo los que tienen nombre y texto. Sin ninguno, no sale.
+function renderTestimonials(list) {
+  const items = (Array.isArray(list) ? list : []).filter((t) => t?.name && t?.text);
+  if (!items.length) return;
+  $("#testimonials-list").innerHTML = items.map((t) => `
+    <figure class="testimonial">
+      <blockquote><p>${esc(t.text)}</p></blockquote>
+      <figcaption>${t.photo ? `<img src="${esc(t.photo)}" alt="" width="56" height="56" loading="lazy" decoding="async">` : ""}<span>${esc(t.name)}</span></figcaption>
+    </figure>`).join("");
+  $("#testimonios").hidden = false;
+  revealOnScroll(".testimonial");
 }
 
 // «Quiénes somos» (studio.json > about). Sin datos, la sección no sale.

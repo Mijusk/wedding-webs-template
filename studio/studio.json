@@ -574,6 +574,8 @@
     "photo": "equipo/luis-cuadrada.jpg",
     "photoAlt": "Luis Ochoteco, de WeddingWebs"
   },
+  "_testimonialsNota": "Testimonios reales de parejas, cada uno { \"name\": \"Lucía y Martín\", \"text\": \"…\", \"photo\": \"testimonios/lucia-martin.jpg\" (opcional, relativa a studio/) }. Lista vacía = la sección no sale.",
+  "testimonials": [],
   "contact": {
     "endpoint": "/api/lead",
     "fallbackEndpoint": "https://script.google.com/macros/s/AKfycbwFomfdtcLSxlReNt1g7i4yX_ch2zRrucXDP6XAmTZbvNWwFa8PGFN3r8o7jmenJbndxQ/exec"
