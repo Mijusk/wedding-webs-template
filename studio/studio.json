@@ -526,7 +526,8 @@
         "summary": "Partimos de una plantilla y la ajustamos a vuestro gusto.",
         "includes": [
           "Todo lo de Tal cual",
-          "Colores, tipografías y textos a medida"
+          "Colores, tipografías y textos a medida",
+          "Lista de invitados con un enlace personal por familia o grupo"
         ],
         "rounds": 2
       },
@@ -540,8 +541,7 @@
         "summary": "Un diseño propio, hecho desde cero para vuestra boda.",
         "includes": [
           "Todo lo de Con cambios",
-          "Diseño único, sin plantilla de partida",
-          "Lista de invitados con un enlace personal por familia o grupo"
+          "Diseño único, sin plantilla de partida"
         ],
         "rounds": 3
       }
@@ -559,7 +559,7 @@
     ],
     "refund": "completa",
     "title": "Si la primera versión no os gusta, os devolvemos el dinero",
-    "conditions": "Vale para las tres tarifas. Basta con pedírnoslo en los {days} días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo."
+    "conditions": "Vale para las tres tarifas. Basta con pedírnoslo en los {days} días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo, por el mismo medio de pago, en un máximo de 14 días desde que nos lo pedís."
   },
   "about": {
     "_nota": "Sección «Quiénes somos», antes de las preguntas frecuentes. photo es relativa a studio/ (480×480, recortada desde equipo/luis.jpg).",
