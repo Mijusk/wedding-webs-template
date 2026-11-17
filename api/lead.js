@@ -52,10 +52,12 @@ export default async function handler(req, res) {
 
     const tasks = [forwardToSheet(sheet, body)];
     // Elección del aviso de cookies (publicidad): constancia en consents, como el consentimiento comercial.
+    // Aviso v1: { granted }. Aviso v2 (por categorías): { choices: { analitica, publicidad }, method }.
     const cc = payload.cookieConsent;
-    if (cc && typeof cc.granted === "boolean" && cc.text) {
+    const adsGranted = typeof cc?.choices?.publicidad === "boolean" ? cc.choices.publicidad : cc?.granted;
+    if (cc && typeof adsGranted === "boolean" && cc.text) {
       tasks.push(rpc("api_record_cookie_consent", {
-        p_lead_id: r.lead_id, p_granted: cc.granted, p_text: String(cc.text).slice(0, 2000),
+        p_lead_id: r.lead_id, p_granted: adsGranted, p_text: String(cc.text).slice(0, 2000),
         p_page: payload.page || null, p_ip: ipRaw || null, p_user_agent: String(req.headers["user-agent"] || "").slice(0, 300),
       }).catch((e) => console.error("cookies", e.message)));
     }
