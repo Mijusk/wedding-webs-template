@@ -308,4 +308,29 @@ main section, .contact { scroll-margin-top: 80px; }
   font-size: 14px; color: var(--muted); animation: rise .35s ease-out;
 }
 .cookies a { color: var(--ink); }
-.cookies__actions { display: flex; gap: 8px; justify-content: flex-end; }
+.cookies__title { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+/* Rechazar, Configurar y Aceptar con el mismo tamaño, peso y color (guía de cookies de la AEPD). */
+.cookies__actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cookies__btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 9px 10px;
+  border: 1px solid var(--ink); border-radius: 999px; background: var(--surface); color: var(--ink);
+  font: 600 14px/1.15 var(--font-body); text-align: center; cursor: pointer; transition: background-color .15s, color .15s;
+}
+.cookies__btn:hover { background: var(--ink); color: var(--bg); }
+
+/* Configurar cookies */
+.cookies-settings { width: min(520px, calc(100vw - 32px)); max-height: calc(100svh - 32px); padding: 0; border: 0; border-radius: 14px;
+  background: var(--bg); color: var(--ink); box-shadow: 0 30px 80px var(--shadow); }
+.cookies-settings::backdrop { background: var(--scrim); }
+.cookies-settings__form { display: grid; gap: 14px; padding: 24px; }
+.cookies-settings__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cookies-settings__head h2 { font-size: 28px; }
+.cookies-settings__intro { font-size: 14px; color: var(--muted); }
+.cookies-settings__list { list-style: none; margin: 0; padding: 0; display: grid; }
+.cookies-settings__list li + li { border-top: 1px solid var(--line); }
+.cookies-settings__always { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+@media (max-width: 560px) {
+  .cookies { left: 16px; right: 16px; width: auto; padding: 16px; }
+  .cookies-settings__actions { grid-template-columns: 1fr; }
+  .cookies-settings .switch small { display: block; } /* el panel de secciones las oculta en móvil */
+}
