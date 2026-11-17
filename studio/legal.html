@@ -70,6 +70,7 @@
       <li>Stripe: pagos. Los datos de la tarjeta los recibe Stripe, nunca nosotros.</li>
       <li>Google (Google Workspace): copia de seguridad de los contactos en una hoja de cálculo.</li>
       <li>Umami: analítica de visitas, solo si la aceptáis en el aviso de cookies (ver <a href="#cookies">Cookies</a>).</li>
+      <li>Meta (Meta Platforms Ireland) y Google (Google Ireland): medición de los anuncios de Instagram, Facebook y Google, solo cuando tenemos esa medición activada y solo si aceptáis la publicidad en el aviso de cookies (ver <a href="#cookies">Cookies</a>).</li>
     </ul>
     <p>Los que son de EE. UU. (Vercel, Resend, Stripe y Google) están adheridos al Marco de Privacidad de Datos UE-EE. UU.</p>
     <p><strong>Facturas.</strong> Si contratáis, guardamos las facturas y sus datos el tiempo que exige la ley fiscal (en general, 6 años).</p>
@@ -84,8 +85,9 @@
     <p><strong>Necesarias (siempre activas).</strong> Guardamos en vuestro navegador vuestra elección sobre este aviso («ww-consent», 12 meses; después os volvemos a preguntar). Mientras la pestaña está abierta (sessionStorage) recordamos también si ya habéis visto la animación de entrada y el aviso «Probar con vuestra boda», y si ya hemos apuntado vuestra prueba, para no repetirlos. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
     <p><strong>Analítica (solo si la aceptáis).</strong> Contamos las visitas con Umami: qué páginas se ven, desde qué web o anuncio se llega, el país, el tipo de dispositivo y qué botones se pulsan (por ejemplo, abrir el generador o enviar una reserva). Umami no usa cookies ni guarda nada en vuestro navegador, pero lee algunos datos de él (como el tamaño de pantalla y el idioma) y distingue una visita de otra a partir de la IP y del navegador. Nosotros solo vemos números agregados, nunca quiénes sois. Si no la aceptáis, el código de Umami no se carga; si retiráis el permiso, deja de enviar datos en ese momento.</p>
     <p><strong>Publicidad y medición de anuncios (solo si la aceptáis).</strong> Guardamos en vuestro navegador («ww-attribution», en localStorage durante 90 días y en sessionStorage) de qué anuncio o web llegasteis la primera vez y la última: los parámetros del enlace del anuncio (utm, gclid o fbclid), la página por la que entrasteis y la web de la que veníais. Si después probáis el generador o nos hacéis una reserva, ese dato va con vuestro contacto, para saber qué publicidad nos trae parejas. Si no lo aceptáis, no guardamos nada de esto en vuestro navegador; solo si nos dejáis vuestros datos en la misma página a la que habéis llegado, el formulario indica de qué anuncio veníais.</p>
+    <p><strong>Píxel de Meta y etiqueta de Google Ads (dentro de publicidad, solo si la aceptáis).</strong> Cuando anunciamos en Instagram, Facebook o Google y tenemos activada su medición, la web carga el píxel de Meta y la etiqueta de Google Ads. Les avisan de que habéis visitado la web y de si probáis el generador o nos enviáis una reserva (con la tarifa y el estilo, nunca vuestro nombre ni vuestro email), para saber qué anuncios nos traen parejas. Usan sus propias cookies en esta web (_fbp y _fbc de Meta; _gcl_au y _gcl_aw de Google). Si rechazáis la publicidad o no contestáis al aviso, no se cargan; si retiráis el permiso, dejamos de enviarles nada y borramos esas cookies de esta web.</p>
     <p><strong>Constancia.</strong> Cuando nos dejáis vuestros datos guardamos con ellos lo que elegisteis en este aviso, el texto que visteis, la fecha y la IP, como prueba de vuestro consentimiento.</p>
-    <p><strong>Cambiar de opinión.</strong> <a href="#cookies" data-cookies>Configurar cookies</a> (también desde el pie de cada página). Si retiráis el permiso de publicidad, borramos «ww-attribution» de vuestro navegador.</p>
+    <p><strong>Cambiar de opinión.</strong> <a href="#cookies" data-cookies>Configurar cookies</a> (también desde el pie de cada página). Si retiráis el permiso de publicidad, borramos «ww-attribution» y las cookies de Meta y Google de esta web.</p>
   </section>
 
   <section id="condiciones">
@@ -112,6 +114,7 @@
 <script type="module">
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
+  import { initAds } from "./app/ads.js";
   import { friendlyError, CONTACT_EMAIL, roundsSummary, fill } from "./app/util.js";
   // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como
   // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
@@ -127,6 +130,7 @@
   }
   setupConsent();
   initAnalytics(studio);
+  initAds(studio);
   const legal = studio.legal || {};
   document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = studio.brand.name; });
   document.querySelectorAll("[data-field]").forEach((el) => {

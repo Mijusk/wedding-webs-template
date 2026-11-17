@@ -65,11 +65,13 @@
   import { captureAttribution } from "./app/attribution.js";
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
+  import { initAds } from "./app/ads.js";
   setupConsent();
   captureAttribution();
   try {
     const catalog = await loadCatalog();
     initAnalytics(catalog.studio);
+    initAds(catalog.studio);
     document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = catalog.studio.brand.name; });
     document.title = `Plantillas · ${catalog.studio.brand.name}`;
     renderStyleCards(document.getElementById("catalog-grid"), catalog, { links: true });

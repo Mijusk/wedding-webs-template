@@ -1,6 +1,7 @@
 import { $, esc, priceLabel, fill, roundsLine, CONTACT_EMAIL } from "./util.js";
 import { saveLead } from "./leads.js";
 import { attribution } from "./attribution.js";
+import { conversion } from "./ads.js";
 import { validNif } from "../../lib/nif.js";
 
 const writeUs = (studio) => `escribidnos a ${studio.legal?.email || CONTACT_EMAIL}`;
@@ -97,6 +98,7 @@ export function setupPricing({ studio, templateUrl }) {
     try {
       const { simulated } = await saveLead({ type: "reserva", ...d, wedding: chosen ? withoutPhotos(chosen.config) : null }, studio.contact);
       const tier = tiers.find((t) => t.id === d.tier);
+      conversion("reserva", { tarifa: tier.id, estilo: d.style, valor: tier.price[0] });
       form.hidden = true;
       $("#contact-thanks").innerHTML = `
         <h3>Recibido, gracias</h3>
@@ -133,7 +135,13 @@ export function setupPricing({ studio, templateUrl }) {
     try {
       const res = await fetch("/api/pedido", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
       const r = await res.json().catch(() => ({}));
-      if (r.ok && r.url) { location.href = r.url; return; }
+      if (r.ok && r.url) {
+        const t = tierOf();
+        conversion("reserva", { tarifa: t?.id, estilo: d.style, valor: t?.price[0] });
+        await new Promise((ok) => setTimeout(ok, 300)); // que salgan los avisos antes de ir a Stripe
+        location.href = r.url;
+        return;
+      }
       err.textContent = {
         nif: "El NIF o NIE no parece correcto (revisad la letra).",
         email: "Revisad el email: lo necesitamos para escribiros.",

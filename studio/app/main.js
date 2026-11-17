@@ -10,6 +10,7 @@ import { captureAttribution } from "./attribution.js";
 import { setupConsent } from "./consent.js";
 import { initAnalytics, track } from "./analytics.js";
 import { addStructuredData } from "./seo.js";
+import { initAds, conversion } from "./ads.js";
 
 // La portada (textos y fotos) ya está en el HTML y la cortina la levanta un script de la propia
 // página, sin esperar a nada. Aquí solo hace falta studio.json para el resto; los precios de la
@@ -22,6 +23,7 @@ async function start() {
   const studio = await loadStudio();
   const catalog = makeCatalog(studio);
   initAnalytics(studio);
+  initAds(studio);
   const { styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
@@ -65,7 +67,9 @@ async function start() {
       const key = `studio-lead:${wedding.email.toLowerCase()}`;
       if (wedding.email !== SAMPLE_EMAIL && !session.get(key)) {
         session.set(key, "1");
-        saveLead(leadFromTrial(wedding, style), studio.contact).catch(() => session.set(key, ""));
+        saveLead(leadFromTrial(wedding, style), studio.contact)
+          .then(() => conversion("lead", { estilo: style.id }))
+          .catch(() => session.set(key, ""));
       }
       track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length });
       setupPricing.prefill(wedding);

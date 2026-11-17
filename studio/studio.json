@@ -648,5 +648,22 @@
     "src": "https://cloud.umami.is/script.js",
     "websiteId": "b2cf399c-8ab3-456c-a6e9-1513c2f85660",
     "domains": ""
+  },
+  "ads": {
+    "_nota": "Medición de anuncios. Vacío = no se carga nada. Con identificadores, solo se carga si la persona acepta la publicidad en el aviso de cookies. metaPixelId: el número del píxel de Meta. googleAdsId: AW-XXXXXXXXXX. googleLabel: la etiqueta de cada conversión de Google Ads. Guía: docs/ANUNCIOS.md",
+    "metaPixelId": "",
+    "googleAdsId": "",
+    "events": {
+      "lead": {
+        "umami": "lead_prueba",
+        "meta": "Lead",
+        "googleLabel": ""
+      },
+      "reserva": {
+        "umami": "reserva_enviada",
+        "meta": "SubmitApplication",
+        "googleLabel": ""
+      }
+    }
   }
 }
