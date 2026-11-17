@@ -115,7 +115,7 @@
   // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
   let studio;
   try {
-    const res = await fetch("studio.json", { cache: "no-store" });
+    const res = await fetch("studio.json");
     if (!res.ok) throw new Error(`studio.json ${res.status}`);
     studio = await res.json();
   } catch (e) {

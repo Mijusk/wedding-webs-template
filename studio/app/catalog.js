@@ -7,7 +7,8 @@ import { demoPhotoUrls, applyDemoPhotos } from "./demo.js";
 // todas las plantillas (plantillas.html).
 
 async function getJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
+  // Sin "no-store": la caché la marcan las cabeceras de vercel.json (corta y con revalidación).
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`No se pudo cargar ${url} (${res.status})`);
   return res.json();
 }
