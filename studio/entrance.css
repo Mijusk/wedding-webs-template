@@ -22,7 +22,7 @@
   stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.15s .15s cubic-bezier(.65, 0, .35, 1) forwards; }
 .monogram .monogram__w2 { stroke: #d6a1b4; animation-delay: .4s; }
 .preloader__brand { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 30px); letter-spacing: .01em; }
-.preloader__brand span { display: inline-block; opacity: 0; transform: translateY(.4em);
+.preloader__brand [data-brand-letters] > span { display: inline-block; opacity: 0; transform: translateY(.4em);
   animation: letter .7s var(--ease-out) forwards; animation-delay: calc(.75s + var(--li) * 40ms); }
 .preloader__note, .preloader__count {
   position: absolute; bottom: max(28px, env(safe-area-inset-bottom)); margin: 0;
@@ -97,3 +97,4 @@ main:has(> .hero) { padding-top: 40px; grid-template-columns: minmax(0, 1fr); }
 @media (prefers-reduced-motion: reduce) {
   .preloader { display: none !important; }
 }
+.preloader__brand .brand__studio { opacity: 0; animation: letter .7s var(--ease-out) forwards; animation-delay: 1.25s; }

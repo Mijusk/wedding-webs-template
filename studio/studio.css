@@ -334,3 +334,10 @@ main section, .contact { scroll-margin-top: 80px; }
   .cookies-settings__actions { grid-template-columns: 1fr; }
   .cookies-settings .switch small { display: block; } /* el panel de secciones las oculta en móvil */
 }
+
+/* Logotipo: «WeddingWebs» en la serif de siempre y «studio» como remate, más pequeño y ligero. */
+.brand-mark { white-space: nowrap; }
+.brand__studio { display: inline-block; margin-left: .16em; font-family: "Jost", var(--font-body); font-weight: 300;
+  font-size: .62em; letter-spacing: .05em; color: var(--accent); line-height: 1; }
+.preloader .brand__studio { color: #d6a1b4; }
+.foot .brand__studio { font-size: .8em; }
