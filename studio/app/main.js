@@ -9,6 +9,7 @@ import { startEntrance, revealOnScroll } from "./entrance.js";
 import { captureAttribution } from "./attribution.js";
 import { setupConsent } from "./consent.js";
 import { initAnalytics, track } from "./analytics.js";
+import { addStructuredData } from "./seo.js";
 
 async function start() {
   setupConsent();
@@ -18,6 +19,7 @@ async function start() {
   const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
+  addStructuredData(studio);
   $("#brand-name").textContent = studio.brand.name;
   $("#foot-brand").textContent = studio.brand.name;
   $("#brand-tagline").textContent = studio.brand.tagline;
