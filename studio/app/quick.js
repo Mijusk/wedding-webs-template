@@ -31,7 +31,7 @@ export function setupQuick({ style, url, withTheme, onStart }) {
     const need = phone.top + phone.height * 0.82 - innerHeight;
     if (need > 0) scrollBy({ top: Math.min(need, box.top - 90), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   };
-  const later = () => { reveal(); clearTimeout(timer); timer = setTimeout(() => paint().catch(() => {}), 160); };
+  const later = () => { reveal(); clearTimeout(timer); timer = setTimeout(() => paint().catch(() => {}), 1000); }; // cuando paran de escribir, no a cada letra
   a.addEventListener("input", later);
   b.addEventListener("input", later);
   // Enter en el primer nombre pasa al segundo, no envía.

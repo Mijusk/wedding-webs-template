@@ -6,6 +6,10 @@ import { showInFrame, fitScaled } from "./preview.js";
 // (lo que aún no han puesto sale del ejemplo de la plantilla). Sin email: se pide al final, si
 // quieren guardarla (send.js). Recoge los datos de la pareja (ver wedding.js).
 const STEPS = ["nombres", "fecha", "lugar", "estilo", "fotos"];
+// Qué parte de la web enseña el móvil en cada paso, y en algunos campos concretos: así ven
+// cambiar justo lo que están rellenando. "top" es la portada; el resto, la sección de ese nombre.
+const STEP_VIEW = { nombres: "top", fecha: "details", lugar: "details", estilo: "top", fotos: "top" };
+const FIELD_VIEW = { "b-name-a": "top", "b-name-b": "top", "b-date": "details", "b-time": "schedule", "b-venue": "details", "b-city": "details" };
 let photos = []; // data URLs ya reducidas
 let opener = null;
 let step = 0;
@@ -71,10 +75,15 @@ export function setupBuilder(context) {
   });
   $("#w-back").addEventListener("click", () => go(step - 1));
 
+  form.addEventListener("focusin", (e) => {
+    const view = FIELD_VIEW[e.target.id];
+    if (view && view !== previewView) { previewView = view; scrollPreview(); }
+  });
   form.addEventListener("input", (e) => {
     if (e.target.id === "b-date") countdown();
     if (e.target.closest(".wstep")) err.textContent = "";
-    livePreview();
+    // Escribiendo, la web cambia cuando paran (1 s), no a cada letra; fecha y hora, enseguida.
+    livePreview(e.target.matches("input[type=text]") ? 1000 : 250);
   });
   form.addEventListener("change", (e) => { if (e.target.name === "style") livePreview(0); });
 
@@ -115,7 +124,11 @@ function livePreview(delay = 180) {
     const style = chosenStyle();
     try {
       const config = await ctx.previewFor(style, partial());
-      showInFrame($("#w-frame"), ctx.studio.templates[style.template].url, config);
+      const frame = $("#w-frame"), url = ctx.studio.templates[style.template].url;
+      const reload = frame.dataset.src !== new URL(url, location.href).href.replace(/#.*$/, "") + "#preview" || !frame.dataset.ready;
+      await showInFrame(frame, url, config);
+      // La plantilla se vuelve a pintar con los datos nuevos: el móvil sigue en la sección que toca.
+      setTimeout(() => scrollPreview(reload ? "auto" : "keep"), reload ? 350 : 120);
     } catch (e) { console.error("[WeddingWebs] vista previa en vivo:", e); }
   }, delay);
 }
@@ -139,6 +152,25 @@ function validStep() {
   return true;
 }
 
+// Desplaza la web del móvil hasta la sección que están rellenando. "keep" solo corrige si la
+// plantilla, al volver a pintarse, la ha movido de sitio.
+let previewView = "top";
+function scrollPreview(behavior = "smooth") {
+  const frame = $("#w-frame");
+  let doc, win;
+  try { doc = frame.contentDocument; win = frame.contentWindow; } catch { return; }
+  if (!doc?.body || !win) return;
+  let y = 0;
+  if (previewView !== "top") {
+    const el = doc.getElementById(`${previewView}-title`)?.closest("section") || doc.querySelector(`section.${previewView}`);
+    if (!el) return;
+    y = Math.max(0, el.getBoundingClientRect().top + win.scrollY - 8);
+  }
+  if (behavior === "keep") { if (Math.abs(win.scrollY - y) < 40) return; behavior = "auto"; }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) behavior = "auto";
+  win.scrollTo({ top: y, behavior });
+}
+
 // Muestra el paso i: barra, contador, botones y el foco en su primer campo.
 function go(i) {
   step = Math.max(0, Math.min(STEPS.length - 1, i));
@@ -154,7 +186,10 @@ function go(i) {
   const current = $(`#builder .wstep[data-step="${STEPS[step]}"]`);
   const first = current.querySelector("input:checked, input:not([type=hidden]):not([type=file])");
   // En móvil, sin abrir el teclado solo por cambiar de paso a la elección de estilo.
+  previewView = STEP_VIEW[STEPS[step]];
   if (first && !(STEPS[step] === "estilo" && matchMedia("(pointer: coarse)").matches)) first.focus({ preventScroll: true });
+  previewView = STEP_VIEW[STEPS[step]]; // el primer campo del paso manda menos que el paso
+  setTimeout(() => scrollPreview(), 60);
 }
 
 // Cuenta atrás: al poner la fecha, los días suben hasta su número.
