@@ -30,7 +30,7 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
       catch {
         err.textContent = /\.hei[cf]$/i.test(file.name)
           ? `«${file.name}» es una foto HEIC del iPhone y este navegador no la abre. Abridla en el móvil y compartidla como JPG, o elegid otra.`
-          : `No se pudo leer «${file.name}». Prueba con una foto JPG o PNG.`;
+          : `No se pudo leer «${file.name}». Probad con una foto JPG o PNG.`;
       }
     }
     $("#b-photos").classList.remove("is-busy");

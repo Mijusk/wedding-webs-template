@@ -1,31 +1,38 @@
-import { $, esc, session } from "./util.js";
+import { $, esc, session, friendlyError, faqItems } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
-import { loadCatalog, renderStyleCards, limitToTwoRows } from "./catalog.js";
+import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoRows } from "./catalog.js";
 import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
 import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } from "./stage.js";
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
-import { startEntrance, revealOnScroll } from "./entrance.js";
+import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
 import { captureAttribution } from "./attribution.js";
 import { setupConsent } from "./consent.js";
 import { initAnalytics, track } from "./analytics.js";
+import { addStructuredData } from "./seo.js";
+import { initAds, conversion } from "./ads.js";
+
+// La portada (textos y fotos) ya está en el HTML y la cortina la levanta un script de la propia
+// página, sin esperar a nada. Aquí solo hace falta studio.json para el resto; los precios de la
+// base de datos y el config de cada plantilla llegan después, sin bloquear.
+startEntrance();
 
 async function start() {
   setupConsent();
   captureAttribution();
-  const catalog = await loadCatalog();
-  initAnalytics(catalog.studio);
-  const { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
+  const studio = await loadStudio();
+  const catalog = makeCatalog(studio);
+  initAnalytics(studio);
+  initAds(studio);
+  const { styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
-  $("#brand-name").textContent = studio.brand.name;
-  $("#foot-brand").textContent = studio.brand.name;
-  $("#brand-tagline").textContent = studio.brand.tagline;
-  startEntrance();
-
-  // Móvil de la portada
-  fitScaled($(".phone .scaled"));
-  showInFrame($("#intro-frame"), urlOf(available[0]), withTheme(available[0]));
+  const faq = faqItems(studio);
+  addStructuredData(studio, { faq });
+  // El HTML ya trae la marca y el titular; solo se tocan si studio.json dice otra cosa.
+  if ($("#brand-name").textContent !== studio.brand.name) $("#brand-name").textContent = studio.brand.name;
+  if ($("#foot-brand").textContent !== studio.brand.name) $("#foot-brand").textContent = studio.brand.name;
+  if ($("#brand-tagline").getAttribute("aria-label") !== studio.brand.tagline) $("#brand-tagline").textContent = studio.brand.tagline;
 
   // Estilos
   const templates = new Set(templateIds);
@@ -35,13 +42,12 @@ async function start() {
     + (soon.length ? ` ${soon.join(", ")} está en camino.` : "");
   renderStyleCards($("#styles-grid"), catalog);
   limitToTwoRows($("#styles-grid"), $("#styles-more"));
-  $("#styles-grid").addEventListener("click", (e) => {
+  $("#styles-grid").addEventListener("click", async (e) => {
     const t = e.target.closest("[data-try], [data-demo]");
     if (!t) return;
     if (t.dataset.try) { track("probar_abierto", { estilo: t.dataset.try, desde: "estilos" }); return openBuilder(t.dataset.try); }
     track("ejemplo_visto", { estilo: t.dataset.demo });
-    prepareStage(null, styles.find((s) => s.id === t.dataset.demo));
-    openStage();
+    await showExample(styles.find((s) => s.id === t.dataset.demo));
   });
 
   revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact, .foot");
@@ -61,13 +67,22 @@ async function start() {
       const key = `studio-lead:${wedding.email.toLowerCase()}`;
       if (wedding.email !== SAMPLE_EMAIL && !session.get(key)) {
         session.set(key, "1");
-        saveLead(leadFromTrial(wedding, style), studio.contact).catch(() => session.set(key, ""));
+        saveLead(leadFromTrial(wedding, style), studio.contact)
+          .then(() => conversion("lead", { estilo: style.id }))
+          .catch(() => session.set(key, ""));
       }
       track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length });
       setupPricing.prefill(wedding);
-      const ready = prepareStage(wedding, style);
-      await Promise.all([ready, playLoading(wedding, studio.generator)]);
-      openStage();
+      const loading = playLoading(wedding, studio.generator);
+      try {
+        await Promise.all([prepareStage(wedding, style), loading]);
+        openStage();
+      } catch (e) {
+        console.error("[WeddingWebs] vista previa:", e);
+        await loading;
+        openBuilder(style.id);
+        $("#b-error").textContent = "No hemos podido preparar la vista previa. Revisad la conexión y volved a pulsar «Crear nuestra web».";
+      }
     },
   });
   document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder(); }));
@@ -79,15 +94,79 @@ async function start() {
     else if (!$("#stage").hidden) closeStage();
   });
 
+  renderAbout(studio.about);
+  renderTestimonials(studio.testimonials);
+  renderFaq(faq);
   setupNudge();
+  // Si se llegó con un enlace a una sección (#tarifas), ahora que ya está pintada.
+  scrollToHash();
+
+  // Móvil de la portada: la web de ejemplo, en cuanto la página ha cargado lo suyo.
+  fitScaled($(".phone .scaled"));
+  afterLoad(() => withTheme(available[0])
+    .then((config) => showInFrame($("#intro-frame"), urlOf(available[0]), config))
+    .catch((e) => console.error("[WeddingWebs] móvil de la portada:", e)));
+
+  // Precios de la base de datos, cuando lleguen.
+  applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); addStructuredData(studio, { faq }); } });
 
   // Desde plantillas.html: ?probar=<estilo> abre el generador y ?ver=<estilo> el ejemplo.
   const params = new URLSearchParams(location.search);
   const pick = (id) => available.find((s) => s.id === id);
   if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
-  else if (pick(params.get("ver"))) { prepareStage(null, pick(params.get("ver"))); openStage(); }
+  else if (pick(params.get("ver"))) await showExample(pick(params.get("ver")));
   else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
   if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
+}
+
+// Testimonios (studio.json > testimonials): solo los que tienen nombre y texto. Sin ninguno, no sale.
+function renderTestimonials(list) {
+  const items = (Array.isArray(list) ? list : []).filter((t) => t?.name && t?.text);
+  if (!items.length) return;
+  $("#testimonials-list").innerHTML = items.map((t) => `
+    <figure class="testimonial">
+      <blockquote><p>${esc(t.text)}</p></blockquote>
+      <figcaption>${t.photo ? `<img src="${esc(t.photo)}" alt="" width="56" height="56" loading="lazy" decoding="async">` : ""}<span>${esc(t.name)}</span></figcaption>
+    </figure>`).join("");
+  $("#testimonios").hidden = false;
+  revealOnScroll(".testimonial");
+}
+
+// Preguntas frecuentes, desplegables (<details>: funcionan con teclado y sin JavaScript extra).
+function renderFaq(items) {
+  if (!items.length) return;
+  $("#faq-list").innerHTML = items.map((i) => `
+    <details class="faq__item"><summary>${esc(i.q)}</summary><p>${esc(i.a)}</p></details>`).join("");
+  $("#preguntas").hidden = false;
+  $("#faq-list").addEventListener("toggle", (e) => { if (e.target.open) track("faq_abierta", { pregunta: e.target.querySelector("summary").textContent.slice(0, 60) }); }, true);
+}
+
+// «Quiénes somos» (studio.json > about). Sin datos, la sección no sale.
+function renderAbout(about) {
+  const el = $("#quienes-somos");
+  if (!about?.title || !about.text?.length) return;
+  const set = (key, value) => { const n = el.querySelector(`[data-about="${key}"]`); if (n) n.textContent = value || ""; };
+  ["eyebrow", "title", "name", "role"].forEach((k) => set(k, about[k]));
+  el.querySelector("[data-about=text]").innerHTML = about.text.map((p) => `<p>${esc(p)}</p>`).join("");
+  const img = el.querySelector(".about__photo");
+  if (about.photo) { img.src = about.photo; img.alt = about.photoAlt || about.name || ""; } else img.remove();
+  el.hidden = false;
+  revealOnScroll(".about");
+}
+
+async function showExample(style) {
+  try {
+    await prepareStage(null, style);
+    openStage();
+  } catch (e) {
+    console.error("[WeddingWebs] ejemplo:", e);
+  }
+}
+
+// Después del evento load (fotos de la portada ya bajadas), o enseguida si ya pasó.
+function afterLoad(fn) {
+  if (document.readyState === "complete") setTimeout(fn, 0);
+  else addEventListener("load", () => setTimeout(fn, 0), { once: true });
 }
 
 // Desde el email de bienvenida (?prueba=<clave>): la web que probaron, con sus datos y fotos de
@@ -122,27 +201,27 @@ function leadFromTrial(w, style) {
   };
 }
 
-// Aviso "¿Probamos con vuestra boda?" al llegar a los estilos. Una vez por visita.
+// Botón pequeño fijo abajo, «Probar con vuestra boda», mientras miran los estilos. No sale con el
+// aviso de cookies puesto, con una capa abierta ni al llegar a las tarifas (tapaba el botón de pagar).
 function setupNudge() {
-  const nudge = $("#nudge"), KEY = "studio-nudge-done";
-  if (session.get(KEY)) return;
-  const done = () => { session.set(KEY, "1"); nudge.hidden = true; removeEventListener("scroll", onScroll); };
-  const onScroll = () => {
-    const trigger = $("#estilos").offsetTop - innerHeight * 0.4;
-    const busy = !$("#builder").hidden || !$("#stage").hidden || !$("#loading").hidden;
-    // Si ya están en las tarifas (o reservando), el aviso estorbaría: tapa el botón de pagar en el móvil.
-    const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.8;
-    if (atPricing) return;
-    if (scrollY > trigger && !busy) { nudge.hidden = false; removeEventListener("scroll", onScroll); }
+  const nudge = $("#nudge");
+  const update = () => {
+    const pastHero = $("#estilos").getBoundingClientRect().top < innerHeight * 0.6;
+    const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.9;
+    const busy = ["#builder", "#stage", "#loading"].some((id) => !$(id).hidden);
+    const show = pastHero && !atPricing && !busy && !document.querySelector(".cookies");
+    nudge.hidden = !show;
+    document.body.classList.toggle("has-nudge", show);
   };
-  $("#contact-form").addEventListener("focusin", () => { if (!nudge.hidden) done(); });
-  addEventListener("scroll", onScroll, { passive: true });
-  $("#nudge-yes").addEventListener("click", () => { done(); openBuilder(); });
-  $("#nudge-no").addEventListener("click", done);
-  document.querySelectorAll("[data-open-builder], [data-try]").forEach((b) => b.addEventListener("click", done));
+  addEventListener("scroll", update, { passive: true });
+  addEventListener("resize", update);
+  // El aviso de cookies entra y sale del <body>; las capas cambian su atributo hidden.
+  new MutationObserver(update).observe(document.body, { childList: true });
+  ["#builder", "#stage", "#loading"].forEach((id) => new MutationObserver(update).observe($(id), { attributes: true, attributeFilter: ["hidden"] }));
+  nudge.addEventListener("click", () => { track("probar_abierto", { desde: "boton_fijo" }); openBuilder(); });
+  update();
 }
 
 start().catch((e) => {
-  startEntrance();
-  $("#styles-grid").innerHTML = `<p class="error">No se pudo cargar el escaparate: ${esc(e.message)}</p>`;
+  $("#styles-grid").innerHTML = friendlyError("los estilos", e);
 });

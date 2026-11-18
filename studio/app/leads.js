@@ -1,16 +1,15 @@
 import { postToSheet } from "../../js/storage.js";
 import { attribution } from "./attribution.js";
 import { consentForLead } from "./consent.js";
-import { track } from "./analytics.js";
 
-// Guardado de contactos (pruebas del generador y reservas). Si studio.json tiene
+// Guardado de contactos (pruebas del generador y reservas). Las conversiones (Umami, Meta y
+// Google) las lanza quien llama, con conversion() de ads.js, cuando el envío ha ido bien. Si studio.json tiene
 // contact.endpoint (/api/lead: nuestra base de datos), se envía ahí y se espera a que confirme.
 // Si eso falla y hay contact.fallbackEndpoint (el Apps Script de la hoja de Google de siempre),
 // se manda ahí: así no se pierde ningún contacto durante el cambio. Sin ninguno, se simula.
 const KEY = "studio-leads-demo";
 
 export async function saveLead(lead, contactConfig = {}) {
-  track(lead.type === "reserva" ? "reserva_enviada" : "lead_prueba", lead.style ? { estilo: lead.style } : undefined);
   const payload = { ...lead, attribution: attribution(), cookieConsent: consentForLead(), page: location.pathname, sentAt: new Date().toISOString() };
 
   if (contactConfig.endpoint) {

@@ -1,25 +1,41 @@
-// Analítica anónima y sin cookies (Umami): visitas, de dónde vienen, páginas y eventos del embudo.
-// No guarda nada en el navegador ni datos personales, así que no necesita consentimiento.
+// Analítica con Umami: visitas, de dónde vienen, páginas y eventos del embudo. Sin cookies y sin
+// datos personales, pero es la categoría «analítica» del aviso: solo se carga si la aceptan, y si la
+// retiran deja de enviar en el acto (data-before-send cancela cada envío).
 // Se activa poniendo studio.json > analytics.websiteId (el id de la web en Umami). Vacío = apagada.
-let ready = false;
+// No se carga en localhost.
+import { allowed, onConsentChange } from "./consent.js";
+
+let cfg = null;
+let loaded = false;
 const queue = [];
 
-export function initAnalytics(studio) {
-  const cfg = studio?.analytics || {};
-  if (!cfg.websiteId || ready || location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
-  ready = true;
+const local = () => ["localhost", "127.0.0.1"].includes(location.hostname);
+
+function load() {
+  if (loaded || !cfg?.websiteId || local() || !allowed("analitica")) return;
+  loaded = true;
+  // Umami llama a esta función antes de cada envío: devolver null lo cancela.
+  window.__wwAnalyticsBeforeSend = (type, payload) => (allowed("analitica") ? payload : null);
   const s = document.createElement("script");
   s.defer = true;
   s.src = cfg.src || "https://cloud.umami.is/script.js";
   s.dataset.websiteId = cfg.websiteId;
+  s.dataset.beforeSend = "__wwAnalyticsBeforeSend";
   if (cfg.domains) s.dataset.domains = cfg.domains;
   s.addEventListener("load", () => queue.splice(0).forEach(([n, d]) => window.umami?.track(n, d)));
   document.head.append(s);
 }
 
+export function initAnalytics(studio) {
+  if (cfg) return;
+  cfg = studio?.analytics || {};
+  onConsentChange((c) => { if (c.analitica) load(); else queue.length = 0; });
+  load();
+}
+
 // Evento del embudo, p. ej. track("prueba_generada", { estilo: "villa" }). Nunca datos personales.
 export function track(name, data) {
-  if (!ready) return;
+  if (!loaded || !allowed("analitica")) return;
   try {
     if (window.umami) window.umami.track(name, data);
     else queue.push([name, data]);

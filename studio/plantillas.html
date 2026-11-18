@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#f6f4f1">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Plantillas · WeddingWebs</title>
 <meta name="description" content="Todas las plantillas de WeddingWebs, con un ejemplo en vivo de cada una.">
@@ -10,6 +13,14 @@
 <meta property="og:title" content="Plantillas · WeddingWebs">
 <meta property="og:description" content="Todas las plantillas, con un ejemplo en vivo de cada una. Probadlas con vuestros nombres y fotos.">
 <meta property="og:locale" content="es_ES">
+<link rel="canonical" href="https://www.weddingwebstudio.es/studio/plantillas.html">
+<meta property="og:url" content="https://www.weddingwebstudio.es/studio/plantillas.html">
+<meta property="og:site_name" content="WeddingWebs">
+<meta property="og:image" content="https://www.weddingwebstudio.es/studio/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="WeddingWebs studio: vuestra web de boda, lista antes que las invitaciones.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="studio.css">
 <link rel="stylesheet" href="entrance.css">
@@ -17,7 +28,7 @@
 <body>
 <header class="top">
   <div class="wrap top__inner">
-    <a class="brand" href="./" data-brand>WeddingWebs</a>
+    <a class="brand brand-mark" href="./"><span data-brand>WeddingWebs</span><span class="brand__studio">studio</span></a>
     <nav class="top__nav" aria-label="Secciones">
       <a href="./#estilos">Inicio</a>
       <a href="./#tarifas">Tarifas</a>
@@ -38,32 +49,35 @@
 </main>
 
 <footer class="foot wrap">
-  <p><span data-brand>WeddingWebs</span> · Webs para bodas, aniversarios y otras celebraciones.</p>
+  <p><span class="brand-mark"><span data-brand>WeddingWebs</span><span class="brand__studio">studio</span></span> · Webs de boda con confirmación de asistencia.</p>
   <nav class="foot__legal" aria-label="Información legal">
     <a href="legal.html#aviso-legal">Aviso legal</a>
     <a href="legal.html#privacidad">Privacidad</a>
     <a href="legal.html#condiciones">Condiciones de contratación</a>
-    <a href="legal.html#cookies" data-cookies>Cookies</a>
+    <a href="legal.html#cookies" data-cookies>Configurar cookies</a>
   </nav>
 </footer>
 
 <script type="module">
   import { loadCatalog, renderStyleCards } from "./app/catalog.js";
   import { revealOnScroll } from "./app/entrance.js";
+  import { friendlyError } from "./app/util.js";
   import { captureAttribution } from "./app/attribution.js";
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
+  import { initAds } from "./app/ads.js";
   setupConsent();
   captureAttribution();
   try {
     const catalog = await loadCatalog();
     initAnalytics(catalog.studio);
+    initAds(catalog.studio);
     document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = catalog.studio.brand.name; });
     document.title = `Plantillas · ${catalog.studio.brand.name}`;
     renderStyleCards(document.getElementById("catalog-grid"), catalog, { links: true });
     revealOnScroll(".section-head, .style-card, .foot");
   } catch (e) {
-    document.getElementById("catalog-grid").innerHTML = `<p class="error">No se pudieron cargar las plantillas: ${e.message}</p>`;
+    document.getElementById("catalog-grid").innerHTML = friendlyError("las plantillas", e);
   }
 </script>
 </body>

@@ -3,13 +3,30 @@
 <head>
 <meta charset="utf-8">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#f6f4f1">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Información legal · WeddingWebs</title>
+<meta name="description" content="Aviso legal, privacidad, cookies y condiciones de contratación de WeddingWebs.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Información legal · WeddingWebs">
+<meta property="og:description" content="Aviso legal, privacidad, cookies y condiciones de contratación.">
+<meta property="og:locale" content="es_ES">
+<link rel="canonical" href="https://www.weddingwebstudio.es/studio/legal.html">
+<meta property="og:url" content="https://www.weddingwebstudio.es/studio/legal.html">
+<meta property="og:site_name" content="WeddingWebs">
+<meta property="og:image" content="https://www.weddingwebstudio.es/studio/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="WeddingWebs studio: vuestra web de boda, lista antes que las invitaciones.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="studio.css">
 <style>
   .legal { max-width: 760px; padding-block: 48px 80px; display: grid; gap: 40px; }
-  .legal section { display: grid; gap: 12px; scroll-margin-top: 24px; }
+  .legal section { display: grid; gap: 12px; scroll-margin-top: 80px; }
+  .legal li[id] { scroll-margin-top: 80px; }
   .legal h1 { font-size: clamp(34px, 5vw, 48px); }
   .legal h2 { font-size: 28px; }
   .legal ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
@@ -20,7 +37,7 @@
 <body>
 <header class="top">
   <div class="wrap top__inner">
-    <a class="brand" href="./" data-brand>WeddingWebs</a>
+    <a class="brand brand-mark" href="./"><span data-brand>WeddingWebs</span><span class="brand__studio">studio</span></a>
   </div>
 </header>
 
@@ -45,19 +62,33 @@
     <p><strong>Qué datos y para qué.</strong> Cuando probáis el generador o hacéis una reserva guardamos vuestros nombres, email, teléfono si lo dais, fecha y lugar de la boda y el estilo elegido, para escribiros sobre vuestra web y, si la contratáis, para prepararla. Las fotos de la prueba no salen de vuestro navegador.</p>
     <p><strong>Base legal.</strong> Vuestro consentimiento al marcar la casilla del formulario y, si contratáis, el propio contrato.</p>
     <p><strong>Cuánto tiempo.</strong> Los contactos que no contratan se borran a los 12 meses. Los de clientes se guardan mientras dure el servicio y después el tiempo que exija la ley fiscal.</p>
-    <p><strong>Quién más los ve.</strong> Nadie se los vende ni se los cede. Los tratan por encargo nuestro, con contrato y las garantías del RGPD: Supabase (base de datos, alojada en la UE), Vercel (alojamiento de la web), Resend (envío de emails) y Stripe (pagos: los datos de la tarjeta los recibe Stripe, nunca nosotros). Mientras cambiamos de sistema, los contactos también se copian en Google Workspace. Los que son de EE. UU. están adheridos al Marco de Privacidad de Datos UE-EE. UU.</p>
+    <p><strong>Quién más los ve.</strong> Nadie se los vende ni se los cede. Los tratan por encargo nuestro, con contrato y las garantías del RGPD:</p>
+    <ul>
+      <li>Supabase: base de datos, alojada en la UE.</li>
+      <li>Vercel: alojamiento de la web.</li>
+      <li>Resend: envío de emails.</li>
+      <li>Stripe: pagos. Los datos de la tarjeta los recibe Stripe, nunca nosotros.</li>
+      <li>Google (Google Workspace): hoja de cálculo de respaldo, que recibe vuestros datos solo si en ese momento falla nuestra base de datos.</li>
+      <li>Umami: analítica de visitas, solo si la aceptáis en el aviso de cookies (ver <a href="#cookies">Cookies</a>).</li>
+      <li>Google (Google Ireland): medición de los anuncios de Google, solo cuando tenemos esa medición activada y solo si aceptáis la publicidad en el aviso de cookies (ver <a href="#cookies">Cookies</a>).</li>
+    </ul>
+    <p>Los que son de EE. UU. (Vercel, Resend, Stripe y Google) están adheridos al Marco de Privacidad de Datos UE-EE. UU.</p>
+    <p><strong>Meta, corresponsable.</strong> Cuando tenemos activada la medición de los anuncios de Instagram y Facebook y aceptáis la publicidad en el aviso de cookies, el píxel de Meta envía a Meta Platforms Ireland que habéis visitado la web y si probáis el generador o nos enviáis una reserva (con la tarifa y el estilo, nunca vuestro nombre ni vuestro email). En esa recogida y ese envío, Meta y nosotros somos corresponsables del tratamiento, como dice el Tribunal de Justicia de la UE (sentencia Fashion ID, C-40/17), y lo regula el acuerdo de corresponsabilidad que Meta firma con los anunciantes. La base legal es vuestro consentimiento. Lo que Meta haga después con esos datos lo decide Meta, como responsable, según su <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener">política de privacidad</a>. Para vuestros derechos sobre esa parte podéis escribirnos a nosotros o a Meta. Meta puede tratar los datos también en EE. UU.; Meta Platforms, Inc. está adherida al Marco de Privacidad de Datos UE-EE. UU.</p>
     <p><strong>Facturas.</strong> Si contratáis, guardamos las facturas y sus datos el tiempo que exige la ley fiscal (en general, 6 años).</p>
     <p><strong>Datos de los invitados.</strong> Las respuestas de los invitados (nombre, asistencia, canción y lo que la pareja pregunte) se guardan solo para la pareja, que decide sobre ellas; nosotros las alojamos por encargo suyo y se borran a los <span data-field="guestDataMonths"></span> meses de la boda.</p>
     <p><strong>Vuestros derechos.</strong> Podéis pedir ver, corregir o borrar vuestros datos, oponeros o retirar el consentimiento escribiendo al email de arriba. Si creéis que no lo hacemos bien, podéis reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
-    <p><strong>Cookies.</strong> Esta web no usa cookies de publicidad ni de analítica. Solo guarda en vuestro navegador si ya habéis visto el aviso de prueba, para no repetirlo. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
+    <p><strong>Cookies.</strong> La analítica y la medición de publicidad solo se activan si nos dais permiso en el aviso de cookies. Todo el detalle, justo debajo.</p>
   </section>
 
   <section id="cookies">
     <h2>Cookies</h2>
-    <p><strong>Analítica, sin cookies.</strong> Contamos las visitas con Umami de forma anónima: qué páginas se ven, desde qué web o anuncio se llega y qué botones se pulsan (por ejemplo, abrir el generador). No guarda nada en vuestro navegador, no usa vuestra IP para identificaros y no nos dice quiénes sois, así que no os pedimos permiso para eso.</p>
-    <p><strong>Publicidad (opcional).</strong> Si lo aceptáis en el aviso, guardamos en vuestro navegador (localStorage, «ww-attribution») de qué anuncio o web llegasteis la primera vez, durante 90 días. Si después nos escribís o probáis el generador, ese dato va con vuestro contacto para saber qué publicidad funciona. Si lo rechazáis, solo lo recordamos mientras tengáis la pestaña abierta.</p>
-    <p><strong>Lo que es necesario.</strong> Guardamos vuestra elección sobre este aviso («ww-consent») y si ya habéis visto el aviso de prueba, para no repetirlos. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
-    <p><strong>Cambiar de opinión.</strong> <a href="#cookies" data-cookies>Volver a abrir el aviso de cookies</a>. Si lo rechazáis, borramos lo guardado.</p>
+    <p>Al entrar os preguntamos con un aviso que tiene tres botones iguales: «Rechazar todo», «Configurar» y «Aceptar todo». Mientras no elijáis, no se activa nada opcional. Esto es lo que usa la web:</p>
+    <p><strong>Necesarias (siempre activas).</strong> Guardamos en vuestro navegador vuestra elección sobre este aviso («ww-consent», 12 meses; después os volvemos a preguntar). Mientras la pestaña está abierta (sessionStorage) recordamos también si ya habéis visto la animación de entrada y el aviso «Probar con vuestra boda», y si ya hemos apuntado vuestra prueba, para no repetirlos. Las fuentes tipográficas se sirven desde esta misma web, sin conectar con Google.</p>
+    <p><strong>Analítica (solo si la aceptáis).</strong> Contamos las visitas con Umami: qué páginas se ven, desde qué web o anuncio se llega, el país, el tipo de dispositivo y qué botones se pulsan (por ejemplo, abrir el generador o enviar una reserva). Umami no usa cookies ni guarda nada en vuestro navegador, pero lee algunos datos de él (como el tamaño de pantalla y el idioma) y distingue una visita de otra a partir de la IP y del navegador. Nosotros solo vemos números agregados, nunca quiénes sois. Si no la aceptáis, el código de Umami no se carga; si retiráis el permiso, deja de enviar datos en ese momento.</p>
+    <p><strong>Publicidad y medición de anuncios (solo si la aceptáis).</strong> Guardamos en vuestro navegador («ww-attribution», en localStorage durante 90 días y en sessionStorage) de qué anuncio o web llegasteis la primera vez y la última: los parámetros del enlace del anuncio (utm, gclid o fbclid), la página por la que entrasteis y la web de la que veníais. Si después probáis el generador o nos hacéis una reserva, ese dato va con vuestro contacto, para saber qué publicidad nos trae parejas. Si no lo aceptáis, no guardamos nada de esto en vuestro navegador; solo si nos dejáis vuestros datos en la misma página a la que habéis llegado, el formulario indica de qué anuncio veníais.</p>
+    <p><strong>Píxel de Meta y etiqueta de Google Ads (dentro de publicidad, solo si la aceptáis).</strong> Cuando anunciamos en Instagram, Facebook o Google y tenemos activada su medición, la web carga el píxel de Meta y la etiqueta de Google Ads. Les avisan de que habéis visitado la web y de si probáis el generador o nos enviáis una reserva (con la tarifa y el estilo, nunca vuestro nombre ni vuestro email), para saber qué anuncios nos traen parejas. Usan sus propias cookies en esta web (_fbp y _fbc de Meta; _gcl_au y _gcl_aw de Google). Si rechazáis la publicidad o no contestáis al aviso, no se cargan; si retiráis el permiso, dejamos de enviarles nada y borramos esas cookies de esta web.</p>
+    <p><strong>Constancia.</strong> Cuando nos dejáis vuestros datos guardamos con ellos lo que elegisteis en este aviso, el texto que visteis, la fecha y la IP, como prueba de vuestro consentimiento.</p>
+    <p><strong>Cambiar de opinión.</strong> <a href="#cookies" data-cookies>Configurar cookies</a> (también desde el pie de cada página). Si retiráis el permiso de publicidad, borramos «ww-attribution» y las cookies de Meta y Google de esta web.</p>
   </section>
 
   <section id="condiciones">
@@ -68,8 +99,9 @@
       <li><strong>Factura.</strong> Os la mandamos por email al pagar. Si no nos pedís factura a nombre de alguien con NIF, es una factura simplificada.</li>
       <li><strong>Seguimiento.</strong> Con el código de vuestro pedido veis cómo va, las propuestas que os mandamos, y podéis pedir cambios o aprobarlas, sin cuenta ni contraseña.</li>
       <li><strong>Entrega.</strong> En <span data-field="deliveryDays"></span> días laborables desde que tenemos vuestros datos y fotos en las tarifas con plantilla; en la tarifa a medida, la fecha que acordemos.</li>
-      <li><strong>Cambios.</strong> Corrección de erratas y datos siempre incluida. Cambios de diseño según la tarifa: ninguno en Tal cual, los acordados en Con cambios y hasta 3 rondas en A medida.</li>
+      <li><strong>Cambios.</strong> Corrección de erratas y datos siempre incluida. Rondas de cambios de diseño según la tarifa: <span data-rounds>ninguna en Tal cual (se entrega tal cual se ha probado), 2 en Con cambios y 3 en A medida</span>.</li>
       <li><strong>Cuánto tiempo sigue online.</strong> Hasta <span data-field="onlineMonths"></span> meses después de la boda.</li>
+      <li id="garantia" data-guarantee><strong>Garantía: si la primera versión no os gusta, os devolvemos el dinero.</strong> <span data-guarantee-text>Vale para las tres tarifas. Basta con pedírnoslo en los 7 días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo, por el mismo medio de pago, en un máximo de 14 días desde que nos lo pedís.</span> Para pedirlo, escribidnos a <span data-field="email"></span>. Es una garantía comercial nuestra: se suma a vuestro derecho de desistimiento (justo debajo) y no lo sustituye ni lo limita.</li>
       <li><strong>Desistimiento.</strong> Tenéis 14 días naturales desde el pago para desistir sin dar motivos y os devolvemos el importe. Si al pagar nos pedís expresamente empezar antes de que acabe ese plazo (la casilla «Queremos que empecéis ya») y la web ya está entregada, se pierde ese derecho (artículo 103 del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios).</li>
       <li><strong>Lo que ponéis vosotros.</strong> Necesitamos que las fotos y textos sean vuestros o tengáis permiso para usarlos.</li>
     </ul>
@@ -83,11 +115,23 @@
 <script type="module">
   import { setupConsent } from "./app/consent.js";
   import { initAnalytics } from "./app/analytics.js";
+  import { initAds } from "./app/ads.js";
+  import { friendlyError, CONTACT_EMAIL, roundsSummary, fill } from "./app/util.js";
   // Los datos del titular y los plazos salen de studio.json > legal; lo que falte se marca como
   // pendiente, salvo las filas opcionales (NIF, domicilio), que si están vacías no se muestran.
-  const studio = await fetch("studio.json", { cache: "no-store" }).then((r) => r.json());
+  let studio;
+  try {
+    const res = await fetch("studio.json");
+    if (!res.ok) throw new Error(`studio.json ${res.status}`);
+    studio = await res.json();
+  } catch (e) {
+    // Sin studio.json, la página se lee igual: se avisa con calma y se deja el email de contacto.
+    document.querySelector(".legal h1").insertAdjacentHTML("afterend", friendlyError("todos los datos de esta página", e));
+    studio = { brand: { name: "WeddingWebs" }, legal: { email: CONTACT_EMAIL } };
+  }
   setupConsent();
   initAnalytics(studio);
+  initAds(studio);
   const legal = studio.legal || {};
   document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = studio.brand.name; });
   document.querySelectorAll("[data-field]").forEach((el) => {
@@ -96,6 +140,13 @@
     else if (value === "" || value == null) { el.textContent = "pendiente"; el.className = "pending"; }
     else el.textContent = value;
   });
+  // Garantía: studio.json > guarantee (si está apagada, no se muestra)
+  const g = studio.guarantee;
+  if (g && !g.enabled) document.querySelector("[data-guarantee]")?.remove();
+  else if (g?.conditions) document.querySelectorAll("[data-guarantee-text]").forEach((el) => { el.textContent = fill(g.conditions, { days: g.days }); });
+  // Rondas de cambios de cada tarifa: studio.json > pricing.tiers[].rounds
+  const rounds = roundsSummary(studio.pricing?.tiers);
+  if (rounds) document.querySelectorAll("[data-rounds]").forEach((el) => { el.textContent = rounds; });
 </script>
 </body>
 </html>

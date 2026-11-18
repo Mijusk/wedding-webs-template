@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Imágenes del escaparate</title>
+<!--
+  Imágenes fijas del escaparate (studio/), pintadas con sus fuentes y colores. Para regenerarlas,
+  con `npm run dev` arrancado, desde la carpeta del proyecto:
+
+    chrome --headless --hide-scrollbars --virtual-time-budget=4000 --window-size=1200,630 ^
+      --screenshot=compartir.png "http://localhost:3000/herramientas/escaparate-imagenes.html?que=compartir"
+    ffmpeg -i compartir.png -q:v 2 studio/compartir.jpg
+
+    (?que=icono con --window-size=180,180 → studio/apple-touch-icon.png;
+     ?que=favicon con --window-size=192,192 y ffmpeg -vf scale=48:48:flags=lanczos → studio/favicon.png)
+
+  Los textos salen de studio/studio.json (brand); la foto, de studio/demo/.
+-->
+<link rel="stylesheet" href="/studio/fonts/fonts.css">
+<style>
+  :root { --night: #1a1520; --paper: #f3ede6; --rose: #d6a1b4; --muted: #a99fae; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: var(--night); overflow: hidden; }
+  [data-que]:not(.on) { display: none !important; }
+  .compartir { width: 1200px; height: 630px; position: relative; color: var(--paper); font-family: "Hanken Grotesk", sans-serif;
+    display: grid; grid-template-columns: 1fr 470px; align-items: center; padding: 64px 56px 56px 72px; gap: 32px; }
+  .texto { display: grid; gap: 26px; align-content: center; }
+  .marca { display: flex; align-items: center; gap: 18px; }
+  .marca svg { width: 74px; overflow: visible; }
+  .marca svg { stroke-width: 2.4; }
+  .nombre { font-family: "Gloock", serif; font-size: 40px; line-height: 1; white-space: nowrap; }
+  .nombre span { font-family: "Jost", sans-serif; font-weight: 300; font-size: .62em; letter-spacing: .05em; color: var(--rose); margin-left: .16em; }
+  h1 { font-family: "Gloock", serif; font-weight: 400; font-size: 60px; line-height: 1.04; letter-spacing: -.015em; max-width: 13ch; }
+  .sub { font-size: 21px; color: var(--muted); max-width: 32ch; line-height: 1.4; }
+  .web { position: absolute; left: 72px; bottom: 44px; font-size: 15px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .fotos { position: relative; height: 100%; }
+  .foto { position: absolute; overflow: hidden; border-radius: 999px 999px 18px 18px; box-shadow: 0 30px 60px rgb(0 0 0 / .45); }
+  .foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .foto--a { width: 300px; height: 440px; right: 0; top: 0; }
+  .foto--b { width: 210px; height: 300px; left: 0; bottom: 0; border: 6px solid var(--night); }
+
+  .icono, .favicon { display: grid; place-items: center; background: var(--night); }
+  .icono { width: 180px; height: 180px; }
+  .favicon { width: 192px; height: 192px; border-radius: 42px; }
+  .icono svg, .favicon svg { width: 76%; overflow: visible; }
+
+  .icono svg { stroke-width: 5; }
+  .favicon svg { stroke-width: 9; }
+  html:has(.favicon.on), html:has(.favicon.on) body { background: transparent; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ww" viewBox="0 0 124 60">
+    <path fill="none" stroke-linejoin="miter" stroke-linecap="square" stroke="#f3ede6" d="M4 8 L22 52 L40 16 L58 52 L76 8"/>
+    <path fill="none" stroke-linejoin="miter" stroke-linecap="square" stroke="#d6a1b4" d="M48 8 L66 52 L84 16 L102 52 L120 8"/>
+  </symbol>
+</svg>
+
+<div class="compartir" data-que="compartir">
+  <div class="texto">
+    <div class="marca"><svg viewBox="0 0 124 60"><use href="#ww"/></svg><p class="nombre" data-brand>WeddingWebs<span>studio</span></p></div>
+    <h1 data-tagline>Vuestra web de boda, lista antes que las invitaciones.</h1>
+    <p class="sub">Con confirmación de asistencia. Probadla con vuestros nombres y fotos antes de pagar.</p>
+  </div>
+  <div class="fotos">
+    <figure class="foto foto--a"><img src="/studio/demo/foto-05.jpg" alt=""></figure>
+    <figure class="foto foto--b"><img src="/studio/demo/foto-03.jpg" alt=""></figure>
+  </div>
+  <p class="web">weddingwebstudio.es</p>
+</div>
+
+<div class="icono" data-que="icono"><svg viewBox="0 0 124 60"><use href="#ww"/></svg></div>
+<div class="favicon" data-que="favicon"><svg viewBox="0 0 124 60"><use href="#ww"/></svg></div>
+
+<script>
+  const que = new URLSearchParams(location.search).get("que") || "compartir";
+  document.querySelector(`[data-que="${que}"]`).classList.add("on");
+  fetch("/studio/studio.json").then((r) => r.json()).then((s) => {
+    const t = document.querySelector("[data-tagline]");
+    if (s.brand?.tagline) t.textContent = s.brand.tagline;
+  }).catch(() => {});
+</script>
+</body>
+</html>

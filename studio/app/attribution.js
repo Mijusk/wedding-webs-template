@@ -1,15 +1,17 @@
 // Atribución de publicidad: de qué anuncio o web llegó la pareja (utm_*, gclid, fbclid, página de
 // entrada y web de origen). Viaja con el lead para saber qué campaña trae bodas.
 //
-// Sin consentimiento solo se guarda en sessionStorage (se borra al cerrar la pestaña), para no
-// perderlo al pasar de plantillas.html a la portada. Si aceptan las cookies de publicidad, se
-// guarda también en localStorage durante 90 días: así el primer toque sobrevive entre visitas.
-// Si las rechazan (o las retiran), se borra lo guardado.
+// Es de la categoría «publicidad» del aviso de cookies:
+//   · Con permiso: se guarda en el navegador («ww-attribution»): en sessionStorage para la visita y
+//     en localStorage 90 días, para que el primer toque sobreviva entre visitas.
+//   · Sin permiso (o al retirarlo): no se guarda nada y se borra lo que hubiera. Solo se recuerda en
+//     memoria mientras están en esta página, por si dejan sus datos aquí mismo.
 import { adsAllowed, onConsentChange } from "./consent.js";
 
-const KEY = "ww-attribution";
+export const KEY = "ww-attribution";
 const MAX_AGE_DAYS = 90;
 const PARAMS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
+let memory = null;
 
 const store = {
   get(s) { try { return JSON.parse(s.getItem(KEY) || "null"); } catch { return null; } },
@@ -23,30 +25,40 @@ function fresh(a) {
 }
 
 function read() {
-  const kept = adsAllowed() ? fresh(store.get(localStorage)) : null;
-  const visit = store.get(sessionStorage);
+  if (!adsAllowed()) return memory || {};
+  const kept = fresh(store.get(localStorage));
+  const visit = store.get(sessionStorage) || memory;
   // El primer toque de verdad es el más antiguo; el último, el de esta visita si lo hay.
   if (kept && visit) return { first: kept.first, last: visit.last || kept.last };
   return kept || visit || {};
 }
 
 function write(a) {
+  memory = a;
+  if (!adsAllowed()) return;
   store.set(sessionStorage, a);
-  if (adsAllowed()) store.set(localStorage, a);
+  store.set(localStorage, a);
+}
+
+export function forgetAttribution() {
+  store.del(localStorage);
+  store.del(sessionStorage);
 }
 
 onConsentChange((c) => {
-  if (c.ads) { const a = read(); if (a.first) store.set(localStorage, a); }
-  else store.del(localStorage);
+  if (c.publicidad) { if (memory?.first) write(memory); }
+  else forgetAttribution();
 });
 
 export function captureAttribution() {
+  // Sin permiso, que no quede nada de antes (p. ej. de la versión anterior del aviso).
+  if (!adsAllowed()) forgetAttribution();
   const q = new URLSearchParams(location.search);
   const touch = Object.fromEntries(PARAMS.filter((p) => q.get(p)).map((p) => [p, q.get(p).slice(0, 300)]));
   let external = false;
   try { external = Boolean(document.referrer) && new URL(document.referrer).origin !== location.origin; } catch { /* sin referrer */ }
   const saved = read();
-  if (!Object.keys(touch).length && !external && saved.first) return;
+  if (!Object.keys(touch).length && !external && saved.first) { memory = saved; return; }
   const now = {
     ...touch,
     landing_page: (location.pathname + location.search).slice(0, 500),

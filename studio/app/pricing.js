@@ -1,21 +1,33 @@
-import { $, esc, priceLabel } from "./util.js";
+import { $, esc, priceLabel, fill, roundsLine, CONTACT_EMAIL } from "./util.js";
 import { saveLead } from "./leads.js";
 import { attribution } from "./attribution.js";
+import { conversion } from "./ads.js";
 import { validNif } from "../../lib/nif.js";
 
+const writeUs = (studio) => `escribidnos a ${studio.legal?.email || CONTACT_EMAIL}`;
 let chosen = null; // { config, style } de la web generada, si la hay
 
 export function setupPricing({ studio, templateUrl }) {
-  const { tiers, currency } = studio.pricing;
-  $("#tiers").innerHTML = tiers.map((t) => `
-    <article class="tier" data-tier="${esc(t.id)}">
+  const { tiers, currency, recommended, roundsText } = studio.pricing;
+  const badge = studio.pricing.recommendedLabel || "Recomendada";
+  // La recomendada (studio.json > pricing.recommended) lleva distintivo. La elegida en el
+  // formulario se marca aparte (.is-selected), y solo cuando la pareja elige.
+  $("#tiers").innerHTML = tiers.map((t) => {
+    const rec = t.id === recommended;
+    const items = [...t.includes, roundsLine(t.rounds, roundsText)].filter(Boolean);
+    return `
+    <article class="tier${rec ? " tier--recommended" : ""}" data-tier="${esc(t.id)}">
+      ${rec ? `<p class="tier__badge">${esc(badge)}</p>` : ""}
       <h3>${esc(t.name)}</h3>
       <p class="tier__price">${esc(priceLabel(t.price, currency))}</p>
       <p class="tier__summary">${esc(t.summary)}</p>
-      <ul>${t.includes.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
-      <button class="btn btn--ghost" type="button" data-pick="${esc(t.id)}">Elegir ${esc(t.name)}</button>
-    </article>`).join("");
-  if (studio.pricing.note) $("#tiers").insertAdjacentHTML("afterend", `<p class="fineprint tiers__note">${esc(studio.pricing.note)}</p>`);
+      <ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
+      <button class="btn${rec ? "" : " btn--ghost"}" type="button" data-pick="${esc(t.id)}" aria-pressed="false">Elegir ${esc(t.name)}</button>
+    </article>`;
+  }).join("");
+  const g = studio.guarantee;
+  if (g?.enabled && g.title) $("#tiers").insertAdjacentHTML("afterend", `<p class="tiers__guarantee">${esc(g.title)}. <a href="legal.html#garantia">Condiciones de la garantía</a></p>`);
+  if (studio.pricing.note) $("#tiers").insertAdjacentHTML("afterend", `<p class="fineprint tiers__note">${esc(fill(studio.pricing.note, studio.legal))}</p>`);
 
   const tierSel = $("#c-tier"), styleSel = $("#c-style");
   tierSel.innerHTML = tiers.map((t) => `<option value="${esc(t.id)}">${esc(t.name)} · ${esc(priceLabel(t.price, currency))}</option>`).join("");
@@ -36,14 +48,22 @@ export function setupPricing({ studio, templateUrl }) {
       : FINE_RESERVE;
   };
   $("#c-invoice").addEventListener("change", (e) => { $("#c-billing").hidden = !e.target.checked; });
+  let picked = false; // hasta que eligen una, ninguna tarjeta sale marcada
   const markTier = () => {
-    document.querySelectorAll(".tier").forEach((el) => el.classList.toggle("is-selected", el.dataset.tier === tierSel.value));
+    document.querySelectorAll(".tier").forEach((el) => {
+      const on = picked && el.dataset.tier === tierSel.value;
+      const btn = el.querySelector("[data-pick]");
+      el.classList.toggle("is-selected", on);
+      btn.setAttribute("aria-pressed", String(on));
+      btn.textContent = on ? "Elegida ✓" : `Elegir ${tiers.find((t) => t.id === el.dataset.tier).name}`;
+    });
     syncCheckout();
   };
-  tierSel.addEventListener("change", markTier);
+  tierSel.addEventListener("change", () => { picked = true; markTier(); });
   $("#tiers").addEventListener("click", (e) => {
     const id = e.target.closest("[data-pick]")?.dataset.pick;
     if (!id) return;
+    picked = true;
     tierSel.value = id;
     if (id === "a-medida") styleSel.value = "a-medida";
     markTier();
@@ -51,6 +71,17 @@ export function setupPricing({ studio, templateUrl }) {
     $("#c-name").focus({ preventScroll: true });
   });
   markTier();
+
+  // Los precios de la base de datos llegan después de pintar la página: se cambian en su sitio.
+  setupPricing.refresh = () => {
+    for (const t of tiers) {
+      const price = $(`.tier[data-tier="${CSS.escape(t.id)}"] .tier__price`);
+      if (price) price.textContent = priceLabel(t.price, currency);
+      const opt = tierSel.querySelector(`option[value="${CSS.escape(t.id)}"]`);
+      if (opt) opt.textContent = `${t.name} · ${priceLabel(t.price, currency)}`;
+    }
+    syncCheckout();
+  };
 
   const form = $("#contact-form"), err = $("#c-error");
   form.addEventListener("submit", async (e) => {
@@ -67,14 +98,16 @@ export function setupPricing({ studio, templateUrl }) {
     try {
       const { simulated } = await saveLead({ type: "reserva", ...d, wedding: chosen ? withoutPhotos(chosen.config) : null }, studio.contact);
       const tier = tiers.find((t) => t.id === d.tier);
+      conversion("reserva", { tarifa: tier.id, estilo: d.style, valor: tier.price[0] });
       form.hidden = true;
       $("#contact-thanks").innerHTML = `
         <h3>Recibido, gracias</h3>
         <p>Hemos apuntado la tarifa ${esc(tier.name)} (${esc(priceLabel(tier.price, currency))}). Os escribimos a ${esc(d.email)} para cerrar los detalles y el pago.</p>
         ${simulated ? '<p class="note">Esto es una demo: la reserva se ha guardado solo en este navegador y no se ha cobrado nada.</p>' : ""}`;
       $("#contact-thanks").hidden = false;
-    } catch {
-      err.textContent = "No se ha podido enviar la reserva. Revisad la conexión y volved a intentarlo; si sigue fallando, escribidnos y lo vemos.";
+    } catch (e) {
+      console.error("[WeddingWebs] reserva:", e);
+      err.textContent = `No se ha podido enviar la reserva. Revisad la conexión y volved a intentarlo; si sigue fallando, ${writeUs(studio)} y lo vemos.`;
       btn.disabled = false; btn.textContent = "Enviar reserva";
     }
   });
@@ -102,16 +135,23 @@ export function setupPricing({ studio, templateUrl }) {
     try {
       const res = await fetch("/api/pedido", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
       const r = await res.json().catch(() => ({}));
-      if (r.ok && r.url) { location.href = r.url; return; }
+      if (r.ok && r.url) {
+        const t = tierOf();
+        conversion("reserva", { tarifa: t?.id, estilo: d.style, valor: t?.price[0] });
+        await new Promise((ok) => setTimeout(ok, 300)); // que salgan los avisos antes de ir a Stripe
+        location.href = r.url;
+        return;
+      }
       err.textContent = {
         nif: "El NIF o NIE no parece correcto (revisad la letra).",
         email: "Revisad el email: lo necesitamos para escribiros.",
         demasiadas: "Demasiados intentos seguidos. Esperad unos minutos.",
         sin_pagos: "Ahora mismo no podemos cobrar en la web. Elegid otra vez la tarifa y enviad la reserva: os escribimos.",
-      }[r.error] || "No se ha podido preparar el pago. Volved a intentarlo; si sigue fallando, escribidnos.";
+      }[r.error] || `No se ha podido preparar el pago. Volved a intentarlo; si sigue fallando, ${writeUs(studio)}.`;
       if (r.error === "sin_pagos") tiers.forEach((t) => { t.checkout = false; });
-    } catch {
-      err.textContent = "No se ha podido preparar el pago. Revisad la conexión y volved a intentarlo.";
+    } catch (e) {
+      console.error("[WeddingWebs] pago:", e);
+      err.textContent = `No se ha podido preparar el pago. Revisad la conexión y volved a intentarlo; si sigue fallando, ${writeUs(studio)}.`;
     }
     btn.disabled = false;
     syncCheckout();

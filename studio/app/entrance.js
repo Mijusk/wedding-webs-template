@@ -1,46 +1,30 @@
 import { $ } from "./util.js";
 
-// Entrada del escaparate: cortina con el monograma de las dos W y un contador (primera visita),
-// la cortina sube y la portada aparece por capas. Después, las fotos se mueven un poco con el
-// ratón y al bajar, y cada bloque de la página aparece al llegar a él.
-// Los estados viven en clases de <html> (ver studio/entrance.css y el script del <head>).
+// Portada del escaparate. La cortina (monograma, nombre y contador) y la aparición de la portada
+// las lleva un script dentro de studio/index.html, para que nunca esperen a la red: como mucho
+// 1 s, una vez por visita y nunca con «reducir movimiento». Aquí van los extras que pueden llegar
+// después: las fotos que se mueven con el ratón y al bajar, el botón magnético, los enlaces
+// del menú y los bloques que aparecen al llegar a ellos.
+// Los estados viven en clases de <html> (ver studio/entrance.css).
 const root = document.documentElement;
-const MIN_CURTAIN_MS = 1900;
-const t0 = performance.now();
 let started = false;
-const counter = { finish: false, done: Promise.resolve() };
 
-splitLetters($("[data-brand-letters]"));
-if (root.classList.contains("is-loading")) runCounter();
-
-// La llama main.js cuando la portada ya tiene sus textos (o si algo falla al cargar).
-export async function startEntrance() {
+export function startEntrance() {
   if (started) return;
   started = true;
-  splitWords($("[data-words]"));
-  try { sessionStorage.setItem("ww-entrance", "1"); } catch { /* sin almacenamiento */ }
-
-  if (root.classList.contains("is-loading")) {
-    await Promise.race([document.fonts?.ready, sleep(1500)]);
-    await sleep(Math.max(0, MIN_CURTAIN_MS - (performance.now() - t0)));
-    counter.finish = true;
-    await counter.done;
-    toStart();
-    const curtain = $("#preloader");
-    curtain.classList.add("is-leaving");
-    curtain.addEventListener("transitionend", () => curtain.remove(), { once: true });
-  }
-  else toStart();
   sameTabAnchors();
-  requestAnimationFrame(() => {
-    root.classList.add("is-ready");
-    // Al terminar, se quitan los estados de entrada para que nada quede a medias.
-    setTimeout(() => root.classList.remove("is-loading", "is-entering"), 3200);
-  });
   if (!root.classList.contains("no-motion")) {
     parallax();
     magnetic();
   }
+}
+
+// Si se llegó con un enlace a una sección (#tarifas desde plantillas.html), se baja a ella una
+// vez pintado el contenido. Sin #, no se toca nada.
+export function scrollToHash() {
+  const target = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (!target || target.id === "inicio") return;
+  target.scrollIntoView({ block: "start" });
 }
 
 // Bloques que aparecen al llegar a ellos. Se puede llamar otra vez tras pintar contenido nuevo.
@@ -61,19 +45,6 @@ export function revealOnScroll(selector) {
 
 // ── Piezas ───────────────────────────────────────────────
 
-// Justo antes de mostrar la página: arriba del todo, o en la sección si se llegó con un enlace
-// a ella (#tarifas). Así nunca aparece a medio bajar tras la cortina.
-function toStart() {
-  const target = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-  let y = 0;
-  if (target && target.id !== "inicio") {
-    // offsetTop ignora el pequeño desplazamiento de la portada mientras la cortina está puesta.
-    for (let el = target; el; el = el.offsetParent) y += el.offsetTop;
-    y -= parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
-  }
-  scrollTo(0, Math.max(0, y));
-}
-
 // Los enlaces del menú bajan suavemente sin dejar #seccion en la dirección, para que al
 // recargar se vuelva a empezar arriba.
 function sameTabAnchors() {
@@ -91,38 +62,6 @@ function sameTabAnchors() {
   });
 }
 
-
-function runCounter() {
-  const out = $("#preloader-count");
-  counter.done = new Promise((resolve) => {
-    let shown = 0;
-    const tick = () => {
-      // Sube sola hasta 90 en el tiempo mínimo; el último tramo, cuando todo está listo.
-      const p = Math.min(1, (performance.now() - t0) / MIN_CURTAIN_MS);
-      const target = counter.finish ? 100 : 90 * (1 - Math.pow(1 - p, 2));
-      shown += (target - shown) * (counter.finish ? 0.18 : 0.12);
-      if (counter.finish && target - shown < 0.6) shown = 100;
-      out.textContent = String(Math.round(shown)).padStart(3, "0");
-      shown >= 100 ? setTimeout(resolve, 120) : requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
-}
-
-function splitLetters(el) {
-  if (!el) return;
-  el.setAttribute("aria-label", el.textContent);
-  el.innerHTML = [...el.textContent].map((c, i) => `<span aria-hidden="true" style="--li:${i}">${c}</span>`).join("");
-}
-
-// Cada palabra en su caja, para que suba desde detrás de la línea. El texto sigue siendo uno solo
-// para los lectores de pantalla.
-function splitWords(el) {
-  if (!el) return;
-  const words = el.textContent.trim().split(/\s+/);
-  el.setAttribute("aria-label", words.join(" "));
-  el.innerHTML = words.map((w, i) => `<span class="w" aria-hidden="true"><span style="--wi:${i}">${escapeHtml(w)}</span></span>`).join(" ");
-}
 
 // Fotos de la portada: se desplazan según la posición del ratón y del scroll, cada una a su
 // profundidad (--depth), con un poco de inercia.
@@ -163,5 +102,3 @@ function magnetic() {
   });
 }
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

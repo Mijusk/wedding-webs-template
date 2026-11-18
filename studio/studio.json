@@ -491,7 +491,15 @@
     ]
   },
   "pricing": {
+    "_nota": "rounds = rondas de cambios de diseño de cada tarifa (salen en la tarjeta y en las condiciones). recommended = id de la tarifa con el distintivo. En note, {deliveryDays} y {onlineMonths} salen de legal.",
     "currency": "€",
+    "recommended": "con-cambios",
+    "recommendedLabel": "Recomendada",
+    "roundsText": {
+      "none": "Sin rondas de cambios: se entrega tal cual la habéis probado",
+      "one": "1 ronda de cambios de diseño",
+      "many": "{n} rondas de cambios de diseño"
+    },
     "tiers": [
       {
         "id": "tal-cual",
@@ -503,9 +511,10 @@
         "summary": "Os quedáis con el estilo que habéis probado, con vuestros datos y fotos.",
         "includes": [
           "Vuestros datos, fotos y programa del día",
-          "Confirmaciones de asistencia en vuestra hoja de Google",
+          "Panel con las confirmaciones al momento y descarga en Excel",
           "Publicada y lista para compartir"
-        ]
+        ],
+        "rounds": 0
       },
       {
         "id": "con-cambios",
@@ -518,8 +527,9 @@
         "includes": [
           "Todo lo de Tal cual",
           "Colores, tipografías y textos a medida",
-          "Secciones extra: galería, regalos, alojamiento"
-        ]
+          "Lista de invitados con un enlace personal por familia o grupo"
+        ],
+        "rounds": 2
       },
       {
         "id": "a-medida",
@@ -531,12 +541,78 @@
         "summary": "Un diseño propio, hecho desde cero para vuestra boda.",
         "includes": [
           "Todo lo de Con cambios",
-          "Diseño único, sin plantilla de partida",
-          "Hasta 3 rondas de revisiones"
-        ]
+          "Diseño único, sin plantilla de partida"
+        ],
+        "rounds": 3
       }
     ],
-    "note": "Precio final, pago único: sin cuotas ni permanencia."
+    "note": "Entrega en {deliveryDays} días laborables (A medida, en la fecha que acordemos) · Online hasta {onlineMonths} meses después de la boda · Pago único, sin cuotas ni permanencia."
+  },
+  "guarantee": {
+    "_nota": "Garantía comercial propia, que se suma al desistimiento legal. days = plazo desde que reciben la primera versión. tiers = ids de las tarifas a las que se aplica. En los textos, {days} se rellena solo.",
+    "enabled": true,
+    "days": 7,
+    "tiers": [
+      "tal-cual",
+      "con-cambios",
+      "a-medida"
+    ],
+    "refund": "completa",
+    "title": "Si la primera versión no os gusta, os devolvemos el dinero",
+    "conditions": "Vale para las tres tarifas. Basta con pedírnoslo en los {days} días siguientes a recibir la primera versión de vuestra web, y antes de publicarla o de compartirla con los invitados. Os devolvemos el importe completo, por el mismo medio de pago, en un máximo de 14 días desde que nos lo pedís."
+  },
+  "about": {
+    "_nota": "Sección «Quiénes somos», antes de las preguntas frecuentes. photo es relativa a studio/ (480×480, recortada desde equipo/luis.jpg).",
+    "eyebrow": "Quiénes somos",
+    "title": "Las hacemos nosotros, una a una",
+    "text": [
+      "Somos WeddingWebs. Diseñamos y montamos cada web nosotros, y la revisamos con vuestros datos antes de entregarla.",
+      "Hablamos con cada pareja para entender cómo queréis vuestra web. Y si nos escribís, os respondemos rápido."
+    ],
+    "name": "Luis Ochoteco",
+    "role": "Diseño y desarrollo de las webs",
+    "photo": "equipo/luis-cuadrada.jpg",
+    "photoAlt": "Luis Ochoteco, de WeddingWebs"
+  },
+  "_testimonialsNota": "Testimonios reales de parejas, cada uno { \"name\": \"Lucía y Martín\", \"text\": \"…\", \"photo\": \"testimonios/lucia-martin.jpg\" (opcional, relativa a studio/) }. Lista vacía = la sección no sale.",
+  "testimonials": [],
+  "faq": {
+    "_nota": "Preguntas frecuentes (antes del pie y en los datos para buscadores). Huecos: {onlineMonths}, {deliveryDays}, {guestDataMonths} (de legal), {guarantee} (las condiciones de guarantee; con needs: \"guarantee\" la pregunta solo sale si la garantía está activa) y {rounds} (rondas de cada tarifa). Solo lo que ya dice legal.html.",
+    "items": [
+      {
+        "q": "¿Cuánto tiempo sigue online la web?",
+        "a": "Hasta {onlineMonths} meses después de la boda."
+      },
+      {
+        "q": "¿Los invitados tienen que instalar algo?",
+        "a": "No. Es una web: la abren con el enlace que les mandéis, desde el móvil o el ordenador, sin instalar nada ni crear una cuenta."
+      },
+      {
+        "q": "¿Cómo confirman la asistencia los invitados?",
+        "a": "Desde la propia web, con un formulario: ponen su nombre, si vienen y lo que vosotros queráis preguntar, como una canción que no puede faltar. Vosotros veis las respuestas al momento en vuestro panel y podéis descargarlas en Excel."
+      },
+      {
+        "q": "¿Podemos cambiar datos después?",
+        "a": "Sí. Corregir erratas y datos siempre está incluido. Las rondas de cambios de diseño dependen de la tarifa: {rounds}."
+      },
+      {
+        "q": "¿Cuándo nos la entregáis?",
+        "a": "En {deliveryDays} días laborables desde que tenemos vuestros datos y fotos. En la tarifa A medida, en la fecha que acordemos."
+      },
+      {
+        "q": "¿Cómo se paga?",
+        "a": "Un pago único, con el precio final e IVA incluido, sin cuotas ni permanencia. Con tarjeta o Bizum (a través de Stripe) o por transferencia."
+      },
+      {
+        "q": "¿Y si la primera versión no nos gusta?",
+        "a": "Os devolvemos el dinero. {guarantee}",
+        "needs": "guarantee"
+      },
+      {
+        "q": "¿Qué pasa con los datos de los invitados?",
+        "a": "Las respuestas de los invitados se guardan solo para vosotros, que decidís sobre ellas. Nosotros las alojamos por encargo vuestro y se borran a los {guestDataMonths} meses de la boda."
+      }
+    ]
   },
   "contact": {
     "endpoint": "/api/lead",
@@ -562,7 +638,7 @@
     "owner": "Luis Ochoteco",
     "nif": "",
     "address": "",
-    "email": "luis8tk@gmail.com",
+    "email": "weddingwebstudios@gmail.com",
     "deliveryDays": 3,
     "onlineMonths": 12,
     "guestDataMonths": 6
@@ -572,5 +648,22 @@
     "src": "https://cloud.umami.is/script.js",
     "websiteId": "b2cf399c-8ab3-456c-a6e9-1513c2f85660",
     "domains": ""
+  },
+  "ads": {
+    "_nota": "Medición de anuncios. Vacío = no se carga nada. Con identificadores, solo se carga si la persona acepta la publicidad en el aviso de cookies. metaPixelId: el número del píxel de Meta. googleAdsId: AW-XXXXXXXXXX. googleLabel: la etiqueta de cada conversión de Google Ads. Guía: docs/ANUNCIOS.md",
+    "metaPixelId": "",
+    "googleAdsId": "",
+    "events": {
+      "lead": {
+        "umami": "lead_prueba",
+        "meta": "Lead",
+        "googleLabel": ""
+      },
+      "reserva": {
+        "umami": "reserva_enviada",
+        "meta": "SubmitApplication",
+        "googleLabel": ""
+      }
+    }
   }
 }

@@ -6,3 +6,6 @@ node_modules/
 .env.local
 .env.*.local
 tests/e2e/capturas/
+
+# Original grande de la foto del equipo: solo para recortar, no se sube
+studio/equipo/luis-original.png

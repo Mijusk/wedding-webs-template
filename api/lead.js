@@ -51,13 +51,19 @@ export default async function handler(req, res) {
     if (!r?.ok) return sendJson(res, 400, { ok: false, error: r?.error || "error" });
 
     const tasks = [forwardToSheet(sheet, body)];
-    // Elección del aviso de cookies (publicidad): constancia en consents, como el consentimiento comercial.
+    // Elección del aviso de cookies: constancia en consents, como el consentimiento comercial.
+    // Aviso v1: { granted } (solo publicidad). Aviso v2 (por categorías): { choices: { analitica, publicidad }, method }.
     const cc = payload.cookieConsent;
-    if (cc && typeof cc.granted === "boolean" && cc.text) {
+    const choices = {
+      cookies_publicidad: typeof cc?.choices?.publicidad === "boolean" ? cc.choices.publicidad : cc?.granted,
+      cookies_analitica: cc?.choices?.analitica,
+    };
+    for (const [purpose, granted] of Object.entries(choices)) {
+      if (!cc?.text || typeof granted !== "boolean") continue;
       tasks.push(rpc("api_record_cookie_consent", {
-        p_lead_id: r.lead_id, p_granted: cc.granted, p_text: String(cc.text).slice(0, 2000),
+        p_lead_id: r.lead_id, p_granted: granted, p_text: String(cc.text).slice(0, 2000), p_purpose: purpose,
         p_page: payload.page || null, p_ip: ipRaw || null, p_user_agent: String(req.headers["user-agent"] || "").slice(0, 300),
-      }).catch((e) => console.error("cookies", e.message)));
+      }).catch((e) => console.error("cookies", purpose, e.message)));
     }
     // Aviso a Luis: lead nuevo o reserva (una pareja que repite la prueba no vuelve a avisar).
     if (r.is_new || r.type === "reserva") {
