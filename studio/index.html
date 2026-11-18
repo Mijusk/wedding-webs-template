@@ -101,10 +101,18 @@
     <div class="wrap hero__head">
       <p class="eyebrow hero__eyebrow" data-rise>Webs de boda con confirmación de asistencia</p>
       <h1 class="hero__title" id="brand-tagline" data-words>Vuestra web de boda, lista antes que las invitaciones.</h1>
-      <div class="intro__cta" data-rise style="--i:0">
-        <button class="btn btn--magnetic" type="button" data-open-builder>Probar con vuestra boda</button>
-        <a class="btn btn--ghost" href="#estilos">Ver estilos</a>
-      </div>
+      <!-- Prueba en un segundo: según escriben, el móvil de la portada cambia con sus nombres
+           (studio/app/quick.js). Al pulsar, sigue el paso a paso con los nombres ya puestos. -->
+      <form class="quick" id="quick" data-rise style="--i:0" novalidate autocomplete="off">
+        <p class="quick__label" id="quick-label">Escribid vuestros nombres y miradla cambiar</p>
+        <div class="quick__row" role="group" aria-labelledby="quick-label">
+          <input class="quick__name" id="q-a" name="a" type="text" placeholder="Lucía" aria-label="Vuestro nombre" maxlength="24" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="next">
+          <span class="quick__amp" aria-hidden="true">&amp;</span>
+          <input class="quick__name" id="q-b" name="b" type="text" placeholder="Martín" aria-label="El nombre de tu pareja" maxlength="24" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go">
+          <button class="btn btn--magnetic quick__go" type="submit">Crear nuestra web <span aria-hidden="true">→</span></button>
+        </div>
+        <p class="quick__alt">Sin registros ni pagos. <a href="#estilos">O mirad antes los estilos</a></p>
+      </form>
     </div>
 
     <!-- Fotos alrededor de la web real funcionando. Se mueven un poco con el ratón y al bajar.
@@ -266,70 +274,106 @@
 <!-- Botón fijo abajo mientras se ven los estilos (app/main.js > setupNudge) -->
 <button class="btn btn--small nudge" id="nudge" type="button" hidden>Probar con vuestra boda</button>
 
-<!-- Formulario del generador -->
-<div class="overlay" id="builder" role="dialog" aria-modal="true" aria-labelledby="builder-title" hidden>
-  <div class="sheet">
+<!-- Generador paso a paso (studio/app/builder.js): una pregunta por pantalla y la web cambiando al
+     lado en cada paso. Sin email: se pide al final, si quieren guardarla (ver #send). -->
+<div class="overlay overlay--wizard" id="builder" role="dialog" aria-modal="true" aria-labelledby="builder-title" hidden>
+  <div class="wizard">
+    <button class="close" type="button" data-close aria-label="Cerrar">×</button>
+    <div class="wizard__main">
+      <div class="wizard__progress" aria-hidden="true"><span id="w-bar"></span></div>
+      <p class="eyebrow" id="w-count">Paso 1 de 5</p>
+      <form id="builder-form" novalidate>
+        <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+        <section class="wstep" data-step="nombres" aria-labelledby="builder-title">
+          <h2 class="wstep__title" id="builder-title">¿Cómo os llamáis?</h2>
+          <p class="wstep__lead">Así saldrá en la portada de vuestra web.</p>
+          <div class="field-row">
+            <div class="field"><label for="b-name-a">Nombre</label><input type="text" id="b-name-a" name="nameA" autocomplete="given-name" autocapitalize="words" maxlength="24" required></div>
+            <div class="field"><label for="b-name-b">y nombre</label><input type="text" id="b-name-b" name="nameB" autocapitalize="words" maxlength="24" required></div>
+          </div>
+          <button class="linkbtn" type="button" id="b-sample">o probad con una pareja de ejemplo</button>
+        </section>
+
+        <section class="wstep" data-step="fecha" aria-labelledby="w-t-fecha" hidden>
+          <h2 class="wstep__title" id="w-t-fecha">¿Cuándo es el gran día?</h2>
+          <p class="wstep__lead">Con la fecha preparamos la cuenta atrás y el plazo para confirmar.</p>
+          <div class="field-row">
+            <div class="field"><label for="b-date">Fecha de la boda</label><input type="date" id="b-date" name="date" required></div>
+            <div class="field"><label for="b-time">Hora de la ceremonia</label><input type="time" id="b-time" name="time" value="18:00" required></div>
+          </div>
+          <div class="countdown" id="w-countdown" aria-live="polite" hidden>
+            <span class="countdown__num" id="w-days">0</span>
+            <span class="countdown__label" id="w-days-label">días para vuestro «sí, quiero»</span>
+          </div>
+        </section>
+
+        <section class="wstep" data-step="lugar" aria-labelledby="w-t-lugar" hidden>
+          <h2 class="wstep__title" id="w-t-lugar">¿Dónde lo celebráis?</h2>
+          <p class="wstep__lead">Lo ponemos en la web con su mapa, para que nadie se pierda.</p>
+          <div class="field-row">
+            <div class="field"><label for="b-venue">Lugar</label><input type="text" id="b-venue" name="venue" placeholder="Finca, iglesia, restaurante…" required></div>
+            <div class="field"><label for="b-city">Ciudad <span class="opt">opcional</span></label><input type="text" id="b-city" name="city"></div>
+          </div>
+        </section>
+
+        <section class="wstep" data-step="estilo" aria-labelledby="w-t-estilo" hidden>
+          <h2 class="wstep__title" id="w-t-estilo">¿Qué estilo os pega?</h2>
+          <p class="wstep__lead">Tocad uno y miradlo al lado. Luego podéis cambiarlo cuantas veces queráis.</p>
+          <fieldset class="field"><legend class="hp">Estilo</legend><div class="style-pick" id="b-styles"></div></fieldset>
+        </section>
+
+        <section class="wstep" data-step="fotos" aria-labelledby="w-t-fotos" hidden>
+          <h2 class="wstep__title" id="w-t-fotos">¿Ponemos vuestras fotos?</h2>
+          <p class="wstep__lead">Hasta tres; la primera será la portada. Si no, usamos fotos de ejemplo.</p>
+          <div class="photos" id="b-photos" aria-label="Fotos">
+            <label class="photos__add" for="b-photo-input" id="b-photo-add">
+              <span aria-hidden="true">+</span> Añadir fotos
+              <input type="file" id="b-photo-input" accept="image/*" multiple>
+            </label>
+          </div>
+          <p class="hint">Las fotos no salen de vuestro navegador.</p>
+        </section>
+
+        <p class="error" id="b-error" role="alert"></p>
+        <div class="wizard__nav">
+          <button class="btn btn--ghost" type="button" id="w-back">Atrás</button>
+          <button class="btn" type="submit" id="w-next">Siguiente</button>
+        </div>
+      </form>
+    </div>
+    <aside class="wizard__preview" aria-label="Vuestra web, en vivo">
+      <figure class="phone wizard__phone">
+        <div class="scaled" data-base-width="390" data-base-height="780">
+          <iframe id="w-frame" title="Vuestra web, en vivo" tabindex="-1" aria-hidden="true"></iframe>
+        </div>
+      </figure>
+      <p class="wizard__live"><span class="live-dot" aria-hidden="true"></span>En vivo</p>
+    </aside>
+  </div>
+</div>
+
+<!-- Guardar la web: el email se pide aquí, cuando ya la han visto (studio/app/send.js). -->
+<div class="overlay" id="send" role="dialog" aria-modal="true" aria-labelledby="send-title" hidden>
+  <div class="sheet sheet--small">
     <button class="close" type="button" data-close aria-label="Cerrar">×</button>
     <p class="eyebrow">Vuestra web</p>
-    <h2 id="builder-title">Contadnos lo mínimo</h2>
-    <button class="btn btn--small btn--ghost sample-fill" type="button" id="b-sample">Rellenar con un ejemplo</button>
-    <form id="builder-form" novalidate>
+    <h2 id="send-title">¿Os la guardamos?</h2>
+    <p class="wstep__lead">Os escribimos con el enlace para que la tengáis a mano y podáis enseñarla.</p>
+    <form id="send-form" novalidate>
       <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-      <div class="field-row">
-        <div class="field">
-          <label for="b-name-a">Nombre</label>
-          <input type="text" id="b-name-a" name="nameA" autocomplete="given-name" required>
-        </div>
-        <div class="field">
-          <label for="b-name-b">y nombre</label>
-          <input type="text" id="b-name-b" name="nameB" required>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="b-date">Fecha de la boda</label>
-          <input type="date" id="b-date" name="date" required>
-        </div>
-        <div class="field">
-          <label for="b-time">Hora de la ceremonia</label>
-          <input type="time" id="b-time" name="time" value="18:00" required>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="b-venue">Lugar</label>
-          <input type="text" id="b-venue" name="venue" placeholder="Finca, iglesia, restaurante…" required>
-        </div>
-        <div class="field">
-          <label for="b-city">Ciudad <span class="opt">opcional</span></label>
-          <input type="text" id="b-city" name="city">
-        </div>
-      </div>
-      <div class="field">
-        <span class="label" id="b-photos-label">Fotos <span class="opt">hasta 3, opcional</span></span>
-        <div class="photos" id="b-photos" aria-labelledby="b-photos-label">
-          <label class="photos__add" for="b-photo-input" id="b-photo-add">
-            <span aria-hidden="true">+</span> Añadir fotos
-            <input type="file" id="b-photo-input" accept="image/*" multiple>
-          </label>
-        </div>
-        <p class="hint">La primera será la portada. Las fotos no salen de vuestro navegador.</p>
-      </div>
-      <fieldset class="field">
-        <legend class="label">Estilo</legend>
-        <div class="style-pick" id="b-styles"></div>
-      </fieldset>
       <div class="field">
         <label for="b-email">Vuestro email</label>
-        <input type="email" id="b-email" name="email" autocomplete="email" placeholder="Para enviaros el enlace de vuestra web" required>
+        <input type="email" id="b-email" name="email" autocomplete="email" required>
       </div>
       <label class="consent" for="b-consent">
         <input type="checkbox" id="b-consent" name="consent" value="si" required>
         <span>Acepto que me escribáis sobre mi web. Solo usaremos este email para eso, y podéis pedirnos que lo borremos cuando queráis (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
       </label>
-      <p class="error" id="b-error" role="alert"></p>
-      <button class="btn btn--wide" type="submit">Crear nuestra web</button>
+      <p class="error" id="send-error" role="alert"></p>
+      <button class="btn btn--wide" type="submit" id="send-submit">Guardadla y mandadme el enlace</button>
     </form>
+    <div class="send__thanks" id="send-thanks" hidden></div>
   </div>
 </div>
 
@@ -355,9 +399,8 @@
         <button type="button" id="view-desktop" aria-pressed="true">Escritorio</button>
         <button type="button" id="view-mobile" aria-pressed="false">Móvil</button>
       </div>
-      <button class="btn btn--small btn--ghost" type="button" id="stage-sections" aria-expanded="false" aria-controls="sections-panel">Secciones</button>
-      <button class="btn btn--small btn--ghost" type="button" id="stage-next">Otro estilo</button>
       <button class="btn btn--small btn--ghost" type="button" id="stage-edit">Editar datos</button>
+      <button class="btn btn--small btn--ghost" type="button" id="stage-save">Guardarla</button>
       <button class="btn btn--small" type="button" id="stage-keep">Me la quedo</button>
       <button class="btn btn--small" type="button" id="stage-try" hidden>Probar con vuestra boda</button>
       <button class="close" type="button" data-close aria-label="Cerrar">×</button>
@@ -372,9 +415,53 @@
       <ul class="sections-panel__list" id="sections-list"></ul>
       <p class="sections-panel__note" id="sections-note"></p>
     </div>
+    <!-- Respuestas de prueba: lo que verían en su panel cuando confirma un invitado. -->
+    <aside class="guest-panel" id="guest-panel" aria-labelledby="guest-title" hidden>
+      <div class="sections-panel__head">
+        <p class="guest-panel__title" id="guest-title">Vuestro panel</p>
+        <button class="close" type="button" id="guest-close" aria-label="Cerrar el panel">×</button>
+      </div>
+      <p class="guest-panel__note" id="guest-note">Responded en la web como si fuerais un invitado y mirad cómo os llega aquí, al momento.</p>
+      <dl class="guest-panel__stats">
+        <div><dt>Vienen</dt><dd id="g-yes">0</dd></div>
+        <div><dt>No vienen</dt><dd id="g-no">0</dd></div>
+        <div><dt>Canciones</dt><dd id="g-songs">0</dd></div>
+      </dl>
+      <ul class="guest-panel__list" id="g-list" aria-live="polite"></ul>
+      <p class="guest-panel__foot">En vuestra web de verdad, además, enlace personal por familia y descarga en Excel para el catering.</p>
+    </aside>
     <div class="stage__frame" id="stage-frame-wrap">
       <iframe id="stage-frame" title="Vista previa de la web"></iframe>
       <div class="switching" id="switching" hidden><p id="switching-msg"></p></div>
+    </div>
+    <div class="stage__dock">
+      <div class="style-dock" id="style-dock" role="group" aria-label="Cambiar de estilo">
+        <button class="style-dock__arrow" type="button" id="dock-prev" aria-label="Estilo anterior">‹</button>
+        <div class="style-dock__name" id="dock-swipe">
+          <small id="dock-count">Estilo</small><strong id="dock-name"></strong><span class="style-dock__hint" id="dock-hint">Deslizad para ver otro</span>
+        </div>
+        <button class="style-dock__arrow" type="button" id="dock-next" aria-label="Estilo siguiente">›</button>
+      </div>
+      <div class="stage__tools">
+        <button class="btn btn--small btn--ghost" type="button" id="stage-guest">Probadla como invitados</button>
+        <button class="btn btn--small btn--ghost" type="button" id="stage-share">Enseñádsela a vuestra pareja</button>
+        <button class="btn btn--small btn--ghost" type="button" id="stage-sections" aria-expanded="false" aria-controls="sections-panel">Secciones</button>
+      </div>
+    </div>
+    <div class="save-nudge" id="save-nudge" role="status" hidden>
+      <p>¿Os la guardamos y os mandamos el enlace?</p>
+      <button class="btn btn--small" type="button" id="save-nudge-yes">Sí, guardadla</button>
+      <button class="close" type="button" id="save-nudge-no" aria-label="Ahora no">×</button>
+    </div>
+    <div class="share-pop" id="share-pop" role="dialog" aria-labelledby="share-title" hidden>
+      <p class="share-pop__title" id="share-title">Enseñádsela a vuestra pareja</p>
+      <p class="share-pop__note">Un enlace con vuestros nombres, la fecha y el estilo. Las fotos no viajan: solo están en este navegador.</p>
+      <input class="share-pop__url" id="share-url" type="text" readonly aria-label="Enlace para compartir">
+      <div class="share-pop__actions">
+        <a class="btn btn--small" id="share-wa" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+        <button class="btn btn--small btn--ghost" type="button" id="share-copy">Copiar enlace</button>
+      </div>
+      <button class="close" type="button" id="share-close" aria-label="Cerrar">×</button>
     </div>
   </div>
 </div>
