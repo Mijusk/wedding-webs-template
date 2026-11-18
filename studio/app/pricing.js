@@ -160,6 +160,7 @@ export function setupPricing({ studio, templateUrl }) {
   // Lo que ya escribieron en el generador no se vuelve a pedir.
   setupPricing.prefill = (w) => {
     if (!$("#c-email").value && w.email) $("#c-email").value = w.email;
+    if ($("#c-phone") && !$("#c-phone").value && w.phone) $("#c-phone").value = w.phone;
     if (!$("#c-name").value) $("#c-name").value = w.couple.join(" y ");
   };
 

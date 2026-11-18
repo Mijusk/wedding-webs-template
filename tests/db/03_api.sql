@@ -56,6 +56,18 @@ begin
   assert public.api_submit_lead('{"email":"sin-arroba"}') ->> 'error' = 'email', 'FALLO: email no válido aceptado';
   raise notice 'OK leads: nuevo, repetición sin duplicar, reserva y atribución primer/último toque';
 
+  -- Leads con móvil (el escaparate pide el móvil al guardar; el email es opcional).
+  r := public.api_submit_lead('{"type":"prueba","phone":"+34 611 22 33 44","name":"Eva y Hugo","consent":true,"consentText":"Acepto que me contactéis."}');
+  assert (r ->> 'ok')::boolean and (r ->> 'is_new')::boolean, 'FALLO: lead solo con móvil ' || r::text;
+  lid := (r ->> 'lead_id')::uuid;
+  r2 := public.api_submit_lead('{"type":"prueba","phone":"611223344","email":"Eva.Hugo@example.com","style":"lacre"}');
+  assert (r2 ->> 'lead_id')::uuid = lid, 'FALLO: el mismo móvil ha creado otro lead';
+  assert (select email from public.leads where id = lid) = 'eva.hugo@example.com', 'FALLO: email añadido después';
+  assert (public.api_submit_lead('{"type":"prueba","email":"eva.hugo@example.com"}') ->> 'lead_id')::uuid = lid, 'FALLO: por email';
+  assert public.api_submit_lead('{"type":"prueba"}') ->> 'error' = 'contacto', 'FALLO: lead sin email ni móvil';
+  assert public.api_submit_lead('{"phone":"123"}') ->> 'error' = 'telefono', 'FALLO: móvil no válido aceptado';
+  raise notice 'OK leads con móvil: alta, reconocido por móvil y por email';
+
   -- Límite de peticiones
   assert public.api_hit_rate_limit('prueba:ip1', 2, 60), 'FALLO: 1.ª petición';
   assert public.api_hit_rate_limit('prueba:ip1', 2, 60), 'FALLO: 2.ª petición';

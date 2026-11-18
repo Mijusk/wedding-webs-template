@@ -66,16 +66,22 @@ const fecha = (iso) => {
   return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
 };
 
+// "600 11 22 33" -> "34600112233" para el enlace de WhatsApp (sin prefijo, se supone España).
+export const waNumber = (phone) => {
+  const d = String(phone || "").replace(/\D/g, "").replace(/^00/, "");
+  return d.length === 9 ? `34${d}` : d;
+};
+
 // Aviso de lead nuevo o reserva, en menos de un minuto.
 export async function notifyLead({ lead, payload, panelUrl }) {
-  const names = lead.names || payload.name || payload.email;
+  const names = lead.names || payload.name || payload.email || payload.phone;
   const subject = lead.type === "reserva"
     ? `Reserva: ${names}${payload.tier ? ` (${payload.tier})` : ""}`
     : `Nueva prueba: ${names}${payload.weddingDate ? `, boda el ${fecha(payload.weddingDate)}` : ""}`;
   const details = [
     subject,
-    `Email: ${payload.email}`,
-    payload.phone && `Teléfono: ${payload.phone}`,
+    payload.phone && `Móvil: ${payload.phone} (WhatsApp: https://wa.me/${waNumber(payload.phone)})`,
+    payload.email && `Email: ${payload.email}`,
     payload.venue && `Lugar: ${payload.venue}`,
     payload.style && `Estilo: ${payload.style}`,
     payload.message && `Mensaje: ${payload.message}`,
