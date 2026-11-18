@@ -1,0 +1,126 @@
+/* Plantilla Riviera. Concepto: un verano en la costa con aire de cartel de los años cincuenta.
+   Azul marino y crema, toldo de rayas con el borde festoneado, un toque de sol amarillo.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --navy: #1F3A5F;
+  --navy-deep: #152A46;
+  --cream: #F6F1E7;
+  --cream-2: #EDE5D5;
+  --sun: #E3A83B;
+  --sky: #CBDCE8;
+
+  --paper: var(--cream);
+  --paper-2: var(--cream-2);
+  --ink: #1C2A3C;
+  --muted: #5D6877;
+  --line: #D9D3C4;
+  --accent: var(--navy);
+  --accent-2: var(--sun);
+  --on-accent: var(--cream);
+  --error: #A23B2C;
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-body: "Josefin Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Josefin Sans", "Helvetica Neue", Arial, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 999px;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 164px);
+  --stripe: 34px;
+}
+
+body { font-weight: 300; font-size: 18px; line-height: 1.75; }
+::selection { background: var(--sky); }
+.eyebrow { font: 600 12px/1.5 var(--font-label); letter-spacing: .32em; color: var(--navy); }
+.link { font: 600 12px/1.5 var(--font-label); letter-spacing: .24em; }
+.button { font: 600 13px/1.2 var(--font-label); letter-spacing: .24em; padding-top: 3px; }
+
+/* Toldo: rayas verticales y un festón de medios círculos que cuadra con cada raya */
+.awning {
+  height: clamp(70px, 9vw, 104px);
+  background: repeating-linear-gradient(90deg, var(--aw-a, var(--navy)) 0 var(--stripe), var(--aw-b, #FFFDF8) var(--stripe) calc(var(--stripe) * 2));
+  -webkit-mask: radial-gradient(circle calc(var(--stripe) / 2) at 50% 0, #000 97%, transparent) 0 100% / var(--stripe) calc(var(--stripe) / 2) repeat-x, linear-gradient(#000, #000) 0 0 / 100% calc(100% - var(--stripe) / 2) no-repeat;
+          mask: radial-gradient(circle calc(var(--stripe) / 2) at 50% 0, #000 97%, transparent) 0 100% / var(--stripe) calc(var(--stripe) / 2) repeat-x, linear-gradient(#000, #000) 0 0 / 100% calc(100% - var(--stripe) / 2) no-repeat;
+  filter: drop-shadow(0 6px 6px rgb(21 42 70 / .18));
+  box-shadow: inset 0 10px 14px -8px rgb(0 0 0 / .25);
+}
+
+/* ---------- portada ---------- */
+.hero { display: grid; grid-template-rows: auto 1fr; background: linear-gradient(180deg, #C9DAE6 0%, #E4EAEA 38%, var(--cream) 75%, #F2EBDC 100%); }
+.hero__awning { position: relative; z-index: 1; }
+.hero__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; gap: clamp(32px, 6vw, 96px); max-width: 1140px; margin-inline: auto; width: 100%; padding: clamp(28px, 6vh, 64px) var(--gutter) clamp(40px, 8vh, 88px); }
+.poster { position: relative; padding: 14px; background: #fff; box-shadow: 0 0 0 1px var(--line), 0 26px 50px rgb(21 42 70 / .18); justify-self: end; width: min(420px, 100%); }
+.poster img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 200px 200px 0 0; }
+.poster__place { margin-top: 12px; font: 400 clamp(26px, 3vw, 36px)/1 var(--font-display); text-align: center; color: var(--navy); letter-spacing: .02em; }
+.hero__text { display: grid; justify-items: start; gap: 16px; }
+.hero__eyebrow { color: var(--sun); }
+.hero__names { display: grid; font-size: min(120px, calc((52vw - 96px) / (var(--len) * .58))); line-height: .95; color: var(--navy); }
+.hero__names .amp { font-style: italic; font-size: .5em; color: var(--sun); margin: .04em 0 .04em .18em; }
+.hero__date { display: flex; gap: 14px; align-items: center; font: 600 14px/1 var(--font-label); letter-spacing: .32em; text-transform: uppercase; color: var(--navy); }
+.hero__date span { padding: 11px 16px 8px 19px; border: 1.5px solid var(--navy); border-radius: 999px; }
+.hero__tagline { font: italic 400 22px/1.4 var(--font-display); color: var(--muted); max-width: 20em; }
+
+/* Entrada (~2,6 s): el toldo se despliega, el cartel sube y los nombres entran como letreros */
+.hero:not(.is-static) .hero__awning { transform-origin: top; animation: unroll 1.3s cubic-bezier(.5, 0, .2, 1) both; }
+.hero:not(.is-static) .poster { animation: rise-up 1.4s var(--ease-out) .6s both; }
+.hero:not(.is-static) .hero__names > * { animation: slide 1.2s var(--ease-out) both; }
+.hero:not(.is-static) .hero__names > :nth-child(1) { animation-delay: 1s; }
+.hero:not(.is-static) .hero__names > :nth-child(2) { animation-delay: 1.2s; }
+.hero:not(.is-static) .hero__names > :nth-child(3) { animation-delay: 1.4s; }
+.hero:not(.is-static) .hero__date span { animation: rise .9s var(--ease-out) both; }
+.hero:not(.is-static) .hero__date span:nth-child(1) { animation-delay: 1.8s; }
+.hero:not(.is-static) .hero__date span:nth-child(2) { animation-delay: 1.95s; }
+.hero:not(.is-static) .hero__date span:nth-child(3) { animation-delay: 2.1s; }
+.hero:not(.is-static) .hero__eyebrow, .hero:not(.is-static) .hero__tagline { animation: fade 1.2s ease 2.1s both; }
+@keyframes unroll { from { transform: scaleY(0); } }
+@keyframes rise-up { from { opacity: 0; transform: translateY(40px); } }
+@keyframes slide { from { opacity: 0; transform: translateX(-30px); } }
+
+/* ---------- secciones ---------- */
+.head__title { color: var(--navy); }
+.head__wave { display: block; width: 84px; height: 10px; background: radial-gradient(circle 6px at 50% -2px, transparent 5px, var(--sun) 5.5px 7px, transparent 7.5px) 0 0 / 14px 10px repeat-x; }
+.facts { background: #fff; border-radius: 24px; padding-block: 36px; box-shadow: 0 0 0 1px var(--line); }
+.fact__big { font-family: var(--font-display); color: var(--navy); }
+.fact__note { color: var(--sun); font-weight: 600; }
+.chapter__photo img { border-radius: 200px 200px 0 0; }
+.chapter__meta { color: var(--sun); }
+.chapter__text { font-family: var(--font-display); font-size: clamp(22px, 2.3vw, 28px); line-height: 1.4; color: var(--navy); }
+
+.schedule { background: var(--navy); color: var(--cream); padding-bottom: var(--space); margin-top: var(--space); }
+.schedule.section { padding-top: var(--space); }
+.schedule .head__title { color: var(--cream); }
+.schedule .eyebrow { color: var(--sun); }
+.schedule .plan__label { color: var(--cream); }
+.schedule .head__text, .schedule .plan__place { color: rgb(246 241 231 / .74); }
+.plan__mark::before { background: rgb(246 241 231 / .25); }
+.plan__mark > * { margin-top: 24px; }
+.buoy { width: 22px; height: 22px; border-radius: 50%; background: conic-gradient(var(--cream) 0 45deg, #D9553F 45deg 90deg, var(--cream) 90deg 135deg, #D9553F 135deg 180deg, var(--cream) 180deg 225deg, #D9553F 225deg 270deg, var(--cream) 270deg 315deg, #D9553F 315deg); -webkit-mask: radial-gradient(circle, transparent 5px, #000 5.5px); mask: radial-gradient(circle, transparent 5px, #000 5.5px); }
+.buoy--last { background: var(--sun); }
+.plan__time { font-family: var(--font-display); color: var(--sun); }
+.plan__label { font-weight: 600; letter-spacing: .26em; }
+
+.photos__item img { border-radius: 16px; }
+.iban__card { border-radius: 24px; background: #fff; }
+
+.closing__body { background: var(--navy); color: var(--cream); padding-top: 0; }
+.closing__awning { --aw-a: var(--cream); --aw-b: var(--sun); margin-bottom: calc(var(--space) * .7); }
+.closing .eyebrow { color: var(--sun); }
+.closing__title { color: var(--cream); }
+.closing__title .amp { color: var(--sun); font-style: italic; }
+.closing__text { color: rgb(246 241 231 / .82); }
+.closing .button { background: var(--sun); border-color: var(--sun); color: var(--navy-deep); }
+.closing__foot { background: var(--navy-deep); color: var(--sky); }
+
+.rsvp-dialog { background: var(--cream); }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); color: var(--navy); }
+
+@media (max-width: 860px) {
+  :root { --stripe: 28px; }
+  .hero__in { grid-template-columns: minmax(0, 1fr); padding-top: 20px; }
+  .poster { width: min(320px, 80vw); justify-self: center; }
+  .hero__text { justify-items: center; text-align: center; }
+  .hero__names { justify-items: center; font-size: min(80px, calc((100vw - 48px) / (var(--len) * .58))); }
+  .hero__names .amp { margin: 0; }
+  .hero__date { gap: 8px; font-size: 12px; letter-spacing: .26em; }
+  .hero__date span { padding: 9px 11px 7px 14px; }
+}

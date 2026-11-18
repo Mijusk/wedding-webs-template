@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Comprueba que las 33 maquetaciones se ven igual servidas desde la base de datos (/b/<slug>)
+// Comprueba que las 45 maquetaciones se ven igual servidas desde la base de datos (/b/<slug>)
 // que desde su carpeta (/plantillas/<x>/ con su config.json). Hace una captura de cada una
 // en móvil, compara píxel a píxel y revisa que no haya errores ni archivos que no carguen.
 //

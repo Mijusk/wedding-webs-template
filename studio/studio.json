@@ -135,6 +135,54 @@
     "origami": {
       "name": "Origami",
       "url": "../plantillas/origami/"
+    },
+    "regencia": {
+      "name": "Regencia",
+      "url": "../plantillas/regencia/"
+    },
+    "encaje": {
+      "name": "Encaje",
+      "url": "../plantillas/encaje/"
+    },
+    "chocolate": {
+      "name": "Chocolate",
+      "url": "../plantillas/chocolate/"
+    },
+    "laca": {
+      "name": "Laca",
+      "url": "../plantillas/laca/"
+    },
+    "caligrafia": {
+      "name": "Caligrafía",
+      "url": "../plantillas/caligrafia/"
+    },
+    "riviera": {
+      "name": "Riviera",
+      "url": "../plantillas/riviera/"
+    },
+    "seda": {
+      "name": "Seda",
+      "url": "../plantillas/seda/"
+    },
+    "feston": {
+      "name": "Festón",
+      "url": "../plantillas/feston/"
+    },
+    "perla": {
+      "name": "Perla",
+      "url": "../plantillas/perla/"
+    },
+    "marmol": {
+      "name": "Mármol",
+      "url": "../plantillas/marmol/"
+    },
+    "terciopelo": {
+      "name": "Terciopelo",
+      "url": "../plantillas/terciopelo/"
+    },
+    "grabado": {
+      "name": "Grabado",
+      "url": "../plantillas/grabado/"
     }
   },
   "styles": [
@@ -521,6 +569,150 @@
         "#d4a99c"
       ],
       "description": "Una grulla de papel que se pliega al entrar, fotos con la esquina doblada y secciones que se despliegan como papel."
+    },
+    {
+      "id": "regencia",
+      "name": "Regencia",
+      "template": "regencia",
+      "theme": "regencia",
+      "status": "available",
+      "swatch": [
+        "#f3f1ec",
+        "#4f6b85"
+      ],
+      "description": "Camafeo ovalado con borde de perlas y lazo de seda, nombres a pluma y un cierre en azul jasperware. Elegancia de época, muy romántica."
+    },
+    {
+      "id": "encaje",
+      "name": "Encaje",
+      "template": "encaje",
+      "theme": "encaje",
+      "status": "available",
+      "swatch": [
+        "#fbf7f4",
+        "#8f6b63"
+      ],
+      "description": "Puntilla de encaje calado que borda la foto de portada, perlas y letra caligráfica. Marfil y rosa polvo de alta costura nupcial."
+    },
+    {
+      "id": "chocolate",
+      "name": "Chocolate",
+      "template": "chocolate",
+      "theme": "chocolate",
+      "status": "available",
+      "swatch": [
+        "#3b2620",
+        "#c9a464"
+      ],
+      "description": "Marrón chocolate profundo con rosa empolvado y pan de oro: la foto en un arco alto con filete dorado y los nombres con brillo de oro. Para bodas de tarde y noche."
+    },
+    {
+      "id": "laca",
+      "name": "Laca",
+      "template": "laca",
+      "theme": "laca",
+      "status": "available",
+      "swatch": [
+        "#a3271f",
+        "#2f6b5e"
+      ],
+      "description": "Chinoiserie en rojo laca, verde jade y oro: la foto en una puerta de luna redonda, una rama de ciruelo en flor con pájaros y greca de celosía."
+    },
+    {
+      "id": "caligrafia",
+      "name": "Caligrafía",
+      "template": "caligrafia",
+      "theme": "caligrafia",
+      "status": "available",
+      "swatch": [
+        "#ede6da",
+        "#a9573a"
+      ],
+      "description": "Una invitación escrita a mano con plumilla sobre papel de algodón con el canto desbarbado, y la foto como una copia posada al lado."
+    },
+    {
+      "id": "riviera",
+      "name": "Riviera",
+      "template": "riviera",
+      "theme": "riviera",
+      "status": "available",
+      "swatch": [
+        "#f6f1e7",
+        "#1f3a5f"
+      ],
+      "description": "Toldo de rayas azul marino y crema con el borde festoneado y la foto como un cartel de verano. Para bodas en la costa."
+    },
+    {
+      "id": "seda",
+      "name": "Seda",
+      "template": "seda",
+      "theme": "seda",
+      "status": "available",
+      "swatch": [
+        "#f7f2ee",
+        "#6e3f50"
+      ],
+      "description": "La foto envuelta como un regalo con una cinta de raso malva que se anuda en un lazo. Letra alta y fina, muy de revista."
+    },
+    {
+      "id": "feston",
+      "name": "Festón",
+      "template": "feston",
+      "theme": "feston",
+      "status": "available",
+      "swatch": [
+        "#eef0e8",
+        "#4c5c44"
+      ],
+      "description": "Bordes ondulados como la vajilla antigua: foto festoneada, la fecha en un sello y secciones en salvia y crema. Amable y alegre."
+    },
+    {
+      "id": "perla",
+      "name": "Perla",
+      "template": "perla",
+      "theme": "perla",
+      "status": "available",
+      "swatch": [
+        "#fbfaf7",
+        "#b49c7a"
+      ],
+      "description": "Minimalismo de marfil y nácar: un collar de perlas cuelga en la portada y se ensarta perla a perla. Mucho aire y letra fina."
+    },
+    {
+      "id": "marmol",
+      "name": "Mármol",
+      "template": "marmol",
+      "theme": "marmol",
+      "status": "available",
+      "swatch": [
+        "#f5f3f0",
+        "#b08d57"
+      ],
+      "description": "Una inscripción en mármol de Carrara con filetes de oro, nombres en capitales romanas y un cierre en mármol negro con vetas doradas."
+    },
+    {
+      "id": "terciopelo",
+      "name": "Terciopelo",
+      "template": "terciopelo",
+      "theme": "terciopelo",
+      "status": "available",
+      "swatch": [
+        "#1e3029",
+        "#c8a15a"
+      ],
+      "description": "Terciopelo verde botella y oro a la luz de las velas: tres velas se encienden e iluminan los nombres. Para bodas de invierno y de noche."
+    },
+    {
+      "id": "grabado",
+      "name": "Grabado",
+      "template": "grabado",
+      "theme": "grabado",
+      "status": "available",
+      "swatch": [
+        "#f7f4ec",
+        "#8e2f25"
+      ],
+      "description": "Una invitación de imprenta con la finca dibujada a plumilla, que se traza sola, y la foto como una lámina numerada."
     },
     {
       "id": "olivar",

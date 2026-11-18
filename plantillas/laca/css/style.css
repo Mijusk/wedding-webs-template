@@ -1,0 +1,127 @@
+/* Plantilla Laca. Concepto: chinoiserie, el papel pintado de seda de los salones del XVIII.
+   Rojo laca, verde jade y oro sobre marfil; puerta de luna redonda con aro dorado, rama de ciruelo
+   con pájaros y greca de celosía. Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --lacquer: #A3271F;
+  --lacquer-deep: #7E1B15;
+  --jade: #2F6B5E;
+  --jade-soft: #CFE0D8;
+  --gold: #C9A24E;
+  --ivory: #F7F1E6;
+  --ivory-2: #EFE6D6;
+
+  --paper: var(--ivory);
+  --paper-2: var(--ivory-2);
+  --ink: #2A2420;
+  --muted: #6E645B;
+  --line: #E1D3BC;
+  --accent: var(--lacquer);
+  --accent-2: var(--jade);
+  --on-accent: var(--ivory);
+  --error: #A23B2C;
+  --font-display: "Marcellus", Georgia, serif;
+  --font-body: "Cormorant Garamond", Georgia, serif;
+  --font-label: "Marcellus", Georgia, serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 164px);
+}
+
+body { font-size: 20px; line-height: 1.6; font-weight: 500; }
+::selection { background: var(--jade-soft); }
+.eyebrow { font: 400 12px/1.5 var(--font-label); letter-spacing: .32em; color: var(--jade); }
+.link { font: 400 12px/1.5 var(--font-label); letter-spacing: .26em; color: var(--lacquer); }
+.button { font: 400 13px/1.2 var(--font-label); letter-spacing: .26em; }
+
+.fret { display: block; width: 100%; height: 16px; color: var(--gold); }
+
+/* ---------- portada ---------- */
+.hero { display: grid; grid-template-rows: auto 1fr auto; gap: 0; padding: clamp(14px, 2.4vw, 28px); background: var(--lacquer) radial-gradient(ellipse at 30% 40%, #B3322A, var(--lacquer) 55%, var(--lacquer-deep)); color: var(--ivory); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 5fr); align-items: center; gap: clamp(32px, 6vw, 96px); max-width: 1120px; margin-inline: auto; width: 100%; padding: clamp(28px, 6vh, 64px) var(--gutter); }
+.moon { position: relative; width: min(440px, 100%); justify-self: end; aspect-ratio: 1; }
+.moon::before { content: ""; position: absolute; inset: -19px; border-radius: 50%; border: 1px solid rgb(201 162 78 / .55); box-shadow: inset 0 0 0 9px var(--lacquer-deep), inset 0 0 0 11px var(--gold), 0 30px 60px rgb(40 0 0 / .35); }
+.moon__photo { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; }
+.moon__photo img { width: 100%; height: 100%; object-fit: cover; }
+.branch { position: absolute; z-index: 1; left: -30%; top: -21%; width: 116%; overflow: visible; filter: drop-shadow(0 3px 4px rgb(40 0 0 / .3)); }
+.branch__wood { fill: none; stroke: #3A2418; stroke-width: 6; stroke-linecap: round; }
+.branch__wood--thin { stroke-width: 3; }
+.blossom ellipse { fill: #FBEFEA; stroke: #E9C9C0; stroke-width: .6; }
+.blossom__c { fill: var(--gold); }
+.bud { fill: #E7A9A0; }
+.bird path { fill: var(--jade); stroke: #1F4A40; stroke-width: .8; }
+.bird__eye { fill: var(--ivory); }
+.hero__text { display: grid; justify-items: start; gap: 14px; }
+.hero__eyebrow { color: var(--gold); }
+.hero__names { display: grid; font-size: min(104px, calc((50vw - 96px) / (var(--len) * .66))); line-height: 1; color: var(--ivory); letter-spacing: .02em; }
+.hero__names .amp { font-family: var(--font-body); font-style: italic; font-size: .5em; color: var(--gold); margin: .05em 0 .05em .2em; }
+.hero__date { margin-top: 8px; font: 400 13px/1.6 var(--font-label); letter-spacing: .36em; text-transform: uppercase; color: var(--gold); padding-block: 10px; border-block: 1px solid rgb(201 162 78 / .6); }
+.hero__place { font: italic 500 22px/1.4 var(--font-body); color: #F2DCD2; }
+.hero__tagline { font: italic 500 20px/1.4 var(--font-body); color: rgb(247 241 230 / .78); }
+
+/* Entrada (~2,8 s): se traza la greca, la luna se abre desde el centro y la rama brota */
+.hero:not(.is-static) .hero__fret { animation: stitch 1.6s cubic-bezier(.5, 0, .3, 1) both; }
+.hero:not(.is-static) .hero__fret--bottom { animation-delay: .3s; }
+/* */
+.hero:not(.is-static) .moon::before { animation: fade 1.4s ease .4s both; }
+.hero:not(.is-static) .moon__photo { animation: moon 1.8s var(--ease-out) .4s both; }
+.hero:not(.is-static) .branch__wood { stroke-dasharray: 600; animation: grow 1.6s cubic-bezier(.5, 0, .3, 1) 1.1s both; }
+.hero:not(.is-static) .blossom, .hero:not(.is-static) .bud { transform-box: fill-box; transform-origin: center; animation: bloom .8s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: 2s; }
+.hero:not(.is-static) .bird { animation: fade 1s ease 2.3s both; }
+.hero:not(.is-static) .hero__text > * { animation: rise 1.1s var(--ease-out) both; animation-delay: 1.2s; }
+.hero:not(.is-static) .hero__names { animation-delay: .9s; }
+@keyframes stitch { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes moon { from { clip-path: circle(0 at 50% 50%); } to { clip-path: circle(50% at 50% 50%); } }
+@keyframes grow { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+@keyframes bloom { from { transform: scale(0); opacity: 0; } }
+
+/* ---------- secciones ---------- */
+.head__title { color: var(--lacquer); }
+.head__knot { display: flex; align-items: center; gap: 10px; width: 150px; }
+.head__knot i { flex: 1; height: 1px; background: var(--gold); }
+.head__knot b { width: 14px; height: 14px; border: 1.5px solid var(--gold); transform: rotate(45deg); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 6px var(--lacquer); }
+.facts { border: 1px solid var(--gold); outline: 1px solid var(--line); outline-offset: 6px; padding-block: 34px; background: #FBF7EF; }
+.fact + .fact { border-color: var(--line); }
+.fact__big { font-family: var(--font-display); color: var(--ink); }
+.fact__note { color: var(--jade); font-style: italic; }
+.chapter__photo img { border-radius: 50%; aspect-ratio: 1; object-fit: cover; box-shadow: 0 0 0 6px var(--paper), 0 0 0 7px var(--gold); }
+.chapter__meta { color: var(--lacquer); }
+.chapter__text { font-size: clamp(22px, 2.3vw, 27px); }
+
+.schedule { background: var(--jade) linear-gradient(180deg, #33725F, var(--jade)); color: var(--ivory); padding-bottom: var(--space); margin-top: var(--space); }
+.schedule.section { padding-top: var(--space); }
+.schedule .head__title { color: var(--ivory); }
+.schedule .eyebrow { color: var(--gold); }
+.schedule .head__text, .schedule .plan__place { color: rgb(247 241 230 / .78); }
+.schedule .head__knot b { box-shadow: inset 0 0 0 3px var(--jade), inset 0 0 0 6px var(--gold); }
+.plan__mark::before { background: rgb(201 162 78 / .5); }
+.plan__mark > * { margin-top: 26px; }
+.lantern { display: grid; place-items: center; width: 16px; height: 22px; border-radius: 45%; background: radial-gradient(ellipse at 50% 40%, #E3473B, var(--lacquer) 60%, var(--lacquer-deep)); border-top: 2px solid var(--gold); border-bottom: 2px solid var(--gold); box-shadow: 0 0 14px rgb(227 71 59 / .45); }
+.lantern--last { box-shadow: 0 0 18px rgb(241 200 110 / .7); }
+.plan__time { font-family: var(--font-display); color: var(--gold); }
+.plan__label { font-family: var(--font-label); letter-spacing: .24em; }
+
+.photos__item { padding: 8px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.iban__card { border-color: var(--gold); background: #FBF7EF; }
+
+.closing__body { background: var(--lacquer) radial-gradient(ellipse at 50% 0, #B3322A, var(--lacquer) 60%); color: var(--ivory); padding-top: 18px; }
+.closing__fret { margin-bottom: calc(var(--space) * .7); padding-inline: 18px; }
+.closing .eyebrow { color: var(--gold); }
+.closing__title { color: var(--ivory); }
+.closing__title .amp { color: var(--gold); font-family: var(--font-body); font-style: italic; }
+.closing__text { color: rgb(247 241 230 / .84); font-style: italic; }
+.closing .button { background: var(--gold); border-color: var(--gold); color: var(--lacquer-deep); }
+.closing__foot { background: var(--lacquer-deep); color: var(--gold); }
+
+.rsvp-dialog { background: #FBF7EF; }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); color: var(--lacquer); }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); }
+  .moon { width: min(300px, 74vw); justify-self: center; margin-top: 18px; }
+  .branch { left: -18%; top: -12%; width: 110%; }
+  .hero__text { justify-items: center; text-align: center; }
+  .hero__names { justify-items: center; font-size: min(68px, calc((100vw - 64px) / (var(--len) * .66))); }
+  .hero__names .amp { margin: 0; }
+}

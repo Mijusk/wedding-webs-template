@@ -1,0 +1,114 @@
+/* Plantilla Regencia. Concepto: una invitación de la época Regencia (estética "Bridgerton").
+   Azul Wedgwood, crema y rosa empolvado; camafeo ovalado con borde de perlas, lazo de seda,
+   guirnaldas y un cierre en azul jasperware con relieves blancos. Pluma para los nombres.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --cream: #F3F1EC;
+  --cream-2: #E9E6DE;
+  --wedgwood: #7F9BB3;
+  --wedgwood-deep: #4F6B85;
+  --powder: #C9D7E3;
+  --rose: #D8B1AC;
+  --rose-deep: #B98580;
+
+  --paper: var(--cream);
+  --paper-2: var(--cream-2);
+  --ink: #2B3440;
+  --muted: #68717C;
+  --line: #CFD6DC;
+  --accent: var(--wedgwood-deep);
+  --accent-2: var(--rose-deep);
+  --on-accent: var(--cream);
+  --error: #A23B2C;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "EB Garamond", Georgia, serif;
+  --font-label: "Playfair Display", Georgia, serif;
+  --font-script: "Pinyon Script", cursive;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 999px;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+}
+
+body { font-size: 19px; line-height: 1.65; }
+::selection { background: var(--powder); }
+.eyebrow { font: italic 400 17px/1.4 var(--font-display); letter-spacing: .04em; text-transform: none; color: var(--wedgwood-deep); }
+.link { font: 500 11px/1.4 var(--font-label); letter-spacing: .28em; color: var(--wedgwood-deep); }
+.button { font: 500 12px/1.2 var(--font-label); letter-spacing: .26em; }
+
+.swag { width: 120px; height: 20px; display: block; overflow: visible; }
+.swag path { fill: none; stroke: var(--rose-deep); stroke-width: 1.1; }
+.swag circle { fill: var(--rose); }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(40px, 8vh, 96px) var(--gutter); background: radial-gradient(ellipse at 30% 40%, #F8F7F3, var(--cream) 60%); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; gap: clamp(32px, 6vw, 96px); max-width: 1120px; margin-inline: auto; width: 100%; }
+.cameo { position: relative; width: min(400px, 100%); justify-self: end; aspect-ratio: 200 / 260; }
+.cameo__photo { position: absolute; inset: 4%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 6px var(--cream), 0 0 0 7px var(--wedgwood), 0 24px 50px rgb(43 52 64 / .18); }
+.cameo__photo img { width: 100%; height: 100%; object-fit: cover; }
+.cameo__pearls { position: absolute; inset: -3%; width: 106%; height: 106%; overflow: visible; }
+.cameo__pearls circle { fill: #FFFDF9; stroke: rgb(127 155 179 / .5); stroke-width: .5; filter: drop-shadow(0 .6px .6px rgb(0 0 0 / .15)); }
+.bow { position: absolute; z-index: 2; top: -7%; left: 50%; width: 46%; margin-left: -23%; overflow: visible; filter: drop-shadow(0 4px 6px rgb(120 70 60 / .2)); }
+.bow path, .bow ellipse { fill: var(--rose); stroke: var(--rose-deep); stroke-width: .8; }
+.bow__knot { fill: var(--rose-deep) !important; }
+.hero__text { display: grid; justify-items: center; gap: 12px; text-align: center; }
+.hero__eyebrow { font: italic 400 20px/1.4 var(--font-display); color: var(--muted); }
+.hero__names { font: 400 min(96px, calc((55vw - 96px) / (var(--len) * .85))) / 1.05 var(--font-script); color: var(--wedgwood-deep); text-wrap: balance; }
+.hero__names .amp { font-family: var(--font-display); font-style: italic; font-size: .45em; color: var(--rose-deep); vertical-align: middle; }
+.hero__tagline { font: italic 400 21px/1.4 var(--font-body); color: var(--ink); max-width: 22em; }
+.hero__date { margin-top: 10px; font: 500 12px/1.6 var(--font-label); letter-spacing: .32em; text-transform: uppercase; color: var(--ink); padding-left: .32em; }
+.hero__place { font: italic 400 19px/1.4 var(--font-body); color: var(--muted); }
+
+/* Entrada (~2,8 s): el camafeo aparece, se ensartan las perlas, cae el lazo y la pluma escribe */
+.hero:not(.is-static) .cameo__photo { animation: cameo 1.6s var(--ease-out) both; }
+.hero:not(.is-static) .cameo__pearls circle { animation: fade .4s ease both; }
+.hero:not(.is-static) .bow { animation: bow 1s cubic-bezier(.3, 1.5, .5, 1) 1.5s both; }
+.hero:not(.is-static) .hero__names { animation: write 1.6s cubic-bezier(.5, 0, .3, 1) .8s both; }
+.hero:not(.is-static) .hero__text > :not(.hero__names) { animation: rise 1.1s var(--ease-out) both; animation-delay: 1.6s; }
+@keyframes cameo { from { opacity: 0; transform: scale(.92); } }
+@keyframes bow { from { opacity: 0; transform: translateY(-20px) scale(.6); } }
+@keyframes write { from { clip-path: inset(-20% 100% -20% -5%); } to { clip-path: inset(-20% -5% -20% -5%); } }
+
+/* ---------- secciones ---------- */
+.head { gap: 10px; }
+.head__title { font-size: clamp(36px, 4.6vw, 56px); color: var(--ink); }
+.head__swag { margin-top: 6px; }
+.fact__big { font-family: var(--font-display); color: var(--wedgwood-deep); font-size: clamp(24px, 2.6vw, 32px); }
+.fact__note { color: var(--rose-deep); }
+.facts { border: 1px solid var(--wedgwood); outline: 1px solid var(--powder); outline-offset: 6px; padding-block: 36px; background: #F8F7F3; }
+.fact + .fact { border-color: var(--powder); }
+.chapter__photo img { border-radius: 50% / 40%; }
+.chapter__text { font-family: var(--font-body); font-size: clamp(21px, 2.2vw, 26px); }
+.chapter__meta { font: italic 400 17px/1.4 var(--font-display); letter-spacing: 0; text-transform: none; color: var(--rose-deep); }
+
+.plan__mark::before { background: var(--powder); }
+.plan__mark > * { margin-top: 30px; }
+.pearl { width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #EDE9E2 55%, #CFC7BC); box-shadow: 0 1px 2px rgb(0 0 0 / .2); }
+.plan__time { font-family: var(--font-display); color: var(--wedgwood-deep); }
+.plan__label { font-family: var(--font-label); font-size: 13px; letter-spacing: .26em; }
+.plan__place { font-style: italic; }
+
+.photos__item img { border-radius: 999px 999px 0 0; }
+.iban__card { border-color: var(--wedgwood); background: #F8F7F3; }
+
+/* Cierre: jasperware */
+.closing__body { background: var(--wedgwood); color: #fff; }
+.laurel { display: block; width: 110px; height: 110px; margin: 0 auto 26px; }
+.laurel path { fill: #FBFBF8; opacity: .9; }
+.closing .eyebrow { color: #EEF2F6; }
+.closing__title { color: #fff; font-family: var(--font-display); }
+.closing__title--names { font-family: var(--font-script); }
+.closing__title .amp { color: var(--cream-2); }
+.closing__text { color: rgb(255 255 255 / .82); font-style: italic; }
+.closing .button { background: #FBFBF8; border-color: #FBFBF8; color: var(--wedgwood-deep); }
+.closing__foot { background: var(--wedgwood-deep); color: #E9EEF3; }
+
+.rsvp-dialog { background: #F8F7F3; }
+.rsvp-dialog .rsvp-title { font-family: var(--font-script); color: var(--wedgwood-deep); font-size: 54px; }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); }
+  .cameo { width: min(280px, 74vw); justify-self: center; margin-top: 24px; }
+  .hero__names { font-size: min(68px, calc((100vw - 48px) / (var(--len) * .7))); }
+}

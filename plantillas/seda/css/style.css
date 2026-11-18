@@ -1,0 +1,121 @@
+/* Plantilla Seda. Concepto: la invitación envuelta como un regalo con cinta de raso.
+   Marfil cálido, malva ciruela satinado y gris perla; letra alta y fina.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --ivory: #F7F2EE;
+  --ivory-2: #EEE6E1;
+  --satin-1: #9A6577;
+  --satin-2: #B98394;
+  --satin-3: #6E3F50;
+  --satin-hi: #E9C9D2;
+  --plum: #5E3444;
+
+  --paper: var(--ivory);
+  --paper-2: var(--ivory-2);
+  --ink: #34282C;
+  --muted: #756469;
+  --line: #E3D6D3;
+  --accent: var(--satin-3);
+  --accent-2: var(--satin-1);
+  --on-accent: var(--ivory);
+  --error: #A23B2C;
+  --font-display: "Italiana", Georgia, serif;
+  --font-body: "Raleway", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Raleway", "Helvetica Neue", Arial, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 164px);
+  --satin: linear-gradient(90deg, var(--satin-3), var(--satin-1) 22%, var(--satin-hi) 46%, var(--satin-2) 58%, var(--satin-1) 78%, var(--satin-3));
+}
+
+body { font-weight: 300; font-size: 17px; line-height: 1.8; }
+::selection { background: var(--satin-hi); }
+.eyebrow { font: 500 11px/1.5 var(--font-label); letter-spacing: .36em; color: var(--satin-1); }
+.link { font: 500 11px/1.5 var(--font-label); letter-spacing: .28em; color: var(--satin-3); }
+.button { font: 500 12px/1.2 var(--font-label); letter-spacing: .28em; background: linear-gradient(90deg, var(--satin-3), var(--satin-1) 40%, #A87383 55%, var(--satin-3)); border: 0; color: #fff; text-shadow: 0 1px 1px rgb(0 0 0 / .2); }
+.bow { display: block; overflow: visible; filter: drop-shadow(0 6px 8px rgb(94 52 68 / .25)); }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(40px, 8vh, 96px) var(--gutter); background: radial-gradient(ellipse at 70% 40%, #FBF8F5, var(--ivory) 65%); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; gap: clamp(36px, 7vw, 110px); max-width: 1160px; margin-inline: auto; width: 100%; }
+.hero__text { display: grid; justify-items: center; gap: 16px; text-align: center; }
+.hero__names { display: grid; justify-items: center; font-size: min(112px, calc((44vw - 96px) / (var(--len) * .5))); line-height: 1; color: var(--ink); letter-spacing: .02em; }
+.hero__names .amp { font-size: .45em; color: var(--satin-1); margin: .14em 0; }
+.hero__date { margin-top: 10px; font: 500 12px/1.6 var(--font-label); letter-spacing: .4em; text-transform: uppercase; color: var(--ink); padding-left: .4em; }
+.hero__place { font: 400 26px/1.3 var(--font-display); color: var(--satin-3); }
+.hero__tagline { font: 300 italic 16px/1.6 var(--font-body); color: var(--muted); }
+
+.gift { position: relative; width: min(500px, 100%); justify-self: start; }
+.gift__photo { box-shadow: 0 30px 60px rgb(52 40 44 / .16); }
+.gift__photo img { width: 100%; aspect-ratio: 4 / 4.8; object-fit: cover; }
+.ribbon { position: absolute; display: block; background: var(--satin); box-shadow: 0 2px 6px rgb(52 40 44 / .25); }
+.ribbon::before, .ribbon::after { content: ""; position: absolute; background: rgb(255 255 255 / .35); }
+.ribbon--v { top: -3%; bottom: -3%; left: 85%; width: 30px; }
+.ribbon--v::before, .ribbon--v::after { top: 0; bottom: 0; width: 1px; left: 3px; }
+.ribbon--v::after { left: auto; right: 3px; }
+.ribbon--h { left: -3%; right: -3%; top: 9%; height: 30px; background: linear-gradient(180deg, var(--satin-3), var(--satin-1) 22%, var(--satin-hi) 46%, var(--satin-2) 58%, var(--satin-1) 78%, var(--satin-3)); }
+.ribbon--h::before, .ribbon--h::after { left: 0; right: 0; height: 1px; top: 3px; }
+.ribbon--h::after { top: auto; bottom: 3px; }
+.gift__bow { position: absolute; z-index: 2; left: calc(85% + 15px); top: calc(9% + 15px); width: 40%; transform: translate(-50%, -38%); }
+
+/* Entrada (~2,8 s): la foto aparece, la cinta la rodea y el lazo se anuda */
+.hero:not(.is-static) .gift__photo { animation: fade-up 1.4s var(--ease-out) both; }
+.hero:not(.is-static) .ribbon--v { transform-origin: top; animation: wrap-v 1.1s cubic-bezier(.6, 0, .2, 1) .8s both; }
+.hero:not(.is-static) .ribbon--h { transform-origin: left; animation: wrap-h 1.1s cubic-bezier(.6, 0, .2, 1) 1.2s both; }
+.hero:not(.is-static) .gift__bow { animation: tie 1s cubic-bezier(.3, 1.6, .5, 1) 2.1s both; }
+.hero:not(.is-static) .hero__text > * { animation: rise 1.2s var(--ease-out) both; animation-delay: .6s; }
+.hero:not(.is-static) .hero__names > * { animation: rise 1.3s var(--ease-out) both; }
+.hero:not(.is-static) .hero__names > :nth-child(2) { animation-delay: .2s; }
+.hero:not(.is-static) .hero__names > :nth-child(3) { animation-delay: .4s; }
+.hero:not(.is-static) .hero__text > :nth-child(n+3) { animation-delay: 1.4s; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(24px); } }
+@keyframes wrap-v { from { transform: scaleY(0); } }
+@keyframes wrap-h { from { transform: scaleX(0); } }
+@keyframes tie { from { opacity: 0; transform: translate(-50%, -38%) scale(.3) rotate(-20deg); } }
+
+/* ---------- secciones ---------- */
+.head__title { font-size: clamp(40px, 5.4vw, 66px); }
+.head__bow .bow { width: 54px; filter: drop-shadow(0 3px 4px rgb(94 52 68 / .2)); }
+.fact__big { font-family: var(--font-display); font-size: clamp(26px, 2.8vw, 34px); }
+.fact__note { color: var(--satin-1); }
+.chapter__photo { position: relative; }
+.chapter__photo::after { content: ""; position: absolute; left: -8px; right: -8px; bottom: 18%; height: 14px; background: linear-gradient(180deg, var(--satin-3), var(--satin-1) 22%, var(--satin-hi) 46%, var(--satin-2) 58%, var(--satin-1) 78%, var(--satin-3)); box-shadow: 0 2px 4px rgb(52 40 44 / .2); }
+.chapter__meta { color: var(--satin-1); }
+.chapter__text { font-family: var(--font-display); font-size: clamp(24px, 2.4vw, 30px); line-height: 1.4; }
+
+.schedule { background: var(--ivory-2); padding-bottom: var(--space); margin-top: var(--space); }
+.schedule.section { padding-top: var(--space); }
+.plan__mark::before { background: linear-gradient(180deg, var(--satin-2), var(--satin-1)); width: 3px; opacity: .6; }
+.plan__mark > * { margin-top: 26px; }
+.knot { width: 16px; height: 16px; border-radius: 6px; background: radial-gradient(circle at 35% 30%, var(--satin-hi), var(--satin-1) 60%, var(--satin-3)); box-shadow: 0 2px 4px rgb(52 40 44 / .25); }
+.knot--last { width: 20px; height: 20px; }
+.plan__time { font-family: var(--font-display); font-size: 1.5em; color: var(--satin-3); }
+.plan__label { font-weight: 500; letter-spacing: .3em; }
+
+.photos__item { box-shadow: 0 14px 30px rgb(52 40 44 / .1); }
+.iban__card { border-color: var(--line); background: #FBF8F5; }
+
+.closing__body { background: var(--plum) radial-gradient(ellipse at 50% 0, #74435A, var(--plum) 60%); color: var(--ivory); padding-top: 0; }
+.closing__ribbon { position: relative; height: 30px; margin-bottom: calc(var(--space) * .9); }
+.closing__ribbon .ribbon--h { left: 0; right: 0; top: 0; }
+.closing__bow { position: absolute; left: 50%; top: 15px; width: 150px; transform: translate(-50%, -38%); filter: drop-shadow(0 8px 12px rgb(0 0 0 / .3)); }
+.closing .eyebrow { color: var(--satin-hi); }
+.closing__title { color: var(--ivory); font-size: clamp(44px, 6vw, 76px); }
+.closing__title .amp { color: var(--satin-hi); }
+.closing__text { color: rgb(247 242 238 / .8); }
+.closing__foot { background: #48252F; color: var(--satin-hi); }
+
+.rsvp-dialog { background: #FBF8F5; }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); color: var(--ink); }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); }
+  .gift { order: -1; width: min(330px, 84vw); justify-self: center; }
+  .ribbon--v, .ribbon--h { --w: 22px; }
+  .ribbon--v { width: 22px; }
+  .ribbon--h { height: 22px; }
+  .gift__bow { left: calc(85% + 11px); top: calc(9% + 11px); }
+  .hero__names { font-size: min(80px, calc((100vw - 48px) / (var(--len) * .5))); }
+}
