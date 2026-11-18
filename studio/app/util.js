@@ -33,7 +33,7 @@ export const fill = (text, vars = {}) =>
 export const roundsLine = (n, texts = {}) =>
   n == null ? "" : n === 0 ? texts.none || "" : n === 1 ? texts.one || "" : fill(texts.many, { n });
 
-// «ninguna en Tal cual (se entrega tal cual se ha probado), 2 en Con cambios y 3 en A medida»
+// «ninguna en Esencial (se entrega tal cual se ha probado), 2 en Completa y 3 en Atelier»
 export function roundsSummary(tiers = []) {
   const parts = tiers.filter((t) => t.rounds != null)
     .map((t) => t.rounds === 0 ? `ninguna en ${t.name} (se entrega tal cual se ha probado)` : `${t.rounds} en ${t.name}`);

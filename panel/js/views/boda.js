@@ -219,7 +219,7 @@ export default async function boda(ctx) {
           <div class="field"><label for="f-notes">Notas</label><textarea id="f-notes" data-row="notes">${w.notes || ""}</textarea></div>
           <div class="field"><label for="f-sheet">Copiar también las respuestas a una hoja de Google</label><input id="f-sheet" data-row="rsvp_sheet_endpoint" value="${w.rsvp_sheet_endpoint || ""}" placeholder="https://script.google.com/macros/s/…/exec">
             <span class="hint">Opcional, para la transición: la URL del Apps Script de la hoja de la pareja.</span></div>
-          <div class="field"><label for="f-domain">Dominio propio (plan A medida)</label><input id="f-domain" data-row="custom_domain" value="${w.custom_domain || ""}" placeholder="luciaymartin.com"></div>
+          <div class="field"><label for="f-domain">Dominio propio (plan Atelier)</label><input id="f-domain" data-row="custom_domain" value="${w.custom_domain || ""}" placeholder="luciaymartin.com"></div>
           <dl class="facts small"><dt>Se retira</dt><dd>${w.retire_at ? fmtDate(w.retire_at) : "—"} (12 meses después de la boda)</dd>
             <dt>Datos de invitados</dt><dd>se borran el ${w.guest_data_delete_at ? fmtDate(w.guest_data_delete_at) : "—"}</dd></dl>
           <div class="btn-row">

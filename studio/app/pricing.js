@@ -22,7 +22,7 @@ export function setupPricing({ studio, templateUrl }) {
       <p class="tier__price">${esc(priceLabel(t.price, currency))}</p>
       <p class="tier__summary">${esc(t.summary)}</p>
       <ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
-      <button class="btn${rec ? "" : " btn--ghost"}" type="button" data-pick="${esc(t.id)}" aria-pressed="false">Elegir ${esc(t.name)}</button>
+      <button class="btn${rec ? "" : " btn--ghost"}" type="button" data-pick="${esc(t.id)}" aria-pressed="false" aria-label="Reservar ${esc(t.name)}">Reservar</button>
     </article>`;
   }).join("");
   const g = studio.guarantee;
@@ -55,7 +55,7 @@ export function setupPricing({ studio, templateUrl }) {
       const btn = el.querySelector("[data-pick]");
       el.classList.toggle("is-selected", on);
       btn.setAttribute("aria-pressed", String(on));
-      btn.textContent = on ? "Elegida ✓" : `Elegir ${tiers.find((t) => t.id === el.dataset.tier).name}`;
+      btn.textContent = on ? "Elegida ✓" : "Reservar";
     });
     syncCheckout();
   };
