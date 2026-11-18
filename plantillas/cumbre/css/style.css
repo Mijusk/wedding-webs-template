@@ -1,0 +1,129 @@
+/* Plantilla Cumbre. Concepto: boda en la montaña, al amanecer.
+   Cielo melocotón y lila, cordilleras en capas de azul pizarra a verde pino que se mueven
+   a distinta velocidad, la foto como un sol que sale detrás de las cimas y curvas de nivel
+   de mapa topográfico. Fraunces para los títulos, Manrope para el texto.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --snow: #F4F3EF;
+  --snow-2: #E9E8E2;
+  --slate: #2F3B40;
+  --pine: #3D5A4C;
+  --dusk: #A9AEC2;
+  --peach: #EBCDB0;
+  --r0: #9AA4B8;
+  --r1: #6F7F8E;
+  --r2: #4F6260;
+  --r3: var(--snow);
+
+  --paper: var(--snow);
+  --paper-2: var(--snow-2);
+  --ink: var(--slate);
+  --muted: #66706F;
+  --line: #CFD2CC;
+  --accent: var(--pine);
+  --accent-2: var(--dusk);
+  --on-accent: var(--snow);
+  --error: #A23B2C;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 999px;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+}
+
+body { font-size: 16px; line-height: 1.75; }
+h1, h2, h3 { font-weight: 300; font-variation-settings: "opsz" 144; }
+::selection { background: rgb(169 174 194 / .4); }
+.eyebrow { font: 600 11px/1.5 var(--font-label); letter-spacing: .3em; color: var(--pine); }
+.link { color: var(--pine); font-weight: 600; }
+.button { font-weight: 600; letter-spacing: .2em; }
+
+.peak { width: 22px; height: 13px; flex: none; }
+.peak path { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.contours { position: absolute; pointer-events: none; overflow: visible; }
+.contours path { fill: none; stroke: var(--pine); stroke-width: 1; opacity: .12; vector-effect: non-scaling-stroke; }
+
+/* ---------- portada ---------- */
+.hero { overflow: hidden; }
+.hero__sky {
+  position: relative; min-height: 100vh; min-height: 100svh; display: grid; grid-template-rows: auto minmax(0, 1fr);
+  background: linear-gradient(180deg, #C9C8D6 0%, #E3D3CC 42%, var(--peach) 70%, #F1DFCB 100%);
+}
+.hero__text { position: relative; z-index: 3; display: grid; justify-items: center; gap: 14px; padding: clamp(56px, 11vh, 120px) 16px 0; text-align: center; }
+.hero__eyebrow { color: var(--slate); }
+.hero__names { font-size: min(118px, 10vw, calc((100vw - 48px) / (var(--len) * .52))); line-height: 1; color: var(--slate); letter-spacing: -.02em; text-wrap: balance; }
+.hero__names .amp { font-style: italic; color: var(--pine); }
+.hero__meta { display: grid; gap: 4px; font: 600 12px/1.6 var(--font-label); letter-spacing: .28em; text-transform: uppercase; color: var(--slate); }
+.hero__sun {
+  --sun: min(420px, 64vw, 40svh);
+  position: absolute; z-index: 1; left: 50%; bottom: 23%; width: var(--sun); aspect-ratio: 1; margin-left: calc(var(--sun) / -2);
+  border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 10px rgb(255 240 220 / .35), 0 0 80px 30px rgb(255 225 190 / .5);
+}
+.hero__sun img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.hero__ridges { position: absolute; z-index: 2; left: 0; right: 0; bottom: -2px; width: 100%; height: 44%; overflow: visible; }
+.ridge { will-change: transform; }
+.ridge--0 { fill: var(--r0); }
+.ridge--1 { fill: var(--r1); }
+.ridge--2 { fill: var(--r2); }
+.ridge--3 { fill: var(--r3); }
+
+/* Entrada (~3 s): las cordilleras suben, el sol (la foto) sale detrás y aparecen los nombres */
+.hero:not(.is-static) .ridge { animation: ridge-in 1.8s var(--ease-out) both; }
+.hero:not(.is-static) .ridge--1 { animation-delay: .12s; } .hero:not(.is-static) .ridge--2 { animation-delay: .24s; } .hero:not(.is-static) .ridge--3 { animation-delay: .36s; }
+.hero:not(.is-static) .hero__sun img { animation: sunrise 2.4s var(--ease-out) .6s both; }
+.hero:not(.is-static) .hero__sun { animation: glow 2.4s ease .6s both; }
+.hero:not(.is-static) .hero__text > * { animation: rise 1.2s var(--ease-out) both; animation-delay: calc(1.4s + var(--d, 0) * 140ms); }
+.hero__text > :nth-child(2) { --d: 1; } .hero__text > :nth-child(3) { --d: 2; }
+@keyframes ridge-in { from { translate: 0 60px; opacity: 0; } }
+@keyframes sunrise { from { transform: translateY(70%) scale(1.1); } }
+@keyframes glow { from { box-shadow: 0 0 0 0 rgb(255 240 220 / 0), 0 0 0 0 rgb(255 225 190 / 0); clip-path: inset(0 0 0 0 round 50%); } }
+
+/* ---------- secciones ---------- */
+.head__eyebrow { display: inline-flex; align-items: center; gap: 10px; }
+.head__title { font-size: clamp(38px, 5vw, 64px); }
+.fact__big { font-weight: 300; }
+.fact__note { font-family: var(--font-display); font-size: 19px; color: var(--pine); }
+
+.story { position: relative; overflow: hidden; }
+.story__contours { left: 50%; top: 40px; width: 1100px; height: 1100px; margin-left: -550px; }
+.story .wrap, .story .head { position: relative; }
+.chapter__text { font-weight: 300; }
+.chapter__meta { color: var(--pine); }
+
+/* Sendero */
+.plan__mark::before { background: repeating-linear-gradient(var(--dusk) 0 4px, transparent 4px 9px); width: 2px; margin-left: -1px; }
+.plan__mark > * { margin-top: 28px; }
+.cairn { width: 14px; height: 12px; background: var(--slate); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.flag { width: 22px; height: 26px; margin-top: 18px !important; }
+.flag path { fill: none; stroke: var(--pine); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.plan__time { font-family: var(--font-display); font-weight: 300; color: var(--pine); }
+.plan__label { font-weight: 600; }
+
+.photos__item { border-radius: 4px; }
+.iban__card { border-radius: 6px; }
+
+/* Cierre: las mismas cimas al anochecer */
+.closing { margin-top: calc(var(--space) * .6); }
+.closing__body { background: var(--slate); color: var(--snow); padding-top: 0; }
+.closing__ridges { display: block; width: 100%; height: clamp(90px, 13vw, 180px); margin-bottom: clamp(48px, 8vw, 96px); background: var(--snow); }
+.closing__ridges .ridge--0 { fill: #C9CDD2; } .closing__ridges .ridge--1 { fill: #8A96A0; }
+.closing__ridges .ridge--2 { fill: #4D5C63; } .closing__ridges .ridge--3 { fill: var(--slate); }
+.closing__contours { right: -200px; bottom: -260px; width: 700px; height: 700px; }
+.closing__contours path { stroke: var(--snow); opacity: .08; }
+.closing .eyebrow { color: var(--dusk); }
+.closing__title { color: var(--snow); }
+.closing__title .amp { font-style: italic; color: var(--peach); }
+.closing__text { color: rgb(244 243 239 / .72); }
+.closing .button { background: var(--peach); border-color: var(--peach); color: var(--slate); }
+.closing__foot { background: #232D31; color: var(--dusk); }
+
+.rsvp-dialog { background: var(--snow); }
+
+@media (max-width: 760px) {
+  .hero__names { font-size: min(64px, calc((100vw - 32px) / (var(--len) * .34))); }
+  .hero__sun { bottom: 27%; }
+  .hero__ridges { height: 34%; left: -70%; right: auto; width: 240%; }
+}

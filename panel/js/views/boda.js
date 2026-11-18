@@ -115,7 +115,7 @@ export default async function boda(ctx) {
           </div>
           <div class="field"><label for="f-vm">Enlace a Google Maps</label>
             <div class="link-box"><input id="f-vm" data-path="venue.mapsUrl" value="${config.venue?.mapsUrl || ""}" type="url"><button class="btn btn--small" type="button" data-maps>Crear desde el nombre</button></div></div>
-          ${["costa", "estrellas"].includes(template) || config.venue?.lat != null ? html`<div class="grid-2">
+          ${["costa", "estrellas", "cartografia"].includes(template) || config.venue?.lat != null ? html`<div class="grid-2">
             <div class="field"><label for="f-lat">Latitud</label><input id="f-lat" data-path="venue.lat" data-num value="${config.venue?.lat ?? ""}" inputmode="decimal"></div>
             <div class="field"><label for="f-lon">Longitud</label><input id="f-lon" data-path="venue.lon" data-num value="${config.venue?.lon ?? ""}" inputmode="decimal"></div>
           </div><p class="hint">Costa y Noche estrellada las usan para la puesta de sol y el cielo de esa noche. En Google Maps: clic derecho sobre el sitio.</p>` : ""}

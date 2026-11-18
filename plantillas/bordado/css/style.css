@@ -1,0 +1,143 @@
+/* Plantilla Bordado. Concepto: un bastidor de bordado sobre lino.
+   Hilos salvia, rosa empolvado y azul tinta; madera clara; pespuntes en lugar de líneas.
+   Las iniciales se bordan a punto de satén y las flores aparecen una a una al entrar.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --linen: #F1EBE0;
+  --linen-2: #E8DFCF;
+  --sage: #7C8C6E;
+  --blush: #C98E8A;
+  --thread: #2E3A55;
+  --wood: #C9A77C;
+  --wood-dark: #9B7A52;
+
+  --paper: var(--linen);
+  --paper-2: var(--linen-2);
+  --ink: #2F3340;
+  --muted: #6C6A66;
+  --line: #D6CCB9;
+  --accent: var(--thread);
+  --accent-2: var(--blush);
+  --on-accent: var(--linen);
+  --error: #A23B2C;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Lora", Georgia, serif;
+  --font-label: "Lora", Georgia, serif;
+  --font-script: "Pinyon Script", cursive;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 999px;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 164px);
+}
+
+/* Lino: trama de hilos finos */
+body {
+  font-size: 16px; line-height: 1.75;
+  background:
+    repeating-linear-gradient(0deg, rgb(140 120 90 / .05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(140 120 90 / .045) 0 1px, transparent 1px 4px),
+    var(--linen);
+}
+::selection { background: rgb(201 142 138 / .3); }
+.eyebrow { font: 500 11px/1.5 var(--font-label); letter-spacing: .3em; color: var(--sage); }
+.link { color: var(--thread); background-image: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); }
+.link:hover { background-size: 100% 1px; color: var(--blush); }
+.button { font-weight: 500; letter-spacing: .2em; }
+
+/* Pespunte */
+.stitch { display: block; flex: 1; height: 1px; max-width: 120px; background: repeating-linear-gradient(90deg, var(--blush) 0 6px, transparent 6px 11px); }
+
+/* ---------- bastidor ---------- */
+.hoop { display: block; width: 100%; height: auto; overflow: visible; }
+.hoop__wood { fill: none; stroke: var(--wood); stroke-width: 9; filter: drop-shadow(0 6px 10px rgb(90 60 30 / .25)); }
+.hoop__inner { fill: none; stroke: var(--wood-dark); stroke-width: 1; opacity: .5; }
+.hoop__screw { fill: var(--wood-dark); }
+.hoop__clasp { fill: var(--wood); stroke: var(--wood-dark); stroke-width: .8; }
+.satin__bg { fill: var(--thread); }
+.satin__line { stroke: rgb(255 255 255 / .22); stroke-width: .8; }
+.hoop__initials { font: 400 52px var(--font-script); fill: url(#satin); stroke: var(--thread); stroke-width: .5; stroke-dasharray: 1.6 1.2; paint-order: stroke; }
+.hoop__amp { font-size: 30px; fill: var(--blush); stroke: none; }
+.w-petal { fill: var(--blush); stroke: rgb(255 255 255 / .45); stroke-width: .5; }
+.w-flower--1 .w-petal { fill: #E3C2A8; }
+.w-flower--2 .w-petal { fill: #A8B6C9; }
+.w-knot { fill: #D9B35E; }
+.w-leaf { fill: none; stroke: var(--sage); stroke-width: 1.3; stroke-dasharray: 2 1.4; stroke-linecap: round; }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(40px, 7vh, 90px) var(--gutter); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(32px, 6vw, 96px); max-width: 1180px; margin-inline: auto; width: 100%; }
+.hero__text { display: grid; justify-items: center; gap: 12px; text-align: center; }
+.hero__hoop { width: min(320px, 80vw); margin-bottom: 16px; }
+.hero__eyebrow { color: var(--blush); }
+.hero__names { font-size: min(76px, calc((50vw - 96px) / (var(--len) * 1.1))); line-height: 1.05; color: var(--thread); font-weight: 400; text-wrap: balance; }
+.hero__names .amp { font: 400 .8em/1 var(--font-script); color: var(--blush); font-size: .8em; }
+.hero__date { font: 500 13px/1.5 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--ink); padding-left: .3em; }
+.hero__place { font: italic 400 20px/1.4 var(--font-display); color: var(--muted); }
+.hero__photo { position: relative; padding: 14px; background: #FBF8F2; box-shadow: 0 18px 40px rgb(80 60 40 / .14); }
+.hero__photo::after { content: ""; position: absolute; inset: 7px; border: 1px dashed var(--blush); pointer-events: none; }
+.hero__photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+
+/* Entrada (~3 s): el aro baja, las iniciales se bordan de izquierda a derecha y brotan las flores */
+.hero:not(.is-static) .hero__hoop { animation: hoop-in 1.2s var(--ease-out) both; }
+.hero:not(.is-static) .hoop__initials { animation: sew 1.8s steps(18) .7s both; }
+.hero:not(.is-static) .w > * { animation: bloom .6s var(--ease-out) both; animation-delay: calc(1.2s + var(--i) * 110ms); transform-box: fill-box; transform-origin: center; }
+.hero:not(.is-static) .hero__text > :not(.hero__hoop) { animation: rise 1s var(--ease-out) both; animation-delay: 2.1s; }
+.hero:not(.is-static) .hero__photo { animation: rise 1.4s var(--ease-out) 1.4s both; }
+@keyframes hoop-in { from { opacity: 0; transform: translateY(-18px) rotate(-6deg); } }
+@keyframes sew { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes bloom { from { opacity: 0; scale: .2; } }
+
+/* ---------- secciones ---------- */
+.head__eyebrow { display: flex; align-items: center; justify-content: center; gap: 16px; width: min(420px, 100%); }
+.head__title { color: var(--thread); }
+.head__text { font-family: var(--font-display); font-style: italic; font-size: 19px; }
+
+/* Lo esencial: un parche cosido */
+.facts { padding: clamp(28px, 4vw, 48px) 0; background: #FBF8F2; position: relative; box-shadow: 0 10px 30px rgb(80 60 40 / .08); }
+.facts::after { content: ""; position: absolute; inset: 9px; border: 1px dashed var(--sage); pointer-events: none; }
+.fact + .fact { border-left: 1px dashed var(--line); }
+.fact__big { color: var(--thread); }
+.fact__note { font-family: var(--font-display); font-size: 19px; color: var(--blush); }
+
+.chapter__text { color: var(--ink); }
+.chapter__meta { color: var(--sage); }
+.chapter__photo { padding: 10px; background: #FBF8F2; position: relative; }
+.chapter__photo::after { content: ""; position: absolute; inset: 5px; border: 1px dashed var(--blush); }
+
+/* Programa con puntos de cruz */
+.plan__mark::before { background: repeating-linear-gradient(var(--line) 0 5px, transparent 5px 9px); }
+.plan__mark > * { margin-top: 24px; }
+.xst { width: 18px; height: 18px; }
+.xst path { stroke: var(--blush); stroke-width: 2.6; stroke-linecap: round; }
+.xst--1 path { stroke: var(--sage); } .xst--2 path { stroke: var(--thread); }
+.plan__time { font-family: var(--font-display); color: var(--thread); font-weight: 500; }
+.plan__label { font-size: 13px; letter-spacing: .24em; }
+.plan__place { font-family: var(--font-display); font-style: italic; font-size: 18px; }
+
+.photos__item { padding: 10px; background: #FBF8F2; position: relative; box-shadow: 0 8px 24px rgb(80 60 40 / .08); }
+.photos__item::after { content: ""; position: absolute; inset: 5px; border: 1px dashed var(--blush); pointer-events: none; }
+
+.iban__card { background: #FBF8F2; border: 1px dashed var(--sage); }
+.iban__holder { color: var(--thread); }
+
+/* Cierre */
+.closing__body { background: var(--linen-2); }
+.heart { display: block; width: 96px; height: 86px; margin: 0 auto 32px; }
+.heart path { stroke: var(--blush); stroke-width: 2.4; stroke-linecap: round; }
+.closing__title { color: var(--thread); }
+.closing__title .amp { font-family: var(--font-script); color: var(--blush); }
+.closing__foot { background: var(--thread); color: var(--linen); }
+
+.rsvp-dialog { background: #FBF8F2; }
+.rsvp-dialog .rsvp-title { color: var(--thread); }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); }
+  .hero__names { font-size: min(60px, calc((100vw - 64px) / (var(--len) * 1.1))); }
+  .hero__hoop { width: min(270px, 72vw); }
+  .hero__photo { width: min(440px, 100%); justify-self: center; }
+}
+@media (max-width: 760px) {
+  .facts { padding-inline: 20px; }
+}

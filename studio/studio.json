@@ -103,6 +103,38 @@
     "ciudades": {
       "name": "Dos ciudades",
       "url": "../plantillas/ciudades/"
+    },
+    "vendimia": {
+      "name": "Vendimia",
+      "url": "../plantillas/vendimia/"
+    },
+    "cartografia": {
+      "name": "Cartografía",
+      "url": "../plantillas/cartografia/"
+    },
+    "cuento": {
+      "name": "Cuento",
+      "url": "../plantillas/cuento/"
+    },
+    "bordado": {
+      "name": "Bordado",
+      "url": "../plantillas/bordado/"
+    },
+    "kintsugi": {
+      "name": "Kintsugi",
+      "url": "../plantillas/kintsugi/"
+    },
+    "partitura": {
+      "name": "Partitura",
+      "url": "../plantillas/partitura/"
+    },
+    "cumbre": {
+      "name": "Cumbre",
+      "url": "../plantillas/cumbre/"
+    },
+    "origami": {
+      "name": "Origami",
+      "url": "../plantillas/origami/"
     }
   },
   "styles": [
@@ -393,6 +425,102 @@
         "#b23a2e"
       ],
       "description": "Pasaporte, sello y dos relojes con la hora de vuestras ciudades. En español e inglés, para bodas de destino."
+    },
+    {
+      "id": "vendimia",
+      "name": "Vendimia",
+      "template": "vendimia",
+      "theme": "vendimia",
+      "status": "available",
+      "swatch": [
+        "#f4ede1",
+        "#5e1b2b"
+      ],
+      "description": "La etiqueta de un vino de reserva: cosecha del año de vuestra boda, notas de cata y un maridaje por programa. Para bodegas y viñedos."
+    },
+    {
+      "id": "cartografia",
+      "name": "Cartografía",
+      "template": "cartografia",
+      "theme": "cartografia",
+      "status": "available",
+      "swatch": [
+        "#efe6d2",
+        "#9a3b2a"
+      ],
+      "description": "Una carta náutica antigua con rosa de los vientos, las coordenadas reales del lugar y un itinerario que se traza al bajar."
+    },
+    {
+      "id": "cuento",
+      "name": "Cuento",
+      "template": "cuento",
+      "theme": "cuento",
+      "status": "available",
+      "swatch": [
+        "#faf5e9",
+        "#24382e"
+      ],
+      "description": "Un libro de tapa de tela verde y letras doradas que se abre al entrar. Cada sección es un capítulo con letra capital."
+    },
+    {
+      "id": "bordado",
+      "name": "Bordado",
+      "template": "bordado",
+      "theme": "bordado",
+      "status": "available",
+      "swatch": [
+        "#f1ebe0",
+        "#2e3a55"
+      ],
+      "description": "Vuestras iniciales bordadas en un bastidor de madera, flores a punto de margarita sobre lino y pespuntes. Artesanal y delicada."
+    },
+    {
+      "id": "kintsugi",
+      "name": "Kintsugi",
+      "template": "kintsugi",
+      "theme": "kintsugi",
+      "status": "available",
+      "swatch": [
+        "#f3efe6",
+        "#b8913f"
+      ],
+      "description": "Calma japonesa: un círculo de pincel que se traza solo, grietas de oro entre secciones y un sello rojo con vuestras iniciales."
+    },
+    {
+      "id": "partitura",
+      "name": "Partitura",
+      "template": "partitura",
+      "theme": "partitura",
+      "status": "available",
+      "swatch": [
+        "#f7f3ea",
+        "#7a2734"
+      ],
+      "description": "La portada de una partitura con vuestra canción, un pentagrama en el que suenan las notas y un programa de mano. Para parejas melómanas."
+    },
+    {
+      "id": "cumbre",
+      "name": "Cumbre",
+      "template": "cumbre",
+      "theme": "cumbre",
+      "status": "available",
+      "swatch": [
+        "#f4f3ef",
+        "#3d5a4c"
+      ],
+      "description": "Cordilleras en capas que se mueven al bajar, vuestra foto saliendo como el sol detrás de las cimas y curvas de nivel. Para bodas en la montaña."
+    },
+    {
+      "id": "origami",
+      "name": "Origami",
+      "template": "origami",
+      "theme": "origami",
+      "status": "available",
+      "swatch": [
+        "#faf7f3",
+        "#d4a99c"
+      ],
+      "description": "Una grulla de papel que se pliega al entrar, fotos con la esquina doblada y secciones que se despliegan como papel."
     },
     {
       "id": "olivar",
