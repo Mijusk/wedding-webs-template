@@ -192,4 +192,33 @@ do $$ begin
 end $$;
 reset role;
 
+-- Emparejar una respuesta del enlace general con un grupo de la lista: unir, deshacer, descartar.
+reset role;
+insert into public.guest_groups (id, wedding_id, name, seats, token, sort) values
+  ('c0000000-0000-4000-8000-0000000000e1', 'b0000000-0000-4000-8000-000000000002', 'Familia Emparejar', 2, 'tok_emparejar_aaaaaaaaaaaaaaaa', 1);
+insert into public.rsvp_responses (wedding_id, group_id, name, attending, created_at) values
+  ('b0000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-0000000000e1', 'Familia Emparejar', true, now() - interval '3 days'),
+  ('b0000000-0000-4000-8000-000000000002', null, 'Jose  Emparejado', false, now() - interval '2 days'),
+  ('b0000000-0000-4000-8000-000000000002', null, 'José Emparejado', true, now() - interval '1 day');
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
+do $$
+declare g uuid := 'c0000000-0000-4000-8000-0000000000e1'; w uuid := 'b0000000-0000-4000-8000-000000000002';
+begin
+  assert public.pareja_emparejar(w, 'jose emparejado', g, 'auto') = 2, 'FALLO: emparejar une todas las filas con ese nombre';
+  assert (select count(*) from public.rsvp_responses where group_id = g) = 3, 'FALLO: emparejar';
+  assert public.pareja_emparejar(w, 'jose emparejado', g, 'deshacer') = 2, 'FALLO: deshacer';
+  assert (select count(*) from public.rsvp_responses where group_id = g) = 1, 'FALLO: deshacer ha soltado la respuesta del enlace personal';
+  perform public.pareja_emparejar(w, 'jose emparejado', g, 'descartar');
+  assert (select bool_and(jsonb_array_length(payload -> 'descartados') = 1) from public.rsvp_responses where wedding_id = w and name_key = 'jose emparejado'),
+    'FALLO: descartados repetidos';
+  begin
+    perform public.pareja_emparejar(w, 'jose emparejado', 'c0000000-0000-4000-8000-0000000000e1'::uuid, 'borrar');
+    raise exception 'FALLO: modo no válido aceptado';
+  exception when raise_exception then if sqlerrm like 'FALLO%' then raise; end if;
+  end;
+  raise notice 'OK emparejar respuestas con la lista: unir, deshacer sin tocar el enlace personal, descartar';
+end $$;
+reset role;
+
 rollback;
