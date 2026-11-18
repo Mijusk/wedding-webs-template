@@ -24,6 +24,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preload" href="fonts/gloock-latin-d8b731.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/jost-latin-b58a58.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="studio.css">
 <link rel="stylesheet" href="entrance.css">
@@ -43,22 +44,43 @@
     document.documentElement.classList.add(calm ? "no-motion" : seen ? "is-entering" : "is-loading");
   } catch { document.documentElement.classList.add("is-entering"); }
   // Por si fallara el script de la entrada (al final de la página): nunca dejar la cortina puesta.
+  // La entrada completa dura unos 3,3 s; el seguro salta a los 5 s.
   setTimeout(() => {
     const el = document.documentElement;
-    if (!el.classList.contains("is-ready")) { el.classList.add("is-ready"); document.getElementById("preloader")?.remove(); }
-  }, 1500);
+    if (!el.classList.contains("is-ready")) {
+      el.classList.add("is-ready", "entrance-done");
+      document.querySelectorAll(".preloader, .preloader-veil").forEach((n) => n.remove());
+    }
+  }, 5000);
 </script>
 </head>
 <body>
-<!-- Entrada: cortina oscura con el monograma de las dos W que se dibuja, un contador y la
-     cortina que sube. Una vez por visita (studio/app/entrance.js). -->
+<!-- Entrada (unos 3 s, una vez por visita): cortina oscura con grano, el monograma de las dos W
+     que se dibuja y recibe un brillo, «WeddingWebs» letra a letra, «studio» y una línea fina que
+     avanza con el contador. Al terminar, la cortina sube con el borde curvo y deja ver un velo
+     granate que sube justo detrás. Se salta con un toque, una tecla o la rueda.
+     Lo mueve el script del final de la página; estilos en studio/entrance.css. -->
+<div class="preloader-veil" aria-hidden="true"></div>
 <div class="preloader" id="preloader" aria-hidden="true">
   <div class="preloader__center">
     <svg class="monogram" viewBox="0 0 124 60" role="presentation">
+      <defs>
+        <linearGradient id="monogram-sheen" gradientUnits="userSpaceOnUse" x1="-40" y1="0" x2="0" y2="0">
+          <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+          <stop offset=".5" stop-color="#fff" stop-opacity=".95"/>
+          <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="190 0" begin="indefinite" dur=".95s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".45 0 .3 1"/>
+        </linearGradient>
+      </defs>
       <path class="monogram__w1" pathLength="1" d="M4 8 L22 52 L40 16 L58 52 L76 8"/>
       <path class="monogram__w2" pathLength="1" d="M48 8 L66 52 L84 16 L102 52 L120 8"/>
+      <g class="monogram__sheen" stroke="url(#monogram-sheen)">
+        <path d="M4 8 L22 52 L40 16 L58 52 L76 8"/>
+        <path d="M48 8 L66 52 L84 16 L102 52 L120 8"/>
+      </g>
     </svg>
     <p class="preloader__brand brand-mark"><span data-brand-letters>WeddingWebs</span><span class="brand__studio">studio</span></p>
+    <span class="preloader__rule"><span></span></span>
   </div>
   <p class="preloader__note">Webs de boda</p>
   <p class="preloader__count"><span id="preloader-count">000</span></p>
@@ -358,16 +380,17 @@
 </div>
 
 <script>
-  // Entrada: cortina con el monograma, el nombre y un contador. Corre en cuanto se lee la página,
-  // sin esperar a ningún archivo, y como mucho dura 1 s (sube a los 0,56 s y tarda 0,44 s).
-  // Una vez por visita y nunca con «reducir movimiento» (lo decide el script del <head>).
+  // Entrada: corre en cuanto se lee la página, sin esperar a ningún archivo de la red.
+  // Cronología (primera visita): 0–2,35 s dibujo, nombre y contador · 2,35 s la cortina sube
+  // (0,95 s) y el velo granate detrás · la portada aparece mientras suben. Un toque, una tecla o la
+  // rueda la adelantan. Una vez por visita y nunca con «reducir movimiento» (lo decide el <head>).
   (() => {
     const root = document.documentElement;
     const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
     // Cada palabra del titular en su caja, para que suba desde detrás de su línea.
     const title = document.querySelector("[data-words]");
     if (title) {
-      const words = title.textContent.trim().split(/s+/);
+      const words = title.textContent.trim().split(/\s+/);
       title.setAttribute("aria-label", words.join(" "));
       title.innerHTML = words.map((w, i) => `<span class="w" aria-hidden="true"><span style="--wi:${i}">${esc(w)}</span></span>`).join(" ");
     }
@@ -378,24 +401,48 @@
     }
     try { sessionStorage.setItem("ww-entrance", "1"); } catch { /* sin almacenamiento */ }
     if (!location.hash) scrollTo(0, 0);
-    const ready = () => {
+    let done = false;
+    const ready = (settle) => {
       root.classList.add("is-ready");
-      setTimeout(() => root.classList.remove("is-loading", "is-entering"), 2600);
+      // Cuando la portada ya se ha colocado: fuera los estados de entrada y llega el aviso de cookies.
+      setTimeout(() => { root.classList.remove("is-loading", "is-entering"); root.classList.add("entrance-done"); }, settle);
     };
-    if (!root.classList.contains("is-loading")) return requestAnimationFrame(ready);
-    const HOLD = 560, t0 = performance.now(), out = document.getElementById("preloader-count");
+    if (!root.classList.contains("is-loading")) return requestAnimationFrame(() => ready(1600));
+
+    const HOLD = 2350, t0 = performance.now();
+    const curtain = document.getElementById("preloader");
+    const veil = document.querySelector(".preloader-veil");
+    const out = document.getElementById("preloader-count");
+    const rule = curtain.querySelector(".preloader__rule > span");
+    const sheen = curtain.querySelector("animateTransform");
+    // Contador y línea: arrancan suaves, van parejos y frenan al llegar a 100.
+    const ease = (p) => (1 - Math.cos(Math.PI * p)) / 2;
+    let shone = false;
     const tick = (now) => {
-      const p = Math.min(1, (now - t0) / HOLD);
-      out.textContent = String(Math.round(100 * (1 - Math.pow(1 - p, 2)))).padStart(3, "0");
+      if (done) return;
+      const p = Math.min(1, (now - t0) / HOLD), e = ease(p);
+      out.textContent = String(Math.round(100 * e)).padStart(3, "0");
+      rule.style.transform = `scaleX(${e.toFixed(4)})`;
+      if (!shone && now - t0 > 1250) { shone = true; try { sheen.beginElement(); } catch { /* sin SMIL */ } }
       if (p < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-    setTimeout(() => {
-      const curtain = document.getElementById("preloader");
-      curtain?.classList.add("is-leaving");
-      ready();
-      setTimeout(() => curtain?.remove(), 480);
-    }, HOLD);
+
+    const leave = () => {
+      if (done) return;
+      done = true;
+      out.textContent = "100";
+      rule.style.transform = "scaleX(1)";
+      curtain.classList.add("is-leaving");
+      veil?.classList.add("is-leaving");
+      ready(2200);
+      setTimeout(() => { curtain.remove(); veil?.remove(); }, 1250);
+      ["pointerdown", "keydown", "wheel", "touchstart"].forEach((t) => removeEventListener(t, skip));
+    };
+    // Saltarla: solo tras un primer vistazo (0,6 s), para que un toque accidental no la corte.
+    const skip = () => { if (performance.now() - t0 > 600) leave(); };
+    ["pointerdown", "keydown", "wheel", "touchstart"].forEach((t) => addEventListener(t, skip, { passive: true }));
+    setTimeout(leave, HOLD);
   })();
 </script>
 <script type="module" src="app/main.js"></script>

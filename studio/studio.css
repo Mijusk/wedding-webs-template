@@ -242,6 +242,7 @@ body.has-nudge { padding-bottom: 64px; }
 @media (max-width: 560px) {
   .top__nav a { display: none; }
   .top__nav a.btn { display: inline-flex; }
+  .top__nav .btn { white-space: nowrap; padding: 10px 14px; font-size: 13px; }
   .field-row { grid-template-columns: 1fr; }
   .sheet { padding: 24px 18px; }
   .stage__actions .seg { display: none; }
