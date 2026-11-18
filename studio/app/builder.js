@@ -1,22 +1,30 @@
 import { $, esc, sleep, syncScrollLock } from "./util.js";
 import { pickRandom } from "./demo.js";
+import { showInFrame, fitScaled } from "./preview.js";
 
-// Formulario "Contadnos lo mínimo": recoge los datos de la pareja (ver wedding.js).
+// Generador paso a paso: una pregunta por pantalla y, al lado, su web cambiando con cada dato
+// (lo que aún no han puesto sale del ejemplo de la plantilla). Sin email: se pide al final, si
+// quieren guardarla (send.js). Recoge los datos de la pareja (ver wedding.js).
+const STEPS = ["nombres", "fecha", "lugar", "estilo", "fotos"];
 let photos = []; // data URLs ya reducidas
 let opener = null;
-export const SAMPLE_EMAIL = "ana.y.pablo@example.com"; // el del botón de ejemplo: nunca se guarda como contacto
+let step = 0;
+let ctx = null;
 
-export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
+export function setupBuilder(context) {
+  ctx = context;
+  const { studio, demoPhotos = [] } = ctx;
   const sheet = $("#builder"), form = $("#builder-form"), err = $("#b-error");
   const available = studio.styles.filter((s) => s.status === "available");
 
-  $("#b-styles").innerHTML = studio.styles.map((s) => `
+  $("#b-styles").innerHTML = studio.styles.filter((s) => s.status === "available").map((s) => `
     <label class="chip">
-      <input type="radio" name="style" value="${esc(s.id)}" ${s.status !== "available" ? "disabled" : ""}>
+      <input type="radio" name="style" value="${esc(s.id)}">
       <span class="swatch" style="--sw-a:${esc(s.swatch[0])};--sw-b:${esc(s.swatch[1])}"></span>
-      ${esc(s.name)}${s.status !== "available" ? ' <span class="opt">pronto</span>' : ""}
+      ${esc(s.name)}
     </label>`).join("");
   form.elements.style.value = available[0].id;
+  fitScaled($(".wizard__phone .scaled"));
 
   const max = studio.generator.maxPhotos;
   const input = $("#b-photo-input");
@@ -35,47 +43,40 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
     }
     $("#b-photos").classList.remove("is-busy");
     renderPhotos(max);
+    livePreview();
   });
 
-  // Para probar rápido: datos inventados y tres fotos de ejemplo al azar, si las hay.
+  // Para probar rápido: una pareja inventada, tres fotos de ejemplo al azar y directos a su web.
   $("#b-sample").addEventListener("click", async () => {
     const d = new Date(); d.setMonth(d.getMonth() + 10);
     const f = form.elements;
     f.nameA.value = "Ana"; f.nameB.value = "Pablo";
-    f.date.value = d.toISOString().slice(0, 10); f.time.value = "18:30";
+    f.date.value = d.toLocaleDateString("sv-SE"); f.time.value = "18:30";
     f.venue.value = "Cortijo Los Almendros"; f.city.value = "Ronda, Málaga";
-    f.email.value = SAMPLE_EMAIL; f.consent.checked = true;
     err.textContent = "";
     photos = [];
     for (const url of pickRandom(demoPhotos, max)) {
       try { photos.push(await shrink(await (await fetch(url)).blob())); } catch { /* foto ilegible: se salta */ }
     }
     renderPhotos(max);
+    generate(true);
   });
 
-  form.addEventListener("submit", async (e) => {
+  // Enter (o «Siguiente») avanza; en el último paso, crea la web.
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(form));
-    const missing = [["nameA", "b-name-a", "Escribid los dos nombres."], ["nameB", "b-name-b", "Escribid los dos nombres."],
-      ["date", "b-date", "Falta la fecha de la boda."], ["time", "b-time", "Falta la hora de la ceremonia."],
-      ["venue", "b-venue", "Falta el lugar de la boda."]].find(([k]) => !String(d[k] || "").trim());
-    if (missing) { err.textContent = missing[2]; return $(`#${missing[1]}`).focus(); }
-    if (d.date < today()) { err.textContent = "La fecha de la boda ya ha pasado. Revisadla."; return $("#b-date").focus(); }
-    if (d.date > inYears(4)) { err.textContent = "Revisad la fecha: ¿seguro que es tan lejos?"; return $("#b-date").focus(); }
-    if (!/^\S+@\S+\.\S+$/.test(d.email || "")) { err.textContent = "Revisad el email: os enviamos ahí el enlace de vuestra web."; return $("#b-email").focus(); }
-    if (!d.consent) { err.textContent = "Marcad la casilla para que podamos escribiros."; return $("#b-consent").focus(); }
-    if (d.website) return closeBuilder(); // campo trampa: lo rellena un bot, no una pareja
-    err.textContent = "";
-    const style = studio.styles.find((s) => s.id === d.style) || available[0];
-    closeBuilder();
-    onGenerate({
-      couple: [d.nameA.trim(), d.nameB.trim()],
-      date: d.date, time: d.time,
-      venue: d.venue.trim(), city: (d.city || "").trim(),
-      email: d.email.trim(),
-      photos: [...photos],
-    }, style);
+    if (!validStep()) return;
+    if (step < STEPS.length - 1) return go(step + 1);
+    generate(false);
   });
+  $("#w-back").addEventListener("click", () => go(step - 1));
+
+  form.addEventListener("input", (e) => {
+    if (e.target.id === "b-date") countdown();
+    if (e.target.closest(".wstep")) err.textContent = "";
+    livePreview();
+  });
+  form.addEventListener("change", (e) => { if (e.target.name === "style") livePreview(0); });
 
   sheet.querySelector("[data-close]").addEventListener("click", closeBuilder);
   sheet.addEventListener("click", (e) => { if (e.target === sheet) closeBuilder(); });
@@ -83,17 +84,133 @@ export function setupBuilder({ studio, demoPhotos = [], onGenerate }) {
 
 const today = () => new Date().toLocaleDateString("sv-SE"); // AAAA-MM-DD en hora local
 const inYears = (n) => { const d = new Date(); d.setFullYear(d.getFullYear() + n); return d.toLocaleDateString("sv-SE"); };
+const daysUntil = (date) => Math.round((new Date(`${date}T12:00:00`) - new Date(`${today()}T12:00:00`)) / 864e5);
 
-export function openBuilder(styleId) {
+function data() {
+  return Object.fromEntries(new FormData($("#builder-form")));
+}
+
+function chosenStyle() {
+  const id = data().style;
+  return ctx.studio.styles.find((s) => s.id === id && s.status === "available")
+    || ctx.studio.styles.find((s) => s.status === "available");
+}
+
+// Lo que lleven escrito, para la vista previa (la fecha solo si es válida).
+function partial() {
+  const d = data();
+  const okDate = d.date && d.date >= today() && d.date <= inYears(4);
+  return {
+    couple: [d.nameA || "", d.nameB || ""],
+    date: okDate ? d.date : "", time: okDate ? d.time : "",
+    venue: d.venue || "", city: d.city || "",
+    photos: [...photos],
+  };
+}
+
+let previewTimer = 0;
+function livePreview(delay = 180) {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(async () => {
+    const style = chosenStyle();
+    try {
+      const config = await ctx.previewFor(style, partial());
+      showInFrame($("#w-frame"), ctx.studio.templates[style.template].url, config);
+    } catch (e) { console.error("[WeddingWebs] vista previa en vivo:", e); }
+  }, delay);
+}
+
+function validStep() {
+  const d = data(), err = $("#b-error");
+  const fail = (msg, id) => { err.textContent = msg; $(`#${id}`).focus(); return false; };
+  const name = STEPS[step];
+  if (name === "nombres") {
+    if (!String(d.nameA || "").trim()) return fail("Escribid los dos nombres.", "b-name-a");
+    if (!String(d.nameB || "").trim()) return fail("Escribid los dos nombres.", "b-name-b");
+  }
+  if (name === "fecha") {
+    if (!d.date) return fail("Falta la fecha de la boda.", "b-date");
+    if (d.date < today()) return fail("La fecha de la boda ya ha pasado. Revisadla.", "b-date");
+    if (d.date > inYears(4)) return fail("Revisad la fecha: ¿seguro que es tan lejos?", "b-date");
+    if (!d.time) return fail("Falta la hora de la ceremonia.", "b-time");
+  }
+  if (name === "lugar" && !String(d.venue || "").trim()) return fail("Falta el lugar de la boda.", "b-venue");
+  err.textContent = "";
+  return true;
+}
+
+// Muestra el paso i: barra, contador, botones y el foco en su primer campo.
+function go(i) {
+  step = Math.max(0, Math.min(STEPS.length - 1, i));
+  document.querySelectorAll("#builder .wstep").forEach((s) => { s.hidden = s.dataset.step !== STEPS[step]; });
+  $("#w-bar").style.width = `${((step + 1) / STEPS.length) * 100}%`;
+  $("#w-count").textContent = `Paso ${step + 1} de ${STEPS.length}`;
+  $("#w-back").hidden = step === 0;
+  $("#w-next").textContent = step === STEPS.length - 1
+    ? (photos.length ? "Crear nuestra web" : "Crear con fotos de ejemplo")
+    : "Siguiente";
+  $("#b-error").textContent = "";
+  if (STEPS[step] === "fecha") countdown();
+  const current = $(`#builder .wstep[data-step="${STEPS[step]}"]`);
+  const first = current.querySelector("input:checked, input:not([type=hidden]):not([type=file])");
+  // En móvil, sin abrir el teclado solo por cambiar de paso a la elección de estilo.
+  if (first && !(STEPS[step] === "estilo" && matchMedia("(pointer: coarse)").matches)) first.focus({ preventScroll: true });
+}
+
+// Cuenta atrás: al poner la fecha, los días suben hasta su número.
+let shownDays = 0, raf = 0;
+function countdown() {
+  const box = $("#w-countdown"), d = data().date;
+  const ok = d && d >= today() && d <= inYears(4);
+  box.hidden = !ok;
+  if (!ok) { shownDays = 0; return; }
+  const target = daysUntil(d), from = shownDays, t0 = performance.now();
+  const ms = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 900;
+  const label = target === 0 ? "¡Es hoy! Vuestro «sí, quiero»" : target === 1 ? "día para vuestro «sí, quiero»" : "días para vuestro «sí, quiero»";
+  $("#w-days-label").textContent = label;
+  cancelAnimationFrame(raf);
+  const tick = (now) => {
+    const p = ms ? Math.min(1, (now - t0) / ms) : 1;
+    const v = Math.round(from + (target - from) * (1 - Math.pow(1 - p, 3)));
+    $("#w-days").textContent = v.toLocaleString("es-ES");
+    shownDays = v;
+    if (p < 1) raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+}
+
+function generate(sample) {
+  const d = data();
+  if (d.website) return closeBuilder(); // campo trampa: lo rellena un bot, no una pareja
+  const style = chosenStyle();
+  closeBuilder();
+  ctx.onGenerate({
+    couple: [d.nameA.trim(), d.nameB.trim()],
+    date: d.date, time: d.time,
+    venue: d.venue.trim(), city: (d.city || "").trim(),
+    photos: [...photos],
+    sample,
+  }, style);
+}
+
+// styleId: el estilo marcado. names: los de la portada (si vienen los dos, empieza por la fecha).
+export function openBuilder(styleId, { names } = {}) {
   opener = document.activeElement;
   const form = $("#builder-form");
-  const radio = styleId && form.querySelector(`input[name="style"][value="${CSS.escape(styleId)}"]:not(:disabled)`);
+  const radio = styleId && form.querySelector(`input[name="style"][value="${CSS.escape(styleId)}"]`);
   if (radio) radio.checked = true;
+  if (names) {
+    if (names[0]) form.elements.nameA.value = names[0];
+    if (names[1]) form.elements.nameB.value = names[1];
+  }
   $("#nudge").hidden = true;
   $("#b-date").min = today();
+  $("#b-date").max = inYears(4);
   $("#builder").hidden = false;
   syncScrollLock();
-  $("#b-name-a").focus();
+  const d = data();
+  go(names && d.nameA?.trim() && d.nameB?.trim() ? 1 : 0);
+  livePreview(0);
 }
 
 export function closeBuilder() {
@@ -111,10 +228,11 @@ function renderPhotos(max) {
     item.className = "photos__item";
     item.innerHTML = `<img src="${src}" alt="Foto ${i + 1}">${i === 0 ? '<span class="first">Portada</span>' : ""}
       <button type="button" aria-label="Quitar foto ${i + 1}">×</button>`;
-    item.querySelector("button").addEventListener("click", () => { photos.splice(i, 1); renderPhotos(max); });
+    item.querySelector("button").addEventListener("click", () => { photos.splice(i, 1); renderPhotos(max); livePreview(); });
     box.insertBefore(item, add);
   });
   add.hidden = photos.length >= max;
+  if (STEPS[step] === "fotos") $("#w-next").textContent = photos.length ? "Crear nuestra web" : "Crear con fotos de ejemplo";
 }
 
 // Reduce la foto (File o Blob) a 2000 px de lado mayor en JPEG de calidad alta: la pareja tiene

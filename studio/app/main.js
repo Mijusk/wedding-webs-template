@@ -1,8 +1,10 @@
 import { $, esc, session, friendlyError, faqItems } from "./util.js";
-import { showInFrame, fitScaled } from "./preview.js";
+import { fitScaled } from "./preview.js";
 import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoRows } from "./catalog.js";
-import { setupBuilder, openBuilder, closeBuilder, playLoading, SAMPLE_EMAIL } from "./builder.js";
-import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel } from "./stage.js";
+import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.js";
+import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, stageState, weddingFromHash } from "./stage.js";
+import { setupQuick } from "./quick.js";
+import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./send.js";
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
@@ -24,7 +26,7 @@ async function start() {
   const catalog = makeCatalog(studio);
   initAnalytics(studio);
   initAds(studio);
-  const { styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme } = catalog;
+  const { styles, available, templateIds, demoPhotos, urlOf, configFor, previewFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
   const faq = faqItems(studio);
@@ -58,42 +60,62 @@ async function start() {
     studio, configFor,
     onEdit: (styleId) => openBuilder(styleId),
     onKeep: (state) => setupPricing.choose(state),
+    onClose: () => hideNudge(),
+    onGuest: () => track("probar_como_invitado", { estilo: stageState()?.style.id }),
+    onShare: () => track("prueba_compartida", { estilo: stageState()?.style.id }),
   });
+
+  // Guardar la prueba (el email se pide al final, ver send.js). Cada email es un contacto; si
+  // después editan los datos o cambian de estilo, se actualiza su fila sin volver a preguntar.
+  let savedEmail = "";
+  const saveTrial = async (email, { wedding, style }) => {
+    await saveLead(leadFromTrial({ ...wedding, email }, style), studio.contact);
+    const key = `studio-lead:${email.toLowerCase()}`;
+    if (!session.get(key)) { session.set(key, "1"); conversion("lead", { estilo: style.id }); }
+    savedEmail = email;
+    setupPricing.prefill({ ...wedding, email });
+  };
+  setupSend({
+    getState: () => stageState(),
+    onOpen: (from) => track("guardar_abierto", { desde: from }),
+    onSave: saveTrial,
+  });
+
   setupBuilder({
-    studio, demoPhotos,
+    studio, demoPhotos, previewFor,
     onGenerate: async (wedding, style) => {
-      // Cada prueba es un contacto: se guarda en cuanto se genera (sin fotos). Una vez por
-      // email y visita, aunque editen los datos, y nunca el email del botón de ejemplo.
-      const key = `studio-lead:${wedding.email.toLowerCase()}`;
-      if (wedding.email !== SAMPLE_EMAIL && !session.get(key)) {
-        session.set(key, "1");
-        saveLead(leadFromTrial(wedding, style), studio.contact)
-          .then(() => conversion("lead", { estilo: style.id }))
-          .catch(() => session.set(key, ""));
-      }
-      track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length });
-      setupPricing.prefill(wedding);
+      track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length, ejemplo: wedding.sample ? "si" : "no" });
+      setupPricing.prefill(savedEmail ? { ...wedding, email: savedEmail } : wedding);
       const loading = playLoading(wedding, studio.generator);
       try {
         await Promise.all([prepareStage(wedding, style), loading]);
         openStage();
+        if (savedEmail) saveTrial(savedEmail, { wedding, style }).catch(() => {});
+        else scheduleSaveNudge();
       } catch (e) {
         console.error("[WeddingWebs] vista previa:", e);
         await loading;
         openBuilder(style.id);
-        $("#b-error").textContent = "No hemos podido preparar la vista previa. Revisad la conexión y volved a pulsar «Crear nuestra web».";
+        $("#b-error").textContent = "No hemos podido preparar la vista previa. Revisad la conexión y volved a intentarlo.";
       }
     },
+  });
+  const quick = setupQuick({
+    style: available[0], url: urlOf(available[0]), withTheme,
+    onStart: (names) => { track("probar_abierto", { desde: "portada_nombres", nombres: names.every(Boolean) ? "si" : "no" }); openBuilder(available[0].id, { names }); },
   });
   document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder(); }));
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (!$("#builder").hidden) closeBuilder();
+    if (sendOpen()) closeSend();
+    else if (!$("#builder").hidden) closeBuilder();
+    else if (!$("#share-pop").hidden) $("#share-pop").hidden = true;
     else if (!$("#sections-panel").hidden) toggleSectionsPanel(false);
     else if (!$("#stage").hidden) closeStage();
   });
 
+  trackCookieBanner();
   renderAbout(studio.about);
   renderTestimonials(studio.testimonials);
   renderFaq(faq);
@@ -103,9 +125,8 @@ async function start() {
 
   // Móvil de la portada: la web de ejemplo, en cuanto la página ha cargado lo suyo.
   fitScaled($(".phone .scaled"));
-  afterLoad(() => withTheme(available[0])
-    .then((config) => showInFrame($("#intro-frame"), urlOf(available[0]), config))
-    .catch((e) => console.error("[WeddingWebs] móvil de la portada:", e)));
+  // Con los nombres que ya hayan escrito, si se adelantaron.
+  afterLoad(() => quick.paint(true).catch((e) => console.error("[WeddingWebs] móvil de la portada:", e)));
 
   // Precios de la base de datos, cuando lleguen.
   applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); addStructuredData(studio, { faq }); } });
@@ -113,7 +134,15 @@ async function start() {
   // Desde plantillas.html: ?probar=<estilo> abre el generador y ?ver=<estilo> el ejemplo.
   const params = new URLSearchParams(location.search);
   const pick = (id) => available.find((s) => s.id === id);
-  if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
+  const shared = weddingFromHash();
+  if (shared) {
+    // Enlace que les ha pasado su pareja (#boda=…): directos a su web, con fotos de ejemplo.
+    history.replaceState(null, "", location.pathname + location.search);
+    track("prueba_abierta_compartida", { estilo: shared.style });
+    setupPricing.prefill(shared.wedding);
+    try { await prepareStage(shared.wedding, pick(shared.style) || available[0]); openStage(); scheduleSaveNudge(30000); }
+    catch (e) { console.error("[WeddingWebs] enlace compartido:", e); }
+  } else if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
   else if (pick(params.get("ver"))) await showExample(pick(params.get("ver")));
   else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
   if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
@@ -176,8 +205,8 @@ async function openSavedTrial(token, styleFor) {
     const res = await fetch(`/api/lead?prueba=${encodeURIComponent(token)}`);
     if (!res.ok) return;
     const { prueba: p } = await res.json();
-    const wedding = { couple: p.couple, date: p.date, time: p.time, venue: p.venue, city: p.city, email: p.email, photos: [] };
-    setupPricing.prefill(wedding);
+    const wedding = { couple: p.couple, date: p.date, time: p.time, venue: p.venue, city: p.city, photos: [] };
+    setupPricing.prefill({ ...wedding, email: p.email });
     await prepareStage(wedding, styleFor(p.style));
     openStage();
   } catch { /* sin la prueba guardada, el escaparate de siempre */ }
@@ -201,6 +230,28 @@ function leadFromTrial(w, style) {
   };
 }
 
+// Mientras el aviso de cookies esté abierto, su tamaño en --cookies-h / --cookies-w: el generador
+// y la vista previa le dejan sitio para que no tape «Siguiente» ni la barra de estilos.
+function trackCookieBanner() {
+  const body = document.body;
+  const ro = new ResizeObserver(([e]) => {
+    const r = e.target.getBoundingClientRect();
+    body.style.setProperty("--cookies-h", `${Math.ceil(r.height + 24)}px`);
+    body.style.setProperty("--cookies-w", `${Math.ceil(r.width + 24)}px`);
+  });
+  let watched = null;
+  const check = () => {
+    const banner = document.querySelector("body > .cookies");
+    if (banner === watched) return;
+    if (watched) ro.unobserve(watched);
+    watched = banner;
+    if (banner) ro.observe(banner);
+    else { body.style.removeProperty("--cookies-h"); body.style.removeProperty("--cookies-w"); }
+  };
+  new MutationObserver(check).observe(body, { childList: true });
+  check();
+}
+
 // Botón pequeño fijo abajo, «Probar con vuestra boda», mientras miran los estilos. No sale con el
 // aviso de cookies puesto, con una capa abierta ni al llegar a las tarifas (tapaba el botón de pagar).
 function setupNudge() {
@@ -208,7 +259,7 @@ function setupNudge() {
   const update = () => {
     const pastHero = $("#estilos").getBoundingClientRect().top < innerHeight * 0.6;
     const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.9;
-    const busy = ["#builder", "#stage", "#loading"].some((id) => !$(id).hidden);
+    const busy = ["#builder", "#stage", "#loading", "#send"].some((id) => !$(id).hidden);
     const show = pastHero && !atPricing && !busy && !document.querySelector(".cookies");
     nudge.hidden = !show;
     document.body.classList.toggle("has-nudge", show);

@@ -29,11 +29,9 @@ export function setupStage(context) {
     e.preventDefault();
     row.scrollLeft += e.deltaY;
   }, { passive: false });
-  $("#stage-next").addEventListener("click", () => {
-    const i = available.findIndex((s) => s.id === state.style.id);
-    switchStyle(available[(i + 1) % available.length].id);
-  });
-  $("#stage-next").hidden = available.length < 2;
+  setupDock(available);
+  setupGuests();
+  setupShare();
 
   const view = (mobile) => {
     $("#stage-frame-wrap").classList.toggle("is-mobile", mobile);
@@ -45,6 +43,13 @@ export function setupStage(context) {
   if (matchMedia("(max-width: 560px)").matches) view(true);
 
   $("#stage-edit").addEventListener("click", () => { closeStage(); ctx.onEdit(state.style.id); });
+  // Flechas del teclado: estilo anterior o siguiente (salvo escribiendo o con un panel abierto).
+  document.addEventListener("keydown", (e) => {
+    if ($("#stage").hidden || !["ArrowLeft", "ArrowRight"].includes(e.key) || e.altKey || e.metaKey || e.ctrlKey) return;
+    if (e.target.closest("input, textarea, select, [role=radiogroup], .seg") || !$("#send").hidden) return;
+    e.preventDefault();
+    stepStyle(e.key === "ArrowRight" ? 1 : -1);
+  });
   $("#stage-keep").addEventListener("click", () => { closeStage(); ctx.onKeep(state); });
   $("#stage-try").addEventListener("click", () => { closeStage(); ctx.onEdit(state.style.id); });
   $("#stage [data-close]").addEventListener("click", closeStage);
@@ -96,6 +101,7 @@ export function toggleSectionsPanel(open = $("#sections-panel").hidden) {
 // wedding = null muestra el ejemplo de la plantilla.
 export async function prepareStage(wedding, style) {
   const demo = !wedding;
+  if (!state || state.wedding !== wedding) resetGuests();
   state = { wedding, style, config: withSections(await ctx.configFor(style, wedding)) };
   renderSectionsList();
   const ready = showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
@@ -105,6 +111,9 @@ export async function prepareStage(wedding, style) {
   $("#stage-edit").hidden = demo;
   $("#stage-keep").hidden = demo;
   $("#stage-try").hidden = !demo;
+  $("#stage-save").hidden = demo;
+  $("#stage-share").hidden = demo;
+  closeShare();
   markStyle();
   return ready;
 }
@@ -118,11 +127,20 @@ export function openStage() {
 export function closeStage() {
   if ($("#stage").hidden) return;
   toggleSectionsPanel(false);
+  closeShare();
+  $("#guest-panel").hidden = true;
+  ctx.onClose?.();
   $("#stage").hidden = true;
   syncScrollLock();
 }
 
+export const stageState = () => state;
+
 function markStyle() {
+  const list = ctx.studio.styles.filter((s) => s.status === "available");
+  const i = list.findIndex((s) => s.id === state.style.id);
+  $("#dock-name").textContent = state.style.name;
+  $("#dock-count").textContent = `Estilo ${i + 1} de ${list.length}`;
   document.querySelectorAll("#stage-styles [data-style]").forEach((b) =>
     b.setAttribute("aria-checked", b.dataset.style === state.style.id));
   // Los estilos van en una fila que se desliza: que el elegido quede a la vista.
@@ -136,7 +154,19 @@ function markStyle() {
 // Los datos ya están cargados: con la misma plantilla, cambiar de estilo es reenviar el config;
 // con otra plantilla, el iframe carga la nueva y recibe los mismos datos.
 async function switchStyle(id) {
-  if (id === state.style.id) return;
+  if (id === state.style.id || busy) return;
+  busy = true;
+  try { await applyStyle(id); } finally { busy = false; }
+}
+let busy = false;
+
+function stepStyle(dir) {
+  const list = ctx.studio.styles.filter((s) => s.status === "available");
+  const i = list.findIndex((s) => s.id === state.style.id);
+  switchStyle(list[(i + dir + list.length) % list.length].id);
+}
+
+async function applyStyle(id) {
   const style = ctx.studio.styles.find((s) => s.id === id);
   const overlay = $("#switching");
   $("#switching-msg").textContent = `Aplicando estilo ${style.name}…`;
@@ -155,4 +185,125 @@ async function switchStyle(id) {
   const ready = showInFrame($("#stage-frame"), ctx.studio.templates[style.template].url, state.config);
   await Promise.all([ready, sleep(ctx.studio.generator.switchMs)]);
   overlay.hidden = true;
+}
+
+// Barra de abajo: el nombre del estilo con flechas a los lados. En el móvil, deslizar el dedo
+// sobre ella cambia de estilo (el iframe se queda el gesto, por eso va aquí y no sobre la web).
+function setupDock(available) {
+  $("#style-dock").hidden = available.length < 2;
+  $("#dock-prev").addEventListener("click", () => stepStyle(-1));
+  $("#dock-next").addEventListener("click", () => stepStyle(1));
+  const touch = matchMedia("(pointer: coarse)").matches;
+  $("#dock-hint").textContent = touch ? "Deslizad para ver otro" : "O usad las flechas ← →";
+  const pad = $("#dock-swipe");
+  let x0 = null, y0 = 0;
+  pad.addEventListener("pointerdown", (e) => { x0 = e.clientX; y0 = e.clientY; pad.setPointerCapture?.(e.pointerId); });
+  pad.addEventListener("pointermove", (e) => {
+    if (x0 == null) return;
+    pad.style.setProperty("--drag", `${Math.max(-60, Math.min(60, e.clientX - x0))}px`);
+  });
+  const end = (e) => {
+    if (x0 == null) return;
+    const dx = e.clientX - x0, dy = e.clientY - y0;
+    x0 = null;
+    pad.style.setProperty("--drag", "0px");
+    if (Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy)) stepStyle(dx < 0 ? 1 : -1);
+  };
+  pad.addEventListener("pointerup", end);
+  pad.addEventListener("pointercancel", () => { x0 = null; pad.style.setProperty("--drag", "0px"); });
+}
+
+// «Probadla como invitados»: abre el formulario de confirmación dentro de la web y, al responder,
+// la respuesta aparece al momento en un panel como el que tendrán (las plantillas avisan con
+// "wedding:rsvp" en la vista previa; ver js/storage.js). Nada se guarda en ningún sitio.
+let guests = [];
+function setupGuests() {
+  $("#stage-guest").addEventListener("click", () => {
+    $("#guest-panel").hidden = false;
+    toggleSectionsPanel(false);
+    closeShare();
+    const doc = $("#stage-frame").contentDocument;
+    const open = doc?.querySelector("[data-rsvp-open], #rsvp-open");
+    if (open) open.click();
+    ctx.onGuest?.();
+  });
+  $("#guest-close").addEventListener("click", () => { $("#guest-panel").hidden = true; });
+  addEventListener("message", (e) => {
+    if (e.origin !== location.origin || e.data?.type !== "wedding:rsvp") return;
+    if (e.source !== $("#stage-frame").contentWindow) return;
+    const entry = e.data.entry || {};
+    guests.unshift({ name: String(entry.name || "Invitado"), attending: entry.attending, song: String(entry.song || "").trim() });
+    renderGuests(true);
+    $("#guest-panel").hidden = false;
+  });
+}
+
+function resetGuests() { guests = []; renderGuests(false); }
+
+function renderGuests(fresh) {
+  const yes = guests.filter((g) => g.attending === "si").length;
+  $("#g-yes").textContent = yes;
+  $("#g-no").textContent = guests.length - yes;
+  $("#g-songs").textContent = guests.filter((g) => g.song).length;
+  $("#guest-panel").classList.toggle("has-entries", guests.length > 0);
+  $("#guest-note").textContent = guests.length
+    ? "Así os llega cada respuesta. Probad otra, con otro nombre."
+    : "Responded en la web como si fuerais un invitado y mirad cómo os llega aquí, al momento.";
+  $("#g-list").innerHTML = guests.slice(0, 6).map((g, i) => `
+    <li class="${i === 0 && fresh ? "is-new" : ""}">
+      <span class="guest-panel__dot ${g.attending === "si" ? "is-yes" : "is-no"}" aria-hidden="true"></span>
+      <span><strong>${esc(g.name)}</strong><small>${g.attending === "si" ? "Viene" : "No viene"}${g.song ? ` · «${esc(g.song)}»` : ""}</small></span>
+      <time>ahora</time>
+    </li>`).join("");
+}
+
+// «Enseñádsela a vuestra pareja»: un enlace con sus datos (sin fotos) en el #, que no llega a
+// ningún servidor. En el móvil, el menú de compartir del sistema; si no, WhatsApp o copiar.
+function setupShare() {
+  $("#stage-share").addEventListener("click", async () => {
+    const url = shareUrl();
+    const [a, b] = state.wedding.couple;
+    const text = `Mira cómo quedaría nuestra web de boda, ${a} y ${b}:`;
+    ctx.onShare?.();
+    if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ title: `${a} & ${b}`, text, url }); return; }
+      catch (e) { if (e?.name === "AbortError") return; }
+    }
+    $("#share-wa").href = `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
+    $("#share-copy").textContent = "Copiar enlace";
+    $("#share-url").value = url;
+    toggleSectionsPanel(false);
+    $("#share-pop").hidden = false;
+    $("#share-wa").focus();
+  });
+  $("#share-copy").addEventListener("click", async () => {
+    const input = $("#share-url");
+    try { await navigator.clipboard.writeText(input.value); $("#share-copy").textContent = "¡Copiado!"; }
+    catch { input.focus(); input.select(); $("#share-copy").textContent = "Copiadlo de arriba"; }
+  });
+  $("#share-close").addEventListener("click", closeShare);
+}
+
+function closeShare() { $("#share-pop").hidden = true; }
+
+function shareUrl() {
+  const w = state.wedding;
+  const data = { c: w.couple, d: w.date, t: w.time, v: w.venue, ci: w.city, s: state.style.id };
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return `${location.origin}${location.pathname}#boda=${b64}`;
+}
+
+// Lo contrario: el enlace que les han pasado -> los datos de la boda (o null si no vale).
+export function weddingFromHash(hash = location.hash) {
+  const m = /^#boda=([\w-]+)$/.exec(hash);
+  if (!m) return null;
+  try {
+    const bin = atob(m[1].replace(/-/g, "+").replace(/_/g, "/"));
+    const d = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
+    const str = (v, n = 80) => String(v ?? "").trim().slice(0, n);
+    const couple = Array.isArray(d.c) ? d.c.slice(0, 2).map((x) => str(x, 24)) : [];
+    if (couple.length !== 2 || !couple[0] || !couple[1] || !/^\d{4}-\d{2}-\d{2}$/.test(d.d) || !/^\d{2}:\d{2}$/.test(d.t) || !str(d.v)) return null;
+    return { wedding: { couple, date: d.d, time: d.t, venue: str(d.v), city: str(d.ci), photos: [], shared: true }, style: str(d.s, 40) };
+  } catch { return null; }
 }

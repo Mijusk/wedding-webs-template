@@ -1,6 +1,6 @@
 import { esc } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
-import { toConfig } from "./wedding.js";
+import { toConfig, withDefaults } from "./wedding.js";
 import { demoPhotoUrls, applyDemoPhotos } from "./demo.js";
 
 // Catálogo de estilos: lo comparten la portada del escaparate (index.html) y la página con
@@ -54,7 +54,12 @@ export function makeCatalog(studio) {
     return bases.get(id);
   };
   const configFor = async (style, wedding) => toConfig(await baseFor(style.template), wedding, style);
-  return { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, withTheme: (style) => configFor(style, null) };
+  // Vista previa en vivo con lo que lleven escrito: lo que falta sale del ejemplo de la plantilla.
+  const previewFor = async (style, partial) => {
+    const base = await baseFor(style.template);
+    return toConfig(base, withDefaults(base, partial), style);
+  };
+  return { studio, styles, available, templateIds, demoPhotos, urlOf, configFor, previewFor, withTheme: (style) => configFor(style, null) };
 }
 
 export async function loadCatalog() {

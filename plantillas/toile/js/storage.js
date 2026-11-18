@@ -19,6 +19,8 @@ export async function saveRsvp(entry, rsvpConfig = {}) {
     localStorage.setItem(KEY, JSON.stringify(all));
   } catch { /* almacenamiento bloqueado: la simulación sigue funcionando */ }
   await new Promise((r) => setTimeout(r, 400));
+  // En la vista previa del escaparate, la respuesta aparece en el «panel» de prueba de al lado.
+  try { if (location.hash === "#preview" && window.parent !== window) window.parent.postMessage({ type: "wedding:rsvp", entry: payload }, location.origin); } catch { /* sin escaparate */ }
   return payload;
 }
 

@@ -48,6 +48,21 @@ function endOf(date, time) {
 const dayMonth = (date) =>
   new Date(`${date}T12:00:00Z`).toLocaleDateString("es-ES", { day: "numeric", month: "long", timeZone: "UTC" });
 
+// Para la vista previa en vivo (portada y paso a paso): lo que aún no han escrito sale del
+// ejemplo de la plantilla, así la web se ve entera desde el primer paso.
+export function withDefaults(base, w = {}) {
+  const [a, b] = w.couple || [];
+  const [baseA, baseB] = base.event.couple;
+  return {
+    couple: [a?.trim() || baseA, b?.trim() || baseB],
+    date: w.date || base.event.date.slice(0, 10),
+    time: w.time || base.event.date.slice(11, 16),
+    venue: w.venue?.trim() || base.venue?.name || "",
+    city: w.venue?.trim() ? (w.city || "").trim() : (w.city?.trim() || base.venue?.city || ""),
+    photos: w.photos || [],
+  };
+}
+
 export function toConfig(base, w, style) {
   const config = structuredClone(base);
   config.theme = style.theme;
@@ -82,14 +97,14 @@ export function toConfig(base, w, style) {
   ];
   config.rsvp = { ...base.rsvp, deadline: rsvpDeadline(w.date), endpoint: "" };
 
-  // Clásica: fotos 2 y 3 en la galería.
-  config.gallery = photos.slice(1);
+  // Clásica: fotos 2 y 3 en la galería. Sin fotos suyas, se quedan las de ejemplo.
+  if (photos.length) config.gallery = photos.slice(1);
   // Editorial: historia en capítulos, con las fotos 2 y 3 si las hay.
   if (base.story) {
     config.story = {
       chapters: [
-        { meta: "Cómo empezó", text: "Aquí irá vuestra historia: cómo os conocisteis, el primer viaje, la pedida. La escribimos juntos cuando reservéis.", photo: photos[1], photoAlt: `${a} y ${b}` },
-        { meta: w.city || w.venue, text: `El ${dayMonth(w.date)} nos casamos en ${w.venue}, y queremos que estés allí.`, photo: photos[2], photoAlt: `${a} y ${b}` },
+        { meta: "Cómo empezó", text: "Aquí irá vuestra historia: cómo os conocisteis, el primer viaje, la pedida. La escribimos juntos cuando reservéis.", photo: photos[1] || (!photos.length ? base.story.chapters?.[0]?.photo : undefined), photoAlt: `${a} y ${b}` },
+        { meta: w.city || w.venue, text: `El ${dayMonth(w.date)} nos casamos en ${w.venue}, y queremos que estés allí.`, photo: photos[2] || (!photos.length ? base.story.chapters?.[1]?.photo : undefined), photoAlt: `${a} y ${b}` },
       ],
     };
   }
