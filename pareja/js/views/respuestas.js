@@ -3,6 +3,7 @@
 import { db, api } from "/panel/js/supa.js";
 import { html, raw, render, $, $$, formDialog, toast, fail, downloadCsv, icons, fmtDateTime, timeAgo } from "/panel/js/ui.js";
 import { loadGuests, peopleOf, whatsapp, reminderMessage, inviteUrl, copy, fullName } from "../comun.js";
+import { matchAnswers, personScore, nameKey } from "../emparejar.js";
 
 let timer = null;
 
@@ -11,7 +12,19 @@ export default async function respuestas(ctx) {
   const { el, data, weddingId, query, go, refreshData } = ctx;
   const ext = Boolean(data.features?.rsvp_ampliado);
   const filter = query.get("ver") || "todas";
-  const { groups, loose, answers } = await loadGuests(weddingId);
+  let { groups, loose, answers } = await loadGuests(weddingId);
+
+  // Respuestas desde el enlace general: las casi seguras se unen solas a su grupo de la lista.
+  if (ext && groups.length && loose.length) {
+    const sure = matchAnswers(loose, groups).filter((m) => m.kind === "seguro");
+    let linked = 0;
+    for (const m of sure) {
+      try { linked += await link(weddingId, m.answer, m.group.id, "auto"); } catch (e) { console.warn("emparejar", e); }
+    }
+    if (linked) { await refreshData(); ({ groups, loose, answers } = await loadGuests(weddingId)); }
+  }
+  const matches = ext && groups.length ? matchAnswers(loose, groups) : [];
+  const autoLinked = groups.filter((g) => g.answer?.payload?.emparejada === "auto");
   const s = data.stats;
   const pending = groups.filter((g) => !g.answer && !g.token_revoked_at);
   const rows = [
@@ -54,7 +67,7 @@ export default async function respuestas(ctx) {
             <span class="row__sub">${g.guests.length ? g.guests.map(fullName).join(", ") : `${g.seats} plazas`}${g.phone ? ` · ${g.phone}` : ""}</span>
           </div>`)}</div>` : html`<p class="empty"><strong>Han contestado todos.</strong></p>`}
       </section>`
-    : html`<section class="panel-block">
+    : html`${matchBlocks(matches, autoLinked)}<section class="panel-block">
         ${shown.length ? shown.map((r) => answerRow(r, ext)) : html`<p class="empty"><strong>${rows.length ? "Ninguna respuesta con este filtro." : "Aún no ha contestado nadie."}</strong>${rows.length ? "" : "Las respuestas aparecen aquí al momento en cuanto alguien confirma en vuestra web."}</p>`}
       </section>`}`);
 
@@ -105,6 +118,20 @@ export default async function respuestas(ctx) {
 
   $("[data-manual]", el).addEventListener("click", () => manual(ctx, groups));
 
+  // Emparejar: confirmar, descartar o deshacer.
+  $$("[data-match]", el).forEach((b) => b.addEventListener("click", async () => {
+    const [modo, i] = b.dataset.match.split(":");
+    const m = modo === "deshacer" ? { answer: autoLinked[i].answer, group: autoLinked[i] } : matches[i];
+    const buttons = $$("button", b.closest(".row"));
+    buttons.forEach((x) => { x.disabled = true; });
+    try {
+      await link(weddingId, m.answer, m.group.id, modo);
+      toast(modo === "pareja" ? `Unida a ${m.group.name}.` : modo === "deshacer" ? `Separada de ${m.group.name}.` : "Vale, no se vuelve a sugerir.");
+      await refreshData();
+      respuestas(ctx);
+    } catch (e) { fail(e); buttons.forEach((x) => { x.disabled = false; }); }
+  }));
+
   // Actualizar sola cada 30 s mientras se ve la página (y no hay un diálogo abierto).
   const stamp = answers[0]?.created_at || "";
   timer = setInterval(async () => {
@@ -118,6 +145,52 @@ export default async function respuestas(ctx) {
   void go;
 }
 
+const link = (weddingId, answer, groupId, modo) =>
+  db.rpc("pareja_emparejar", { p_wedding_id: weddingId, p_name_key: answer.name_key || nameKey(answer.name), p_group_id: groupId, p_modo: modo });
+
+// La persona de la lista que más se parece a lo que escribió el invitado.
+function closest(written, g) {
+  let best = null;
+  let score = 0;
+  for (const p of g.guests || []) {
+    const s = personScore(written, p.first_name, p.last_name);
+    if (s > score) { score = s; best = p; }
+  }
+  return best ? fullName(best) : "";
+}
+
+const WHY = {
+  duplicado: "Ese grupo ya había contestado desde su enlace: puede que sea la misma respuesta dos veces. Si la unís, cuenta la más reciente.",
+  varios: "Se parece a más de un grupo de vuestra lista.",
+  parecido: "Se parece, pero no es igual.",
+};
+
+function matchBlocks(matches, autoLinked) {
+  if (!matches.length && !autoLinked.length) return "";
+  const pair = (written, g, guest) => html`<span class="row__title">«${written}»</span>
+    <span class="row__sub">escribió en la web · en vuestra lista: <b>${guest || g.name}</b>${guest ? ` (${g.name})` : ""}</span>`;
+  return html`
+    ${matches.length ? html`<section class="panel-block" style="margin-bottom:14px">
+      <div class="block-title"><span>¿Es quien creéis? (${matches.length})</span></div>
+      <p class="small muted" style="margin-bottom:8px">Han contestado desde el enlace general de la web, sin su enlace personal, y se parecen a alguien de vuestra lista.</p>
+      <div class="rows">${matches.map((m, i) => html`<div class="row">
+        ${pair(m.answer.name, m.group, m.guest ? fullName(m.guest) : "")}
+        <span class="row__side">
+          <button class="btn btn--small btn--primary" type="button" data-match="pareja:${i}">Sí, es</button>
+          <button class="btn btn--small btn--quiet" type="button" data-match="descartar:${i}">No</button></span>
+        ${m.reason && WHY[m.reason] ? html`<span class="row__sub small">${WHY[m.reason]}</span>` : ""}
+      </div>`)}</div>
+    </section>` : ""}
+    ${autoLinked.length ? html`<section class="panel-block" style="margin-bottom:14px">
+      <details><summary class="block-title" style="cursor:pointer"><span>Unidas solas a vuestra lista (${autoLinked.length})</span></summary>
+      <p class="small muted" style="margin:4px 0 8px">Contestaron desde el enlace general y el nombre coincide casi seguro con alguien de vuestra lista. Si alguna no es, deshacedla.</p>
+      <div class="rows">${autoLinked.map((g, i) => html`<div class="row">
+        ${pair(g.answer.name, g, closest(g.answer.name, g))}
+        <span class="row__side"><button class="btn btn--small btn--quiet" type="button" data-match="deshacer:${i}">Deshacer</button></span>
+      </div>`)}</div></details>
+    </section>` : ""}`;
+}
+
 const allergies = (r) => [r.dietary, ...(r.companions || []).filter((c) => c.attending && c.dietary).map((c) => `${c.name}: ${c.dietary}`)].filter(Boolean).join("; ");
 
 function answerRow(r, ext) {
@@ -129,7 +202,7 @@ function answerRow(r, ext) {
     r.song && `Canción: «${r.song}»`,
   ].filter(Boolean);
   return html`<div class="answer">
-    <span class="answer__who">${r.name}</span>
+    <span class="answer__who">${r.name}${r.group && nameKey(r.group.name) !== nameKey(r.name) ? html` <span class="small muted">· ${r.group.name}</span>` : ""}</span>
     <span><span class="status" data-s="${r.attending ? "ganado" : "perdido"}">${r.attending ? (ext ? `Vienen ${peopleOf(r)}` : "Viene") : "No viene"}</span></span>
     ${details.length ? html`<span class="answer__detail">${details.join(" · ")}</span>` : ""}
     ${r.message ? html`<span class="answer__detail"><q>${r.message}</q></span>` : ""}
