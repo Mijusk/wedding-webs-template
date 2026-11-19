@@ -15,7 +15,8 @@ export const templateDir = (template) => (template === "clasica" ? "" : `plantil
 // Las plantillas que hay (las mismas que studio/studio.json > templates).
 export const TEMPLATES = ["clasica", "editorial", "minimal", "verbena", "postal", "villa", "etiqueta", "lacre", "acuarela",
   "monograma", "negro", "toile", "palacio", "jardin", "lino", "azulejo", "carrete", "carta", "vegetal", "capilla", "botanica",
-  "costa", "estrellas", "galeria", "ciudades"];
+  "costa", "estrellas", "galeria", "ciudades", "vendimia", "cartografia", "cuento", "bordado", "kintsugi", "partitura",
+  "cumbre", "origami"];
 
 export const templateExists = (template) =>
   TEMPLATES.includes(template) || (/^[a-z0-9-]+$/.test(template || "") && existsSync(join(ROOT, templateDir(template), "index.html")));

@@ -1,0 +1,186 @@
+/* Plantilla Cartografía. Concepto: una carta náutica antigua.
+   Papel envejecido con meridianos y paralelos, tinta sepia, rojo de imprenta y verde agua.
+   Rosa de los vientos que busca el norte, cartela con los nombres, coordenadas reales y una
+   ruta punteada que se traza al bajar por el itinerario.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --chart: #EFE6D2;
+  --chart-2: #E6DBC2;
+  --sepia: #3B2F22;
+  --red: #9A3B2A;
+  --sea: #4F6F6A;
+  --faded: #B9A98A;
+
+  --paper: var(--chart);
+  --paper-2: var(--chart-2);
+  --ink: var(--sepia);
+  --muted: #6B5B47;
+  --line: #CDBE9F;
+  --accent: var(--red);
+  --accent-2: var(--sea);
+  --on-accent: var(--chart);
+  --error: #A23B2C;
+  --font-display: "IM Fell English", Georgia, serif;
+  --font-body: "Libre Caslon Text", Georgia, serif;
+  --font-label: "IM Fell English SC", Georgia, serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+}
+
+body {
+  font-size: 16px; line-height: 1.75;
+  background:
+    radial-gradient(ellipse at 50% 30%, transparent 55%, rgb(120 90 50 / .14)),
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 160px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 160px 100%,
+    var(--chart);
+  background-attachment: fixed, scroll, scroll, scroll;
+}
+/* Los meridianos solo se insinúan */
+body::before { content: ""; position: fixed; inset: 0; background: rgb(239 230 210 / .72); pointer-events: none; z-index: -1; }
+body { isolation: isolate; }
+::selection { background: rgb(154 59 42 / .2); }
+.eyebrow { font: 400 15px/1.4 var(--font-label); letter-spacing: .16em; text-transform: lowercase; color: var(--red); }
+.link { font: 400 15px/1.4 var(--font-label); letter-spacing: .12em; text-transform: lowercase; color: var(--red); }
+.button { font: 400 17px/1.2 var(--font-label); letter-spacing: .12em; text-transform: lowercase; }
+.button:hover { background: var(--sepia); border-color: var(--sepia); filter: none; }
+
+/* ---------- rosa de los vientos ---------- */
+.rose { display: block; width: 150px; height: 162px; overflow: visible; }
+.rose__ring { fill: none; stroke: var(--sepia); stroke-width: .8; }
+.rose__tick { stroke: var(--sepia); stroke-width: .8; }
+.rose__pt { fill: var(--chart); stroke: var(--sepia); stroke-width: .8; stroke-linejoin: round; }
+.rose__pt--shade { fill: var(--sepia); }
+.rose__pt--n { fill: var(--red); stroke: var(--red); }
+.rose__pt--small { fill: var(--faded); }
+.rose__hub { fill: var(--chart); stroke: var(--sepia); stroke-width: .8; }
+.rose__n { font: 400 15px var(--font-display); fill: var(--red); }
+.rose__needle { transform-origin: 60px 60px; transform-box: view-box; }
+.star { width: 13px; height: 13px; flex: none; }
+.star path { fill: var(--red); }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(40px, 8vh, 96px) var(--gutter) clamp(64px, 12vh, 120px); }
+.hero__in {
+  display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); grid-template-rows: auto auto;
+  column-gap: clamp(32px, 6vw, 96px); align-items: center; max-width: 1180px; margin-inline: auto; width: 100%;
+}
+.cartouche {
+  grid-column: 1; grid-row: 1; position: relative; display: grid; justify-items: center; gap: 10px; text-align: center;
+  padding: clamp(30px, 4vw, 52px) clamp(20px, 3vw, 44px);
+  border: 1px solid var(--sepia); outline: 1px solid var(--sepia); outline-offset: 5px;
+  background: rgb(243 236 220 / .7);
+}
+/* Esquinas de la cartela */
+.cartouche::before, .cartouche::after {
+  content: ""; position: absolute; width: 22px; height: 22px; border: 1px solid var(--red); transform: rotate(45deg); background: var(--chart);
+}
+.cartouche::before { top: -12px; left: calc(50% - 11px); }
+.cartouche::after { bottom: -12px; left: calc(50% - 11px); }
+.cartouche__eyebrow { font: italic 400 18px/1.4 var(--font-display); color: var(--muted); }
+.cartouche__names {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: .3em;
+  font-size: min(96px, 8vw, calc((100vw - 96px) / (var(--len) * 1.2))); line-height: 1.02; color: var(--sepia);
+}
+.cartouche__names .amp { font-style: italic; color: var(--red); }
+.cartouche__date { font: italic 400 22px/1.4 var(--font-display); color: var(--sepia); }
+.cartouche__place { font: 400 18px/1.4 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--red); padding-left: .3em; }
+.cartouche__coords { font: 400 13px/1.4 var(--font-body); letter-spacing: .12em; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.hero__rose { grid-column: 1; grid-row: 2; justify-self: start; margin: clamp(24px, 4vh, 44px) 0 0 clamp(0px, 2vw, 24px); }
+.hero__photo { grid-column: 2; grid-row: 1 / span 2; position: relative; padding: 10px; border: 1px solid var(--sepia); background: var(--chart); box-shadow: 0 20px 40px rgb(59 47 34 / .16); transform: rotate(1.2deg); }
+.hero__photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; filter: sepia(.18) saturate(.92); }
+.hero__photo figcaption { padding-top: 10px; text-align: center; font: italic 400 15px/1.3 var(--font-display); color: var(--muted); }
+
+.hero__route { position: absolute; left: 0; right: 0; bottom: 24px; width: 100%; height: 70px; overflow: visible; pointer-events: none; }
+.hero__route path { fill: none; stroke: var(--red); stroke-width: 1.4; stroke-dasharray: .006 .008; vector-effect: non-scaling-stroke; opacity: .7; }
+.hero__grid { display: none; }
+
+/* Entrada (~2,6 s): la aguja gira buscando el norte, aparecen la cartela, la lámina y la ruta */
+.hero:not(.is-static) .rose__needle { animation: seek 2.4s cubic-bezier(.3, 1.4, .4, 1) .2s both; }
+.hero:not(.is-static) .cartouche { animation: rise 1.2s var(--ease-out) .1s both; }
+.hero:not(.is-static) .cartouche > * { animation: fade 1s ease both; animation-delay: calc(.5s + var(--d, 0) * 120ms); }
+.cartouche > :nth-child(2) { --d: 1; } .cartouche > :nth-child(3) { --d: 2; } .cartouche > :nth-child(4) { --d: 3; } .cartouche > :nth-child(5) { --d: 4; }
+.hero:not(.is-static) .hero__photo { animation: plate 1.6s var(--ease-out) .7s both; }
+.hero:not(.is-static) .hero__route { mask: linear-gradient(90deg, #000 50%, transparent 50%) 100% 0 / 200% 100% no-repeat; animation: route 2s ease-in-out 1.2s both; }
+@keyframes seek { 0% { transform: rotate(-160deg); } 60% { transform: rotate(14deg); } 80% { transform: rotate(-5deg); } 100% { transform: rotate(0); } }
+@keyframes plate { from { opacity: 0; transform: rotate(4deg) translateY(24px); } }
+@keyframes route { from { mask-position: 100% 0; } to { mask-position: 0 0; } }
+
+/* ---------- secciones ---------- */
+.head__eyebrow { display: flex; align-items: center; gap: 12px; width: min(520px, 100%); }
+.head__rule { flex: 1; height: 1px; background: var(--sepia); opacity: .5; }
+.head__title { color: var(--sepia); }
+.head__text { font: italic 400 19px/1.5 var(--font-display); }
+.fact__big { color: var(--sepia); font-family: var(--font-display); }
+.fact__note { font-family: var(--font-display); font-size: 18px; }
+.fact + .fact { border-left-style: dashed; border-color: var(--faded); }
+
+/* Bitácora */
+.chapter__text { font-family: var(--font-display); }
+.chapter:not(.has-photo) + .chapter:not(.has-photo)::before { content: "· · ·"; display: block; margin-bottom: 40px; color: var(--red); letter-spacing: .5em; }
+.chapter__meta { color: var(--red); }
+
+/* Itinerario: ruta punteada que se traza con el scroll (--p desde js/enhance.js) */
+.plan { position: relative; --p: 0; }
+.plan__mark::before { background: none; }
+.plan::before {
+  content: ""; position: absolute; top: 34px; bottom: 34px; left: calc(80px + 16px + 22px); width: 2px; margin-left: -1px;
+  background: repeating-linear-gradient(var(--red) 0 6px, transparent 6px 12px);
+  clip-path: inset(0 0 calc((1 - var(--p)) * 100%) 0);
+}
+.plan__mark > * { margin-top: 16px; }
+.stop {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--chart); border: 1px solid var(--sepia); font: 400 13px/1 var(--font-display); color: var(--sepia);
+}
+.stop--x { border-color: var(--red); }
+.stop--x svg { width: 14px; height: 14px; }
+.stop--x path { stroke: var(--red); stroke-width: 2.2; stroke-linecap: round; }
+.plan__time { font-family: var(--font-display); color: var(--red); }
+.plan__label { font: 400 19px/1.3 var(--font-label); letter-spacing: .1em; text-transform: lowercase; }
+.plan__place { font: italic 400 17px/1.4 var(--font-display); }
+
+/* Cuaderno: fotos como láminas con margen */
+.photos__item { padding: 8px; background: var(--chart); border: 1px solid var(--line); }
+.photos__item:nth-child(odd) { transform: rotate(-.6deg); }
+.photos__item:nth-child(even) { transform: rotate(.7deg); }
+.photos__item img { filter: sepia(.15); }
+
+.iban__card { background: rgb(243 236 220 / .8); border-color: var(--sepia); outline: 1px solid var(--sepia); outline-offset: -6px; }
+.iban__holder { font-family: var(--font-display); }
+
+/* Destino */
+.closing__body { border-top: 1px solid var(--sepia); }
+.closing__rose { display: grid; place-items: center; margin-bottom: 28px; }
+.closing__rose .rose { width: 110px; height: 119px; }
+.closing__title { color: var(--sepia); }
+.closing__title .amp { color: var(--red); font-style: italic; }
+.closing__legend { display: grid; justify-items: center; gap: 12px; margin-top: clamp(56px, 8vw, 96px); text-align: center; }
+.scale { display: grid; justify-items: center; gap: 8px; font: italic 400 16px/1.3 var(--font-display); color: var(--muted); }
+.scale__bar { display: flex; width: 160px; height: 7px; border: 1px solid var(--sepia); }
+.scale__bar i { flex: 1; }
+.scale__bar i:nth-child(odd) { background: var(--sepia); }
+.closing__coords { font-size: 13px; letter-spacing: .12em; color: var(--muted); }
+.closing__foot { background: var(--sepia); color: var(--chart); }
+.closing__foot-in { font: 400 15px/1.4 var(--font-label); letter-spacing: .2em; text-transform: lowercase; }
+
+.rsvp-dialog { background: #F3ECDC; }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 36px; }
+  .cartouche, .hero__photo, .hero__rose { grid-column: 1; grid-row: auto; }
+  .hero__photo { width: min(420px, 92%); justify-self: center; }
+  .hero__rose { justify-self: center; margin: 0; width: 110px; height: 119px; }
+  .cartouche__names { flex-direction: column; align-items: center; font-size: min(68px, calc((100vw - 96px) / (var(--len) * .55))); }
+  .hero__route { bottom: 8px; }
+}
+@media (max-width: 760px) {
+  .plan::before { left: calc(60px + 12px + 17px); }
+  .stop { width: 28px; height: 28px; font-size: 12px; }
+  .plan__label { font-size: 17px; }
+}

@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "wedding-config.schema.json",
   "title": "Config de una web de boda",
-  "description": "El config.json que pintan las 27 plantillas (24 maquetaciones + la Clásica con 3 estilos). Es la fuente única de verdad de cada boda: en la base de datos vive en weddings.config. Lo comprueban scripts/validar-configs.mjs, el panel antes de guardar y la API.",
+  "description": "El config.json que pintan las 35 plantillas (32 maquetaciones + la Clásica con 3 estilos). Es la fuente única de verdad de cada boda: en la base de datos vive en weddings.config. Lo comprueban scripts/validar-configs.mjs, el panel antes de guardar y la API.",
   "type": "object",
   "required": ["locale", "event", "venue", "rsvp", "copy", "sections"],
   "additionalProperties": false,

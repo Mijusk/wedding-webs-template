@@ -1,0 +1,133 @@
+/* Plantilla Partitura. Concepto: la portada de una partitura impresa.
+   Papel crema, tinta negra, burdeos para las indicaciones y Bodoni para los títulos. Un
+   pentagrama a todo lo ancho con clave de sol y 2/4 (para dos) en el que las notas aparecen
+   una a una; las secciones son movimientos y el cierre, una doble barra final.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --sheet: #F7F3EA;
+  --sheet-2: #EEE8DA;
+  --black: #1A1A1A;
+  --bordeaux: #7A2734;
+  --hair: #BFB6A3;
+
+  --paper: var(--sheet);
+  --paper-2: var(--sheet-2);
+  --ink: var(--black);
+  --muted: #5F5A52;
+  --line: #D6CEBE;
+  --accent: var(--bordeaux);
+  --accent-2: var(--black);
+  --on-accent: var(--sheet);
+  --error: #A23B2C;
+  --font-display: "Bodoni Moda", "Didot", Georgia, serif;
+  --font-body: "Cormorant Garamond", Georgia, serif;
+  --font-label: "Bodoni Moda", Georgia, serif;
+  --font-music: "Noto Music", serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+}
+
+body { font-size: 20px; line-height: 1.6; }
+::selection { background: rgb(122 39 52 / .18); }
+.eyebrow { font: italic 400 17px/1.4 var(--font-display); letter-spacing: .02em; text-transform: none; color: var(--bordeaux); }
+.link { font: 500 11px/1.4 var(--font-label); letter-spacing: .26em; color: var(--black); }
+.button { font: 500 12px/1.2 var(--font-label); letter-spacing: .26em; }
+.button:hover { background: var(--black); border-color: var(--black); filter: none; }
+
+/* ---------- pentagrama ---------- */
+.st { display: block; width: 100%; height: auto; overflow: visible; }
+.st__line { stroke: var(--black); stroke-width: .9; }
+.st__bar { stroke: var(--black); stroke-width: 1.2; }
+.st__bar--thick { stroke-width: 4; }
+.st__clef { font: 74px/1 var(--font-music); fill: var(--black); }
+.st__time { font: 700 23px/1 var(--font-display); fill: var(--black); }
+.st__head { fill: var(--black); }
+.st__head--open { fill: var(--sheet); stroke: var(--black); stroke-width: 1.6; }
+.st__stem, .st__flag { fill: none; stroke: var(--black); stroke-width: 1.3; }
+
+/* ---------- portada ---------- */
+.hero { display: grid; grid-template-rows: auto minmax(0, 1fr); padding-top: clamp(28px, 5vh, 64px); }
+.score { width: 100%; max-width: 1180px; margin-inline: auto; padding-inline: var(--gutter); display: grid; justify-items: center; text-align: center; }
+.score__opus { justify-self: end; font: italic 400 16px/1.4 var(--font-display); color: var(--muted); }
+.score__eyebrow { margin-top: clamp(10px, 3vh, 32px); font: 500 12px/1.4 var(--font-label); letter-spacing: .5em; text-transform: uppercase; color: var(--bordeaux); padding-left: .5em; }
+.score__title {
+  margin-top: 14px; font-weight: 400; color: var(--black); line-height: 1.02; letter-spacing: -.01em;
+  font-size: min(112px, calc((100vw - 2 * var(--gutter)) / (var(--len) * .5)));
+}
+.score__title .amp { font-style: italic; color: var(--bordeaux); }
+.score__sub { margin-top: 12px; font: italic 400 22px/1.4 var(--font-body); color: var(--muted); }
+.score__credits { display: flex; justify-content: space-between; align-items: end; gap: 24px; width: 100%; margin-top: clamp(24px, 5vh, 52px); text-align: left; }
+.score__tempo { font: italic 600 18px/1.3 var(--font-display); color: var(--black); }
+.score__composer { text-align: right; font: 500 12px/1.8 var(--font-label); letter-spacing: .2em; text-transform: uppercase; }
+.score__staff { margin-top: 44px; width: 100%; }
+.hero__photo { margin: clamp(24px, 4vh, 48px) auto 0; width: 100%; max-width: 1180px; padding-inline: var(--gutter); min-height: 240px; display: flex; }
+.hero__photo img { width: 100%; min-height: 100%; aspect-ratio: auto; object-fit: cover; object-position: 50% 35%; }
+
+/* Entrada (~3 s): aparece el título, el pentagrama se dibuja y las notas suenan una tras otra */
+.hero:not(.is-static) .score > :not(.score__staff) { animation: rise 1.1s var(--ease-out) both; animation-delay: calc(var(--d, 0) * 120ms); }
+.score > :nth-child(2) { --d: 1; } .score > :nth-child(3) { --d: 2; } .score > :nth-child(4) { --d: 4; } .score > :nth-child(5) { --d: 5; }
+.hero:not(.is-static) .st__line, .hero:not(.is-static) .st__bar { animation: draw 1.2s var(--ease-out) .5s both; }
+.hero:not(.is-static) .st__clef, .hero:not(.is-static) .st__time { animation: fade .8s ease 1s both; }
+.hero:not(.is-static) .st__note { animation: note .45s cubic-bezier(.3, 1.6, .5, 1) both; animation-delay: calc(1.2s + var(--i) * 95ms); }
+.hero:not(.is-static) .hero__photo { animation: fade 1.6s ease 1.3s both; }
+@keyframes draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes note { from { opacity: 0; transform: translateY(-8px); } }
+
+/* ---------- movimientos ---------- */
+.head__title { font-size: clamp(38px, 5vw, 64px); }
+.head__staff { position: relative; display: grid; gap: 5px; width: 140px; margin-block: 6px 2px; }
+.head__staff span { display: block; height: 1px; background: var(--hair); }
+.head__staff i { position: absolute; left: calc(100% + 10px); top: -4px; font: normal 26px/1 var(--font-music); color: var(--bordeaux); }
+.head__text { font-style: italic; }
+
+.fact__big { font-family: var(--font-display); }
+.fact__note { color: var(--bordeaux); }
+.fact + .fact { border-color: var(--hair); }
+.chapter__text { font-family: var(--font-body); font-size: clamp(22px, 2.3vw, 28px); }
+.chapter__meta { font: italic 400 17px/1.4 var(--font-display); letter-spacing: 0; text-transform: none; color: var(--bordeaux); }
+
+/* Programa de mano: entre filetes, con la indicación de tempo en burdeos */
+.schedule .plan { border-block: 3px double var(--black); padding-block: 12px; }
+.plan__item + .plan__item { border-top: 1px solid var(--line); }
+.plan__mark::before { display: none; }
+.plan__mark > * { margin-top: 16px; }
+.note-mark { font: 30px/1 var(--font-music); color: var(--bordeaux); }
+.plan__time { font-family: var(--font-display); color: var(--black); }
+.plan__note { font: italic 600 17px/1.3 var(--font-display); color: var(--bordeaux); }
+.plan__label { font-family: var(--font-label); font-size: 13px; letter-spacing: .3em; }
+.plan__place { font-style: italic; }
+
+.photos__item img { filter: grayscale(.15); }
+.iban__card { border: 3px double var(--black); }
+.iban__holder { font-family: var(--font-display); }
+
+/* Final */
+.closing__body { border-top: 1px solid var(--line); }
+.fine { display: grid; justify-items: center; gap: 6px; margin-bottom: 36px; }
+.fine__fermata { font: 40px/1 var(--font-music); color: var(--bordeaux); }
+.fine__bars { display: flex; gap: 6px; height: 58px; }
+.fine__bars i { width: 1.5px; background: var(--black); }
+.fine__bars i + i { width: 6px; }
+.fine__word { font: italic 600 19px/1 var(--font-display); color: var(--black); }
+.closing__title { font-family: var(--font-display); }
+.closing__title .amp { color: var(--bordeaux); font-style: italic; }
+.closing__text { font-style: italic; }
+.closing__foot { background: var(--black); color: var(--sheet); }
+.closing__foot-in { font-family: var(--font-label); }
+
+.rsvp-dialog { background: var(--sheet); }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); }
+
+@media (max-width: 760px) {
+  body { font-size: 18px; }
+  .score__title { font-size: min(64px, calc((100vw - 32px) / (var(--len) * .3))); text-wrap: balance; }
+  .score__credits { flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+  .score__composer { text-align: center; }
+  .score__opus { justify-self: center; }
+  .score__staff { width: 170%; max-width: none; margin-left: 0; justify-self: start; }
+  .score { overflow: hidden; }
+  .hero__photo { padding-inline: 0; min-height: 300px; }
+}

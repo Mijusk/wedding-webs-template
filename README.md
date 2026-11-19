@@ -2,7 +2,7 @@
 
 Webs de boda configurables desde un único config. HTML, CSS y JS sin framework ni paso de build.
 
-Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 27 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
+Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 35 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
 
 | Documento | Para qué |
 | --- | --- |
@@ -63,6 +63,14 @@ No hay paso de build. Las plantillas y el escaparate también funcionan con `npx
 | `plantillas/estrellas/` | Mapa del cielo real de esa noche (catálogo de 411 estrellas, Luna) con `venue.lat`/`venue.lon`; sin ellas usa Madrid. Autocontenida |
 | `plantillas/galeria/` | Museo: marcos dorados, focos que se encienden, cartelas en `copy.gallery.labels`. Autocontenida |
 | `plantillas/ciudades/` | Pasaporte y sello; `cities` (dos ciudades con tz y lat/lon) para relojes y mapa; ES/EN con `copy_en`; sección `travel`. Autocontenida |
+| `plantillas/vendimia/` | Etiqueta de vino de reserva sobre la foto del viñedo, con brillo dorado; historia como notas de cata (`copy.story.labels`) y programa como maridaje (`copy.schedule.notes`). Autocontenida |
+| `plantillas/cartografia/` | Carta náutica: rosa de los vientos que busca el norte, coordenadas de `venue.lat`/`venue.lon` y un itinerario que se traza al bajar. Autocontenida |
+| `plantillas/cuento/` | Libro con tapa de tela que se abre al entrar (tocarla la abre antes); capítulos en romanos, letra capital y número de página. Autocontenida |
+| `plantillas/bordado/` | Bastidor con las iniciales a punto de satén y flores bordadas sobre lino; pespuntes y corazón a punto de cruz. Autocontenida |
+| `plantillas/kintsugi/` | Ensō de pincel que se traza solo con la foto dentro, grietas de oro entre secciones y sello rojo con las iniciales. Autocontenida |
+| `plantillas/partitura/` | Portada de partitura con pentagrama, clave de sol y notas que aparecen; `copy.hero.song` y tempos en `copy.schedule.notes`. Autocontenida |
+| `plantillas/cumbre/` | Cordilleras en capas con paralaje, la foto como sol detrás de las cimas y curvas de nivel; `copy.hero.altitude`. Autocontenida |
+| `plantillas/origami/` | Grulla de papel que se pliega al entrar, esquinas dobladas y bloques que se despliegan al bajar; guirnalda de grullas al final. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |

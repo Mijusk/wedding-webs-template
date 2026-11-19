@@ -26,6 +26,14 @@ const WEBS = [
   ["../plantillas/estrellas/", "Noche estrellada"],
   ["../plantillas/galeria/", "Galería de arte"],
   ["../plantillas/ciudades/", "Dos ciudades"],
+  ["../plantillas/vendimia/", "Vendimia"],
+  ["../plantillas/cartografia/", "Cartografía"],
+  ["../plantillas/cuento/", "Cuento"],
+  ["../plantillas/bordado/", "Bordado"],
+  ["../plantillas/kintsugi/", "Kintsugi"],
+  ["../plantillas/partitura/", "Partitura"],
+  ["../plantillas/cumbre/", "Cumbre"],
+  ["../plantillas/origami/", "Origami"],
 ];
 
 export async function fillWebSelect(select) {

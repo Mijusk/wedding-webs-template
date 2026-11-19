@@ -1,0 +1,158 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
+    "tagline": "Y entonces empezó el capítulo más bonito",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Érase una vez",
+        "text": "Érase una vez una tarde de septiembre a la orilla del Tajo, dos desconocidos y un libro que se cayó al agua.",
+        "photo": "assets/foto-3.jpg",
+        "photoAlt": "Lucía y Martín"
+      },
+      {
+        "meta": "Y desde entonces",
+        "text": "Él lo rescató, ella se rió, y desde entonces no han dejado de pasar página juntos.",
+        "photo": "assets/foto-4.jpg",
+        "photoAlt": "Lucía y Martín"
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez",
+    "lat": 40.0331,
+    "lon": -3.6028
+  },
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "Jardín de los olivos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "Patio central"
+    },
+    {
+      "time": "21:00",
+      "label": "Cena",
+      "place": "Salón de la bodega"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Hasta que el cuerpo aguante"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "La historia de",
+      "volume": "Tomo único",
+      "open": "Abrir el libro"
+    },
+    "details": {
+      "eyebrow": "Capítulo",
+      "title": "El día y el lugar",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Ver en el mapa"
+    },
+    "story": {
+      "eyebrow": "Capítulo",
+      "title": "Cómo empezó todo"
+    },
+    "schedule": {
+      "eyebrow": "Capítulo",
+      "title": "Lo que pasará ese día",
+      "text": "Horarios orientativos."
+    },
+    "gallery": {
+      "eyebrow": "Capítulo",
+      "title": "Ilustraciones"
+    },
+    "gifts": {
+      "eyebrow": "Capítulo",
+      "title": "Tu presencia es el regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Epílogo",
+      "title": "¿Formarás parte de la historia?",
+      "text": "Te agradeceremos que nos lo confirmes antes del {deadline}.",
+      "after": "Y fueron felices, y bailaron hasta el amanecer.",
+      "today": "Hoy es el día. Nos vemos allí.",
+      "end": "Fin"
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-3.jpg"
+  ]
+}

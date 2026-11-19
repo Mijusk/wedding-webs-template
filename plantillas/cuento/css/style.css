@@ -1,0 +1,164 @@
+/* Plantilla Cuento. Concepto: un libro antiguo de cuentos.
+   Tapa de tela verde botella con marco y letras doradas que se abre al entrar; dentro, papel
+   marfil, capítulos numerados en romanos, letra capital decorada y número de página.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --ivory: #FAF5E9;
+  --ivory-2: #F1E9D7;
+  --cloth: #24382E;
+  --cloth-deep: #18261F;
+  --gilt: #C7A35C;
+  --gilt-soft: #E2CB95;
+  --ink-soft: #4A4136;
+
+  --paper: var(--ivory);
+  --paper-2: var(--ivory-2);
+  --ink: #2A251E;
+  --muted: #6D6355;
+  --line: #DCD0B6;
+  --accent: var(--cloth);
+  --accent-2: var(--gilt);
+  --on-accent: var(--ivory);
+  --error: #A23B2C;
+  --font-display: "EB Garamond", Georgia, serif;
+  --font-body: "EB Garamond", Georgia, serif;
+  --font-label: "EB Garamond", Georgia, serif;
+  --font-deco: "Cinzel Decorative", "EB Garamond", serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(18px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+}
+
+body { font-size: 19px; line-height: 1.65; counter-reset: folio; }
+::selection { background: var(--gilt-soft); }
+.eyebrow { font: italic 400 19px/1.4 var(--font-display); letter-spacing: .04em; text-transform: none; color: var(--gilt); }
+.link { font: 500 14px/1.4 var(--font-label); letter-spacing: .2em; color: var(--cloth); }
+.button { font: 500 14px/1.2 var(--font-label); letter-spacing: .24em; }
+.button:hover { background: var(--cloth-deep); border-color: var(--cloth-deep); filter: none; }
+
+.fleuron { display: block; width: 60px; height: 16px; }
+.fleuron path { fill: none; stroke: var(--gilt); stroke-width: 1; stroke-linecap: round; }
+.fleuron .fleuron__leaf { fill: var(--gilt); stroke: none; }
+
+/* ---------- portada: tapa que se abre sobre la portadilla ---------- */
+.hero { display: grid; place-items: center; padding: clamp(24px, 5vh, 56px) 16px; background: var(--ivory-2); perspective: 2200px; overflow: hidden; }
+.page {
+  position: relative; width: min(560px, 100%); min-height: min(820px, calc(100svh - 48px));
+  display: grid; place-items: center;
+  background: var(--ivory); box-shadow: 0 1px 0 var(--line), 0 24px 60px rgb(42 37 30 / .14), inset 18px 0 30px -24px rgb(42 37 30 / .25);
+}
+.page__in { display: grid; justify-items: center; gap: 14px; padding: clamp(34px, 6vh, 64px) clamp(22px, 6vw, 56px); text-align: center; }
+.page__eyebrow { font: italic 400 20px/1.3 var(--font-display); color: var(--muted); }
+.page__names {
+  font: 400 min(64px, calc((100vw - 96px) / (var(--len) * 1.3))) / 1.05 var(--font-deco); color: var(--cloth); text-wrap: balance;
+}
+.page__names .amp { font-family: var(--font-display); font-style: italic; color: var(--gilt); }
+.page__photo { width: min(300px, 78%); margin-block: 10px; padding: 8px; border: 1px solid var(--gilt); border-radius: 50% / 42%; }
+.page__photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 50% / 42%; }
+.page__tagline { font: italic 400 21px/1.4 var(--font-display); color: var(--ink-soft); max-width: 22em; text-wrap: balance; }
+.page__imprint { margin-top: 8px; font: 500 12px/1.5 var(--font-label); letter-spacing: .32em; text-transform: uppercase; color: var(--muted); }
+
+.cover {
+  position: absolute; inset: clamp(24px, 5vh, 56px) 16px; margin-inline: auto; width: min(560px, calc(100% - 32px));
+  min-height: min(820px, calc(100svh - 48px)); transform-origin: left center; transform-style: preserve-3d; z-index: 2; cursor: pointer;
+}
+.cover__face, .cover__back { position: absolute; inset: 0; backface-visibility: hidden; }
+.cover__face {
+  display: grid; place-items: center; color: var(--gilt);
+  background:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / .025) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / .05) 0 2px, transparent 2px 4px),
+    radial-gradient(ellipse at 40% 30%, #2E4739, var(--cloth) 60%, var(--cloth-deep));
+  box-shadow: 0 30px 70px rgb(24 38 31 / .45), inset 10px 0 18px -8px rgb(0 0 0 / .4), inset -2px 0 0 rgb(255 255 255 / .06);
+  border-radius: 2px 6px 6px 2px;
+}
+.cover__back { transform: rotateY(180deg); background: repeating-radial-gradient(circle at 30% 40%, #E9DFC8 0 6px, #DCCFB2 6px 9px, #EFE6D2 9px 15px); border-radius: 6px 2px 2px 6px; }
+.cover__frame {
+  position: relative; display: grid; justify-items: center; align-content: center; gap: 20px; text-align: center;
+  width: calc(100% - 56px); height: calc(100% - 56px); padding: 40px 24px; border: 1px solid var(--gilt); outline: 1px solid rgb(199 163 92 / .5); outline-offset: -8px;
+}
+.corner { position: absolute; width: 40px; height: 40px; }
+.corner path { fill: none; stroke: var(--gilt); stroke-width: 1; }
+.corner--tl { top: 10px; left: 10px; } .corner--tr { top: 10px; right: 10px; transform: scaleX(-1); }
+.corner--bl { bottom: 10px; left: 10px; transform: scaleY(-1); } .corner--br { bottom: 10px; right: 10px; transform: scale(-1); }
+.cover__eyebrow { font: italic 400 21px/1.3 var(--font-display); color: var(--gilt-soft); }
+.cover__names { display: grid; gap: 6px; font: 700 min(58px, calc((100vw - 120px) / (var(--len) * .75))) / 1.05 var(--font-deco); color: var(--gilt); text-shadow: 0 1px 0 rgb(0 0 0 / .35); }
+.cover__names .amp { font: italic 400 .6em/1 var(--font-display); color: var(--gilt-soft); }
+.cover__fleuron path { stroke: var(--gilt); } .cover__fleuron .fleuron__leaf { fill: var(--gilt); }
+.cover__volume { font: 500 12px/1.5 var(--font-label); letter-spacing: .36em; text-transform: uppercase; color: var(--gilt-soft); }
+
+/* Entrada (~2,8 s): la tapa espera, se abre hacia la izquierda y se desvanece */
+.cover { animation: open 2.8s cubic-bezier(.6, 0, .3, 1) both; }
+.hero.is-opening .cover { animation: open-now 1.4s cubic-bezier(.6, 0, .3, 1) both; }
+.hero.is-static .cover, .hero.is-open .cover { display: none; }
+.hero:not(.is-static) .page__in > * { animation: rise 1s var(--ease-out) both; animation-delay: calc(2s + var(--d, 0) * 110ms); }
+.page__in > :nth-child(2) { --d: 1; } .page__in > :nth-child(3) { --d: 2; } .page__in > :nth-child(4) { --d: 3; } .page__in > :nth-child(5) { --d: 4; } .page__in > :nth-child(6) { --d: 5; }
+.hero.is-opening .page__in > * { animation-delay: calc(.6s + var(--d, 0) * 110ms); }
+@keyframes open {
+  0%, 38% { transform: rotateY(0); opacity: 1; }
+  88% { transform: rotateY(-165deg); opacity: 1; }
+  100% { transform: rotateY(-178deg); opacity: 0; }
+}
+@keyframes open-now {
+  0% { transform: rotateY(0); opacity: 1; }
+  80% { transform: rotateY(-165deg); opacity: 1; }
+  100% { transform: rotateY(-178deg); opacity: 0; }
+}
+
+/* ---------- capítulos ---------- */
+.section { counter-increment: folio; }
+.section::after { content: "— " counter(folio) " —"; display: block; margin-top: clamp(56px, 7vw, 88px); text-align: center; font: italic 400 15px/1 var(--font-display); color: var(--muted); }
+.head { gap: 12px; }
+.head__title { font-family: var(--font-display); color: var(--cloth); font-size: clamp(38px, 5vw, 60px); }
+.head__fleuron { margin-top: 6px; }
+.head__text { font-style: italic; margin-top: 4px; }
+
+/* Letra capital */
+.chapter__text::first-letter, .story .chapter:first-child .chapter__text::first-letter {
+  float: left; margin: .06em .12em 0 0; padding: .02em .1em 0; font: 400 3.2em/.86 var(--font-deco); color: var(--cloth);
+  border: 1px solid var(--gilt); background: var(--ivory-2);
+}
+.chapter { text-align: left; }
+.chapter__meta { font: italic 400 19px/1.4 var(--font-display); letter-spacing: 0; text-transform: none; color: var(--gilt); }
+.chapter__text { font-size: clamp(20px, 2vw, 24px); }
+.chapter__photo { padding: 8px; border: 1px solid var(--line); background: #fff; box-shadow: 0 10px 30px rgb(42 37 30 / .08); }
+
+.fact__big { color: var(--cloth); }
+.fact__note { color: var(--gilt); }
+
+.plan__time { color: var(--cloth); }
+.plan__mark > * { display: none; }
+.plan__mark::after { content: "❧"; position: relative; top: 18px; color: var(--gilt); font: 22px/1 var(--font-display); background: var(--ivory); }
+.plan__label { font: 500 15px/1.4 var(--font-label); letter-spacing: .2em; }
+.plan__place { font-style: italic; }
+
+.photos__item { padding: 8px; border: 1px solid var(--line); background: #fff; }
+
+.iban__card { border-color: var(--gilt); background: #FFFDF7; }
+.iban__holder { color: var(--cloth); }
+
+/* Epílogo: la contratapa */
+.closing__body { background: var(--cloth); color: var(--ivory); }
+.closing__end { text-align: center; font: 400 clamp(44px, 7vw, 72px)/1 var(--font-deco); color: var(--gilt); }
+.closing__fleuron { margin: 18px auto 40px; }
+.closing .eyebrow { color: var(--gilt-soft); }
+.closing__title { color: var(--ivory); font-family: var(--font-display); }
+.closing__title .amp { color: var(--gilt); font-style: italic; }
+.closing__text { color: rgb(250 245 233 / .75); font-style: italic; }
+.closing .button { background: var(--gilt); border-color: var(--gilt); color: var(--cloth-deep); }
+.closing .button:hover { background: var(--gilt-soft); border-color: var(--gilt-soft); }
+.closing__foot { background: var(--cloth-deep); color: var(--gilt-soft); }
+
+.rsvp-dialog { background: var(--ivory); }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); color: var(--cloth); }
+
+@media (max-width: 760px) {
+  body { font-size: 18px; }
+  .hero { padding: 14px 12px; }
+  .page, .cover { min-height: calc(100svh - 28px); }
+  .cover { inset: 14px 12px; width: calc(100% - 24px); }
+  .cover__frame { width: calc(100% - 36px); height: calc(100% - 36px); }
+  .chapter { text-align: left; }
+}

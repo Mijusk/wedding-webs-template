@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Valida los config.json de ejemplo de las 25 maquetaciones (y cualquier otro que se pase)
+// Valida los config.json de ejemplo de las 33 maquetaciones (y cualquier otro que se pase)
 // contra schema/wedding-config.schema.json.
 //   node scripts/validar-configs.mjs                 -> todas las plantillas
 //   node scripts/validar-configs.mjs ruta/config.json -> solo ese archivo
