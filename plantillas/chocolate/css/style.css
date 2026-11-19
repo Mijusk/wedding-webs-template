@@ -1,0 +1,119 @@
+/* Plantilla Chocolate. Concepto: el marrón chocolate que sustituye al beige en 2026.
+   Chocolate profundo, crema rosada y pan de oro. Foto en un arco alto con filete dorado,
+   nombres en serif escultórica con brillo de oro que se desliza, filetes y rombos dorados.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --choc: #3B2620;
+  --choc-2: #4A3029;
+  --choc-deep: #2A1A16;
+  --cream: #F1E6DA;
+  --blush: #D9B8A8;
+  --gold: #C9A464;
+  --gold-hi: #F1DDA6;
+
+  --paper: var(--choc);
+  --paper-2: var(--choc-2);
+  --ink: var(--cream);
+  --muted: #C7B2A4;
+  --line: rgb(201 164 100 / .35);
+  --accent: var(--gold);
+  --accent-2: var(--blush);
+  --on-accent: var(--choc-deep);
+  --error: #E58B7A;
+  --font-display: "Gloock", Georgia, serif;
+  --font-body: "Jost", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Jost", "Helvetica Neue", Arial, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+}
+
+html { color-scheme: dark; }
+body { font-weight: 300; font-size: 16px; line-height: 1.8; background: radial-gradient(ellipse at 50% 0%, var(--choc-2), var(--choc) 60%) fixed, var(--choc); }
+::selection { background: rgb(201 164 100 / .35); }
+.eyebrow { font: 400 11px/1.5 var(--font-label); letter-spacing: .38em; color: var(--blush); }
+.link { color: var(--gold); font-weight: 400; }
+.button { font-weight: 500; letter-spacing: .28em; background: linear-gradient(110deg, #B48B4C, var(--gold-hi) 45%, #B48B4C); border: 0; }
+.button:hover { filter: brightness(1.08); }
+
+/* Oro: degradado que se desliza despacio */
+.foil {
+  background: linear-gradient(105deg, #A9813F 0%, var(--gold-hi) 25%, #B48B4C 45%, #E7CC8C 70%, #A9813F 100%) 0 0 / 220% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: foil 7s ease-in-out infinite alternate;
+}
+@keyframes foil { to { background-position: 100% 0; } }
+.goldrule { display: flex; align-items: center; gap: 10px; width: 160px; }
+.goldrule i { flex: 1; height: 1px; background: var(--gold); }
+.goldrule b { width: 7px; height: 7px; transform: rotate(45deg); background: var(--gold); }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(36px, 7vh, 88px) var(--gutter); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); align-items: center; gap: clamp(32px, 6vw, 100px); max-width: 1160px; margin-inline: auto; width: 100%; }
+.hero__text { display: grid; justify-items: start; gap: 18px; }
+.hero__names { display: grid; font-size: min(116px, calc((50vw - 96px) / (var(--len) * .62))); line-height: .98; letter-spacing: -.01em; }
+.hero__names .amp { font-size: .42em; color: var(--blush); margin: .1em 0 .1em .1em; font-style: italic; }
+.hero__date { font: 400 13px/1.6 var(--font-label); letter-spacing: .38em; text-transform: uppercase; color: var(--cream); }
+.hero__place { font: 400 20px/1.4 var(--font-display); color: var(--muted); }
+.arch { position: relative; padding: 12px; border: 1px solid var(--gold); border-radius: 999px 999px 0 0; }
+.arch img { width: 100%; aspect-ratio: 3 / 4.2; object-fit: cover; border-radius: 999px 999px 0 0; }
+
+/* Entrada (~2,6 s): el arco se abre de abajo arriba, los nombres se revelan y el filete se traza */
+.hero:not(.is-static) .arch img { animation: arch-in 2s cubic-bezier(.6, 0, .2, 1) .2s both; }
+.hero:not(.is-static) .arch { animation: fade 1.2s ease both; }
+.hero:not(.is-static) .hero__names > * { animation: rise 1.3s var(--ease-out) both; }
+.hero:not(.is-static) .hero__names > :nth-child(1) { animation-delay: .6s; }
+.hero:not(.is-static) .hero__names > :nth-child(2) { animation-delay: .85s; }
+.hero:not(.is-static) .hero__names > :nth-child(3) { animation-delay: 1.1s; }
+.hero:not(.is-static) .hero__text > .goldrule { animation: rule 1.2s var(--ease-out) 1.4s both; transform-origin: left; }
+.hero:not(.is-static) .hero__text > p { animation: fade 1.2s ease 1.8s both; }
+@keyframes arch-in { from { clip-path: inset(100% 0 0 0 round 999px 999px 0 0); } to { clip-path: inset(0 0 0 0 round 999px 999px 0 0); } }
+@keyframes rule { from { transform: scaleX(0); } }
+
+/* ---------- secciones ---------- */
+.head__title { font-size: clamp(38px, 5vw, 64px); color: var(--cream); }
+.head .goldrule { margin-top: 6px; }
+.fact__big { color: var(--cream); }
+.fact__note { font-style: normal; color: var(--gold); letter-spacing: .08em; }
+.chapter__photo { padding: 10px; border: 1px solid var(--line); border-radius: 999px 999px 0 0; }
+.chapter__photo img { border-radius: 999px 999px 0 0; }
+.chapter__meta { color: var(--gold); }
+
+.schedule { background: var(--cream); color: var(--choc); padding-bottom: var(--space); margin-top: var(--space); }
+.schedule.section { padding-top: var(--space); }
+.schedule .head__title { color: var(--choc); }
+.schedule .eyebrow { color: #9B6E5E; }
+.schedule .head__text, .schedule .plan__place { color: #7A5E53; }
+.schedule .plan__label { color: var(--choc); }
+.plan__mark::before { background: var(--line); }
+.schedule .plan__mark::before { background: rgb(59 38 32 / .2); }
+.plan__mark > * { margin-top: 28px; }
+.gem { width: 10px; height: 10px; transform: rotate(45deg); border: 1px solid var(--gold); background: var(--cream); }
+.gem--last { background: var(--gold); }
+.plan__time { font-family: var(--font-display); color: #9A7438; }
+.plan__label { font-weight: 500; letter-spacing: .26em; }
+
+.photos__item img { filter: saturate(.92) sepia(.08); }
+.iban__card { background: var(--choc-2); border-color: var(--line); }
+.iban__holder { color: var(--cream); }
+
+.closing { margin-top: 0; }
+.closing__body { background: var(--choc-deep); }
+.closing__rule { display: grid; place-items: center; margin-bottom: 34px; }
+.closing__title { color: var(--cream); }
+.closing__title .amp { color: var(--blush); }
+.closing__foot { background: #1F1310; color: var(--gold); }
+
+.rsvp-dialog { background: var(--choc-2); color: var(--cream); }
+.rsvp-dialog .rsvp-title { color: var(--cream); font-family: var(--font-display); }
+.rsvp-dialog .choice label:has(input:checked) { color: var(--choc-deep); }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); }
+  .hero__text { justify-items: center; text-align: center; }
+  .hero__names { justify-items: center; font-size: min(76px, calc((100vw - 48px) / (var(--len) * .62))); }
+  .arch { width: min(360px, 88%); justify-self: center; }
+}
+@media (prefers-reduced-motion: reduce) { .foil { animation: none; } }

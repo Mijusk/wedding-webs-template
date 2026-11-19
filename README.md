@@ -2,7 +2,7 @@
 
 Webs de boda configurables desde un único config. HTML, CSS y JS sin framework ni paso de build.
 
-Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 35 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
+Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 47 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
 
 | Documento | Para qué |
 | --- | --- |
@@ -71,6 +71,18 @@ No hay paso de build. Las plantillas y el escaparate también funcionan con `npx
 | `plantillas/partitura/` | Portada de partitura con pentagrama, clave de sol y notas que aparecen; `copy.hero.song` y tempos en `copy.schedule.notes`. Autocontenida |
 | `plantillas/cumbre/` | Cordilleras en capas con paralaje, la foto como sol detrás de las cimas y curvas de nivel; `copy.hero.altitude`. Autocontenida |
 | `plantillas/origami/` | Grulla de papel que se pliega al entrar, esquinas dobladas y bloques que se despliegan al bajar; guirnalda de grullas al final. Autocontenida |
+| `plantillas/regencia/` | Camafeo ovalado con borde de perlas, lazo de seda que cae, nombres a pluma y cierre en azul jasperware con laurel.. Autocontenida |
+| `plantillas/encaje/` | Puntilla de encaje en SVG que se borda sobre la foto, perlas en los títulos y cierre rosa con encaje blanco.. Autocontenida |
+| `plantillas/chocolate/` | Tema oscuro chocolate: foto en arco con filete de oro, nombres con brillo dorado que se desliza y programa en crema.. Autocontenida |
+| `plantillas/laca/` | Chinoiserie: puerta de luna con aro dorado, rama de ciruelo que brota con pájaros, greca de celosía y farolillos en el programa.. Autocontenida |
+| `plantillas/caligrafia/` | Papel de algodón con canto desbarbado, nombres en letra inglesa que se escriben y un rasgueo de tinta que se dibuja solo.. Autocontenida |
+| `plantillas/riviera/` | Toldo de rayas con festón que se despliega, foto como cartel de verano, fecha en píldoras y salvavidas en el programa.. Autocontenida |
+| `plantillas/seda/` | Cinta de raso con brillo que envuelve la foto y se anuda en un lazo; lacitos en los títulos y nudos en el programa.. Autocontenida |
+| `plantillas/feston/` | Foto recortada con festón, sello con la fecha que rueda, secciones con borde de ondas en salvia y crema.. Autocontenida |
+| `plantillas/perla/` | Collar de perlas que se ensarta desde el centro con una perla en lágrima, nombres en Cormorant fina y foto panorámica.. Autocontenida |
+| `plantillas/marmol/` | Mármol de Carrara en SVG, marco de oro con la inscripción en capitales romanas y cierre en Nero Marquina con vetas doradas.. Autocontenida |
+| `plantillas/terciopelo/` | Tema oscuro de terciopelo verde, tres velas que se encienden y tiemblan, foto en marco de oro y llamas en el programa.. Autocontenida |
+| `plantillas/grabado/` | Lámina a plumilla de la finca que se dibuja sola, foto como lámina numerada y tipografía Caslon de imprenta.. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |

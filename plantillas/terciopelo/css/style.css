@@ -1,0 +1,126 @@
+/* Plantilla Terciopelo. Concepto: una cena de invierno a la luz de las velas.
+   Terciopelo verde botella con brillo, oro viejo, crema y la luz cálida de tres velas.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --velvet: #1E3029;
+  --velvet-deep: #14211C;
+  --velvet-hi: #2F4D41;
+  --gold: #C8A15A;
+  --gold-hi: #EBCF91;
+  --cream: #EFE6D2;
+  --flame: #FFC566;
+
+  --paper: var(--velvet);
+  --paper-2: var(--velvet-hi);
+  --ink: var(--cream);
+  --muted: #B8B39F;
+  --line: rgb(200 161 90 / .3);
+  --accent: var(--gold);
+  --accent-2: var(--gold-hi);
+  --on-accent: var(--velvet-deep);
+  --error: #E58B7A;
+  --font-display: "Prata", Georgia, serif;
+  --font-body: "Lato", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Lato", "Helvetica Neue", Arial, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+  --velvet-bg: radial-gradient(ellipse 80% 60% at 30% 20%, rgb(64 104 88 / .45), transparent 60%), radial-gradient(ellipse 70% 50% at 80% 90%, rgb(64 104 88 / .3), transparent 60%), linear-gradient(160deg, var(--velvet) 0%, var(--velvet-deep) 100%);
+}
+
+html { color-scheme: dark; }
+body { font-weight: 300; font-size: 17px; line-height: 1.8; background: var(--velvet-bg) fixed, var(--velvet); }
+::selection { background: rgb(200 161 90 / .35); }
+.eyebrow { font: 400 11px/1.5 var(--font-label); letter-spacing: .36em; color: var(--gold); }
+.link { color: var(--gold-hi); font-weight: 400; }
+.button { font-weight: 700; letter-spacing: .26em; background: linear-gradient(110deg, #A9843F, var(--gold-hi) 50%, #A9843F); border: 0; }
+
+/* Velas: cera crema, mecha y una llama que tiembla con su halo */
+.candles { display: flex; align-items: flex-end; justify-content: center; gap: 16px; height: 140px; }
+.candle { position: relative; width: 16px; height: var(--h); border-radius: 3px 3px 2px 2px; background: linear-gradient(90deg, #CFC3A6, #F6EEDC 40%, #E4D8BD 70%, #BFB295); box-shadow: inset 0 6px 6px -4px rgb(255 214 140 / .7); }
+.candle::before { content: ""; position: absolute; left: 50%; top: -6px; width: 1.5px; height: 7px; margin-left: -.75px; background: #2A1E14; }
+.flame { position: absolute; left: 50%; bottom: 100%; width: 10px; height: 22px; margin: 0 0 4px -5px; border-radius: 50% 50% 45% 45% / 62% 62% 38% 38%; background: radial-gradient(ellipse at 50% 80%, #fff 0 18%, var(--flame) 40%, #FF8A2A 75%, transparent 78%); transform-origin: 50% 90%; animation: flicker 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i, 0) * -.7s); filter: blur(.3px); }
+.flame::after { content: ""; position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; background: radial-gradient(circle, rgb(255 197 102 / .28), transparent 65%); pointer-events: none; animation: halo 2.6s ease-in-out infinite alternate; animation-delay: inherit; }
+@keyframes flicker { 0% { transform: scale(1, 1) rotate(-1deg); } 30% { transform: scale(.94, 1.06) rotate(2deg); } 60% { transform: scale(1.04, .95) rotate(-2deg); } 100% { transform: scale(.97, 1.03) rotate(1deg); } }
+@keyframes halo { to { opacity: .7; transform: scale(.92); } }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(40px, 8vh, 96px) var(--gutter); background: var(--velvet-bg); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; gap: clamp(36px, 7vw, 110px); max-width: 1140px; margin-inline: auto; width: 100%; }
+.frame { position: relative; justify-self: end; width: min(430px, 100%); padding: 18px; background: linear-gradient(160deg, #26392F, #121D18); box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 0 6px #172620, inset 0 0 0 7px rgb(200 161 90 / .45), 0 40px 70px rgb(0 0 0 / .45); }
+.frame img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; filter: sepia(.12) saturate(.95) brightness(.96); }
+.frame::after { content: ""; position: absolute; inset: 18px; background: radial-gradient(ellipse at 80% 10%, rgb(255 190 110 / .22), transparent 55%); mix-blend-mode: screen; animation: halo 3s ease-in-out infinite alternate; pointer-events: none; }
+.hero__text { position: relative; display: grid; justify-items: center; gap: 14px; text-align: center; }
+.hero__text::before { content: ""; position: absolute; left: 50%; top: 10px; width: 520px; height: 520px; margin-left: -260px; border-radius: 50%; background: radial-gradient(circle, rgb(255 190 110 / .16), transparent 62%); pointer-events: none; animation: halo 2.6s ease-in-out infinite alternate; }
+.hero__candles { margin-bottom: 8px; }
+.hero__names { display: grid; justify-items: center; font-size: min(100px, calc((50vw - 96px) / (var(--len) * .7))); line-height: 1.04; color: var(--cream); text-shadow: 0 0 30px rgb(255 190 110 / .25); }
+.hero__names .amp { font-size: .45em; color: var(--gold); margin: .1em 0; font-style: italic; }
+.hero__date { margin-top: 6px; font: 400 13px/1.6 var(--font-label); letter-spacing: .4em; text-transform: uppercase; color: var(--gold-hi); padding-left: .4em; }
+.hero__place { font: 400 21px/1.4 var(--font-display); color: var(--muted); }
+.hero__tagline { font: italic 300 17px/1.5 var(--font-body); color: var(--muted); }
+
+/* Entrada (~2,8 s): todo empieza a oscuras, se encienden las velas una a una y la luz descubre la portada */
+.hero:not(.is-static) .flame { animation: light .7s ease-out both, flicker 2.6s ease-in-out .7s infinite alternate; }
+.hero:not(.is-static) .hero__candles .candle:nth-child(1) .flame { animation-delay: .5s, 1.2s; }
+.hero:not(.is-static) .hero__candles .candle:nth-child(2) .flame { animation-delay: .9s, 1.6s; }
+.hero:not(.is-static) .hero__candles .candle:nth-child(3) .flame { animation-delay: 1.3s, 2s; }
+.hero:not(.is-static) .hero__candles { animation: fade 1s ease both; }
+.hero:not(.is-static) .frame { animation: dawn 2.2s ease .6s both; }
+.hero:not(.is-static) .hero__text > :not(.hero__candles) { animation: dawn 1.8s ease both; animation-delay: 1.4s; }
+.hero:not(.is-static) .hero__names { animation-delay: 1.2s; }
+@keyframes light { from { opacity: 0; transform: scale(.2, .1); } }
+@keyframes dawn { from { opacity: 0; filter: brightness(.3); } }
+
+/* ---------- secciones ---------- */
+.head__title { color: var(--cream); }
+.head__glow { position: relative; display: flex; align-items: center; gap: 12px; width: 150px; height: 26px; }
+.head__glow i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+.head__glow i:last-child { background: linear-gradient(90deg, var(--gold), transparent); }
+.head__glow .flame { position: relative; left: auto; bottom: auto; margin: 0; width: 8px; height: 18px; }
+.head__glow .flame::after { width: 70px; height: 70px; margin: -35px 0 0 -35px; }
+.facts { border: 1px solid var(--line); outline: 1px solid rgb(200 161 90 / .15); outline-offset: 6px; padding-block: 36px; background: rgb(20 33 28 / .5); }
+.fact + .fact { border-color: var(--line); }
+.fact__big { font-family: var(--font-display); color: var(--cream); }
+.fact__note { font-style: italic; color: var(--gold-hi); }
+.chapter__photo { padding: 10px; background: #172620; box-shadow: inset 0 0 0 1px var(--gold); }
+.chapter__photo img { filter: sepia(.1); }
+.chapter__meta { color: var(--gold); }
+.chapter__text { font-family: var(--font-display); font-size: clamp(21px, 2.2vw, 26px); line-height: 1.5; }
+
+.schedule { background: rgb(20 33 28 / .6); padding-bottom: var(--space); margin-top: var(--space); border-block: 1px solid var(--line); }
+.schedule.section { padding-top: var(--space); }
+.plan__mark::before { background: var(--line); }
+.plan__mark > * { margin-top: 30px; }
+.wick { position: relative; display: block; width: 12px; height: 16px; border-radius: 2px; background: linear-gradient(90deg, #CFC3A6, #F6EEDC 45%, #BFB295); }
+.wick .flame { width: 8px; height: 16px; margin: 0 0 2px -4px; }
+.wick .flame::after { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+.plan__time { font-family: var(--font-display); color: var(--gold-hi); }
+.plan__label { font-weight: 700; letter-spacing: .28em; }
+.plan__place { color: var(--muted); }
+
+.photos__item { padding: 8px; background: #172620; box-shadow: inset 0 0 0 1px rgb(200 161 90 / .5); }
+.iban__card { background: var(--velvet-deep); border-color: var(--line); }
+.iban__holder { color: var(--cream); }
+
+.closing { margin-top: 0; }
+.closing__body { background: radial-gradient(ellipse at 50% 20%, rgb(255 190 110 / .12), transparent 55%), var(--velvet-deep); }
+.closing__candles { margin-bottom: 30px; }
+.closing__title { color: var(--cream); }
+.closing__title .amp { color: var(--gold); }
+.closing__foot { background: #0E1713; color: var(--gold); }
+
+.rsvp-dialog { background: var(--velvet); color: var(--cream); }
+.rsvp-dialog .rsvp-title { color: var(--cream); font-family: var(--font-display); }
+.rsvp-dialog .choice label:has(input:checked) { color: var(--velvet-deep); }
+
+@media (max-width: 860px) {
+  .hero__in { grid-template-columns: minmax(0, 1fr); }
+  .frame { justify-self: center; width: min(300px, 78vw); padding: 12px; }
+  .frame::after { inset: 12px; }
+  .hero__text::before { width: 360px; height: 360px; margin-left: -180px; }
+  .hero__candles { height: 110px; }
+  .hero__names { font-size: min(70px, calc((100vw - 48px) / (var(--len) * .7))); }
+}
+@media (prefers-reduced-motion: reduce) { .flame, .flame::after, .hero__text::before, .frame::after { animation: none !important; } }

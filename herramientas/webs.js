@@ -34,6 +34,18 @@ const WEBS = [
   ["../plantillas/partitura/", "Partitura"],
   ["../plantillas/cumbre/", "Cumbre"],
   ["../plantillas/origami/", "Origami"],
+  ["../plantillas/regencia/", "Regencia"],
+  ["../plantillas/encaje/", "Encaje"],
+  ["../plantillas/chocolate/", "Chocolate"],
+  ["../plantillas/laca/", "Laca"],
+  ["../plantillas/caligrafia/", "Caligrafía"],
+  ["../plantillas/riviera/", "Riviera"],
+  ["../plantillas/seda/", "Seda"],
+  ["../plantillas/feston/", "Festón"],
+  ["../plantillas/perla/", "Perla"],
+  ["../plantillas/marmol/", "Mármol"],
+  ["../plantillas/terciopelo/", "Terciopelo"],
+  ["../plantillas/grabado/", "Grabado"],
 ];
 
 export async function fillWebSelect(select) {

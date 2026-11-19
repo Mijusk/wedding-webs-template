@@ -1,0 +1,111 @@
+/* Plantilla Encaje. Concepto: alta costura nupcial.
+   Marfil, rosa polvo y perlas; puntilla de encaje con festones calados que borda la foto de
+   portada y separa las secciones; nombres en letra caligráfica.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --ivory: #FBF7F4;
+  --ivory-2: #F3EBE6;
+  --blush: #E8D3CC;
+  --blush-deep: #B88C83;
+  --taupe: #8B7B74;
+
+  --paper: var(--ivory);
+  --paper-2: var(--ivory-2);
+  --ink: #3C3331;
+  --muted: #7D716D;
+  --line: #E6D9D3;
+  --accent: #8F6B63;
+  --accent-2: var(--blush-deep);
+  --on-accent: var(--ivory);
+  --error: #A23B2C;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Mulish", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Mulish", "Helvetica Neue", Arial, sans-serif;
+  --font-script: "Great Vibes", cursive;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 999px;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 164px);
+}
+
+body { font-weight: 300; font-size: 16px; line-height: 1.8; }
+::selection { background: var(--blush); }
+.eyebrow { font: 400 11px/1.5 var(--font-label); letter-spacing: .34em; color: var(--blush-deep); }
+.link { font-weight: 600; letter-spacing: .26em; color: var(--accent); }
+.button { font-weight: 600; letter-spacing: .24em; }
+
+/* ---------- encaje ---------- */
+.lace { display: block; width: 100%; height: 34px; }
+.lace__edge, .lace__line { fill: none; stroke: #fff; stroke-width: 1.2; }
+.lace__hole { fill: none; stroke: #fff; stroke-width: 1; }
+.lace__dot, .lace__flower circle { fill: #fff; }
+.pearl { width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #F1EAE4 55%, #D5C9C1); box-shadow: 0 1px 2px rgb(0 0 0 / .18); }
+
+/* ---------- portada ---------- */
+.hero { position: relative; display: grid; grid-template-rows: minmax(52vh, 1fr) auto; min-height: 100svh; }
+.hero__photo { position: relative; overflow: hidden; }
+.hero__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; }
+.hero__photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgb(251 247 244 / .35)); }
+/* La puntilla cae sobre el borde inferior de la foto, en marfil */
+.hero__lace { position: relative; z-index: 1; height: 34px; margin-top: -24px; transform: scaleY(-1); }
+.hero__lace .lace__edge, .hero__lace .lace__line, .hero__lace .lace__hole { stroke: var(--ivory); stroke-width: 2.2; }
+.hero__lace .lace__dot, .hero__lace .lace__flower circle { fill: var(--ivory); }
+.hero__lace rect { filter: drop-shadow(0 -1px 0 var(--ivory)); }
+.hero__text { position: relative; display: grid; justify-items: center; gap: 10px; padding: 16px 16px clamp(36px, 6vh, 64px); text-align: center; background: var(--ivory); }
+.hero__names { font: 400 min(96px, calc((100vw - 48px) / (var(--len) * 1.25))) / 1.05 var(--font-script); color: var(--accent); }
+.hero__names .amp { font-size: .7em; color: var(--blush-deep); }
+.hero__date { font: 400 12px/1.6 var(--font-label); letter-spacing: .36em; text-transform: uppercase; color: var(--ink); padding-left: .36em; }
+.hero__place { font: italic 400 21px/1.4 var(--font-display); color: var(--muted); }
+.hero__tagline { margin-top: 6px; font: 400 18px/1.4 var(--font-display); color: var(--muted); }
+
+/* Entrada (~2,8 s): la foto se aclara desde el blanco, la puntilla se borda de izquierda a
+   derecha y los nombres aparecen escritos */
+.hero:not(.is-static) .hero__photo img { animation: veil 2.4s ease both; }
+.hero:not(.is-static) .hero__lace { animation: stitch 1.8s cubic-bezier(.5, 0, .3, 1) .5s both; }
+.hero:not(.is-static) .hero__names { animation: write 1.6s cubic-bezier(.5, 0, .3, 1) 1s both; }
+.hero:not(.is-static) .hero__text > :not(.hero__names) { animation: rise 1.1s var(--ease-out) both; animation-delay: 1.8s; }
+@keyframes veil { from { opacity: 0; transform: scale(1.05); filter: brightness(1.6) saturate(.5); } }
+@keyframes stitch { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes write { from { clip-path: inset(-20% 100% -20% -5%); } to { clip-path: inset(-20% -5% -20% -5%); } }
+
+/* ---------- secciones ---------- */
+.head { gap: 12px; }
+.head__title { font-weight: 300; font-size: clamp(38px, 5vw, 60px); }
+.head__pearls { display: flex; gap: 7px; align-items: center; }
+.head__pearls i { width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #EFE6E0 55%, #D3C6BE); box-shadow: 0 1px 1px rgb(0 0 0 / .15); }
+.head__pearls i:nth-child(3) { width: 10px; height: 10px; }
+.fact__big { font-weight: 400; }
+.fact__note { font-family: var(--font-display); font-size: 19px; color: var(--blush-deep); }
+.chapter__text { font-weight: 400; }
+.chapter__meta { color: var(--blush-deep); }
+.chapter__photo { padding: 10px; background: #fff; box-shadow: 0 10px 30px rgb(60 51 49 / .08); }
+
+.schedule { background: var(--ivory-2); padding-bottom: var(--space); margin-top: var(--space); }
+.schedule.section { padding-top: var(--space); }
+.plan__mark::before { background: var(--blush); }
+.plan__mark > * { margin-top: 28px; }
+.plan__time { font-family: var(--font-display); font-weight: 500; color: var(--accent); }
+.plan__label { font-weight: 600; font-size: 12px; letter-spacing: .3em; }
+
+.photos__item { padding: 8px; background: #fff; }
+.iban__card { background: #fff; border-color: var(--blush); }
+
+/* Cierre: rosa con puntilla blanca arriba */
+.closing__body { background: var(--blush); padding-top: 0; }
+.closing__lace { margin-bottom: calc(var(--space) * .7); }
+.closing__lace .lace__edge, .closing__lace .lace__line, .closing__lace .lace__hole { stroke: var(--ivory); stroke-width: 2; }
+.closing__lace .lace__dot, .closing__lace .lace__flower circle { fill: var(--ivory); }
+.closing { background: var(--ivory); }
+.closing .eyebrow { color: var(--accent); }
+.closing__title { font-weight: 300; }
+.closing__title--names { font-family: var(--font-script); color: var(--accent); }
+.closing__text { color: #6E5F5B; }
+.closing__foot { background: #8F6B63; color: var(--ivory); }
+
+.rsvp-dialog { background: #fff; }
+.rsvp-dialog .rsvp-title { font-family: var(--font-script); color: var(--accent); font-size: 54px; }
+
+@media (max-width: 760px) {
+  .hero { grid-template-rows: 56svh auto; }
+}

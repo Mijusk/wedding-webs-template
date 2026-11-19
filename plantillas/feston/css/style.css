@@ -1,0 +1,112 @@
+/* Plantilla Festón. Concepto: el borde ondulado de la vajilla antigua y de los manteles.
+   Salvia y crema con un toque de mantequilla; foto festoneada, sello con la fecha y secciones con
+   el borde en ondas. Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --cream: #F7F3EA;
+  --cream-2: #EEF0E8;
+  --sage: #8C9C7C;
+  --sage-soft: #D6DDCB;
+  --sage-deep: #4C5C44;
+  --butter: #EDD9A3;
+
+  --paper: var(--cream);
+  --paper-2: var(--cream-2);
+  --ink: #2F3529;
+  --muted: #69705F;
+  --line: #DCDFD2;
+  --accent: var(--sage-deep);
+  --accent-2: var(--sage);
+  --on-accent: var(--cream);
+  --error: #A23B2C;
+  --font-display: "Young Serif", Georgia, serif;
+  --font-body: "Mulish", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Mulish", "Helvetica Neue", Arial, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 999px;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 160px);
+}
+
+body { font-weight: 400; font-size: 17px; line-height: 1.75; }
+::selection { background: var(--sage-soft); }
+.eyebrow { font: 700 11px/1.5 var(--font-label); letter-spacing: .3em; color: var(--sage); }
+.link { font: 700 11px/1.5 var(--font-label); letter-spacing: .24em; }
+.button { font: 700 12px/1.2 var(--font-label); letter-spacing: .22em; }
+
+/* Festón: un rectángulo metido hacia dentro y una fila de círculos que asoma por los cuatro lados */
+.scallop {
+  --r: 14px;
+  display: block;
+  -webkit-mask: linear-gradient(#000 0 0) 50% 50% / calc(100% - 2 * var(--r)) calc(100% - 2 * var(--r)) no-repeat, radial-gradient(circle var(--r), #000 96%, #0000) 0 0 / calc(2 * var(--r)) calc(2 * var(--r)) round;
+          mask: linear-gradient(#000 0 0) 50% 50% / calc(100% - 2 * var(--r)) calc(100% - 2 * var(--r)) no-repeat, radial-gradient(circle var(--r), #000 96%, #0000) 0 0 / calc(2 * var(--r)) calc(2 * var(--r)) round;
+}
+.scallop img { width: 100%; height: 100%; object-fit: cover; }
+.scallop--sm { --r: 10px; }
+/* Borde de ondas arriba o abajo de una franja de color */
+.closing__body { -webkit-mask: radial-gradient(circle 16px at 50% 100%, #000 96%, #0000) 0 0 / 32px 16px repeat-x, linear-gradient(#000 0 0) 0 16px / 100% calc(100% - 16px) no-repeat; mask: radial-gradient(circle 16px at 50% 100%, #000 96%, #0000) 0 0 / 32px 16px repeat-x, linear-gradient(#000 0 0) 0 16px / 100% calc(100% - 16px) no-repeat; }
+.schedule { -webkit-mask: radial-gradient(circle 16px at 50% 100%, #000 96%, #0000) 0 0 / 32px 16px repeat-x, radial-gradient(circle 16px at 50% 0, #000 96%, #0000) 0 100% / 32px 16px repeat-x, linear-gradient(#000 0 0) 0 16px / 100% calc(100% - 32px) no-repeat; mask: radial-gradient(circle 16px at 50% 100%, #000 96%, #0000) 0 0 / 32px 16px repeat-x, radial-gradient(circle 16px at 50% 0, #000 96%, #0000) 0 100% / 32px 16px repeat-x, linear-gradient(#000 0 0) 0 16px / 100% calc(100% - 32px) no-repeat; }
+
+/* ---------- portada ---------- */
+.hero { display: grid; align-items: center; padding: clamp(28px, 6vh, 72px) var(--gutter) clamp(40px, 8vh, 88px); background: radial-gradient(ellipse at 50% 0, #F2F4EC, var(--cream-2) 60%); }
+.hero__in { position: relative; display: grid; justify-items: center; gap: 14px; max-width: 980px; margin-inline: auto; width: 100%; text-align: center; }
+.hero__photo { --r: 18px; width: 100%; height: min(54svh, 560px); min-height: 300px; filter: drop-shadow(0 20px 30px rgb(47 53 41 / .14)); }
+.seal { --r: 9px; position: absolute; top: calc(min(54svh, 560px) - 70px); right: 6%; display: grid; place-content: center; width: 124px; height: 124px; background: var(--butter); color: var(--sage-deep); border-radius: 50%; box-shadow: 0 0 0 7px var(--butter); outline: 2px dashed rgb(76 92 68 / .45); outline-offset: -10px; text-transform: uppercase; transform: rotate(-8deg); }
+.seal__day { font: 400 40px/1 var(--font-display); }
+.seal__month { font: 700 11px/1.4 var(--font-label); letter-spacing: .22em; padding-left: .22em; }
+.seal__year { font: 700 10px/1.4 var(--font-label); letter-spacing: .3em; padding-left: .3em; opacity: .75; }
+.hero__eyebrow { margin-top: 26px; }
+.hero__names { font-size: min(96px, calc((100vw - 96px) / (var(--len) * .6))); line-height: 1.05; color: var(--sage-deep); text-wrap: balance; }
+.hero__names .amp { font-size: .55em; color: var(--sage); }
+.hero__date { font: 700 12px/1.6 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--ink); }
+.hero__tagline { font: 400 19px/1.5 var(--font-display); color: var(--muted); }
+
+/* Entrada (~2,6 s): la foto se recorta con el festón desde el centro, rueda el sello y suben los nombres */
+.hero:not(.is-static) .hero__photo { animation: open 1.6s cubic-bezier(.6, 0, .2, 1) both; }
+.hero:not(.is-static) .seal { animation: roll 1.1s cubic-bezier(.3, 1.4, .5, 1) 1.4s both; }
+.hero:not(.is-static) .hero__in > :not(.hero__photo):not(.seal) { animation: rise 1.2s var(--ease-out) both; animation-delay: 1s; }
+.hero:not(.is-static) .hero__names { animation-delay: .8s; }
+@keyframes open { from { clip-path: inset(50% 50% 50% 50%); } to { clip-path: inset(0); } }
+@keyframes roll { from { opacity: 0; transform: translateX(60px) rotate(120deg) scale(.6); } }
+
+/* ---------- secciones ---------- */
+.head__title { color: var(--sage-deep); }
+.head__scallops { display: block; width: 96px; height: 12px; background: radial-gradient(circle 6px at 50% 0, var(--sage) 95%, #0000) 0 0 / 12px 12px repeat-x; }
+.facts { background: #fff; border-radius: 28px; padding-block: 38px; box-shadow: 0 0 0 1px var(--line), 0 0 0 8px var(--cream), 0 0 0 9px var(--sage-soft); }
+.fact__big { font-family: var(--font-display); color: var(--sage-deep); }
+.fact__note { color: var(--sage); font-weight: 700; }
+.chapter__photo .scallop { aspect-ratio: 4 / 5; }
+.chapter__meta { color: var(--sage); }
+.chapter__text { font-family: var(--font-display); font-size: clamp(21px, 2.2vw, 26px); line-height: 1.45; color: var(--ink); }
+
+.schedule { background: var(--sage-soft); padding-bottom: var(--space); margin-top: var(--space); }
+.schedule.section { padding-top: var(--space); }
+.plan__mark::before { background: var(--sage); opacity: .5; }
+.plan__mark > * { margin-top: 26px; }
+.dot-scallop { --r: 4px; width: 22px; height: 22px; background: radial-gradient(circle, var(--cream) 3px, var(--sage-deep) 3.5px); -webkit-mask: radial-gradient(circle 7px, #000 96%, #0000) 50% 50% / 14px 14px no-repeat, radial-gradient(circle 4px, #000 96%, #0000) 0 0 / 8px 8px round; mask: radial-gradient(circle 7px, #000 96%, #0000) 50% 50% / 14px 14px no-repeat, radial-gradient(circle 4px, #000 96%, #0000) 0 0 / 8px 8px round; border-radius: 50%; }
+.dot-scallop--last { background: var(--butter); box-shadow: inset 0 0 0 2px var(--sage-deep); }
+.plan__time { font-family: var(--font-display); color: var(--sage-deep); }
+.plan__label { font-weight: 800; letter-spacing: .24em; }
+
+.photos__item { border-radius: 24px; overflow: hidden; }
+.iban__card { border-radius: 24px; background: #fff; }
+
+.closing { background: var(--paper); }
+.closing__body { background: var(--sage-deep); color: var(--cream); padding-top: calc(var(--space) * .9); }
+.closing .eyebrow { color: var(--butter); }
+.closing__title { color: var(--cream); }
+.closing__title .amp { color: var(--butter); }
+.closing__text { color: rgb(247 243 234 / .82); }
+.closing .button { background: var(--butter); border-color: var(--butter); color: var(--sage-deep); }
+.closing__foot { background: #3C4A35; color: var(--sage-soft); }
+
+.rsvp-dialog { background: var(--cream); }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); color: var(--sage-deep); }
+
+@media (max-width: 760px) {
+  .hero__photo { --r: 12px; height: 52svh; min-height: 280px; }
+  .seal { top: calc(52svh - 56px); right: 2%; width: 100px; height: 100px; }
+  .seal__day { font-size: 32px; }
+  .hero__eyebrow { margin-top: 32px; }
+  .hero__names { font-size: min(64px, calc((100vw - 40px) / (var(--len) * .38))); }
+}

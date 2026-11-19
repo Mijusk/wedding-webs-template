@@ -1,0 +1,107 @@
+/* Plantilla Mármol. Concepto: una inscripción en mármol de Carrara con filetes de oro.
+   Blanco veteado, gris piedra, oro viejo y un cierre en mármol negro con vetas doradas.
+   Cada boda debería tocar solo los tokens de :root. */
+:root {
+  --stone: #F5F3F0;
+  --stone-2: #EBE8E3;
+  --gold: #B08D57;
+  --gold-hi: #D9BC85;
+  --graphite: #2B2A29;
+
+  --paper: var(--stone);
+  --paper-2: var(--stone-2);
+  --ink: var(--graphite);
+  --muted: #6F6C68;
+  --line: #DAD5CD;
+  --accent: var(--graphite);
+  --accent-2: var(--gold);
+  --on-accent: var(--stone);
+  --error: #A23B2C;
+  --font-display: "Cinzel", Georgia, serif;
+  --font-body: "Cormorant Garamond", Georgia, serif;
+  --font-label: "Cinzel", Georgia, serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --radius: 0;
+
+  --gutter: clamp(16px, 6vw, 96px);
+  --space: clamp(96px, 12vw, 168px);
+  --marble: url("marmol.svg") center / cover;
+  --nero: url("nero.svg") center / cover;
+}
+
+body { font-size: 20px; line-height: 1.6; font-weight: 500; }
+::selection { background: rgb(176 141 87 / .3); }
+.eyebrow { font: 400 11px/1.5 var(--font-label); letter-spacing: .36em; color: var(--gold); }
+.link { font: 400 11px/1.5 var(--font-label); letter-spacing: .26em; }
+.button { font: 400 12px/1.2 var(--font-label); letter-spacing: .26em; }
+
+/* ---------- portada ---------- */
+.hero { display: grid; grid-template-columns: 1fr 1fr; background: var(--marble), var(--stone); }
+.hero__photo { position: relative; overflow: hidden; border-right: 1px solid var(--gold); box-shadow: 1px 0 0 3px rgb(255 255 255 / .6), 4px 0 0 0 var(--gold); }
+.hero__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.slab { display: grid; place-items: center; padding: clamp(28px, 5vw, 72px); }
+.slab__frame { position: relative; display: grid; justify-items: center; gap: 16px; width: min(520px, 100%); padding: clamp(44px, 6vw, 72px) clamp(24px, 4vw, 48px); text-align: center; border: 1px solid var(--gold); outline: 1px solid rgb(176 141 87 / .5); outline-offset: 7px; background: rgb(255 255 255 / .28); backdrop-filter: blur(1px); }
+.slab__frame::before, .slab__frame::after { content: ""; position: absolute; left: 50%; width: 9px; height: 9px; margin-left: -4.5px; background: var(--gold); transform: rotate(45deg); }
+.slab__frame::before { top: -13px; }
+.slab__frame::after { bottom: -13px; }
+.hero__names { display: grid; justify-items: center; font-size: min(68px, calc((50vw - 200px) / (var(--len) * .78))); line-height: 1.12; letter-spacing: .08em; color: var(--graphite); text-shadow: 0 1px 0 rgb(255 255 255 / .8), 0 -1px 0 rgb(0 0 0 / .12); }
+.hero__names .amp { font-family: var(--font-body); font-style: italic; font-size: .7em; letter-spacing: 0; color: var(--gold); margin: .05em 0; text-shadow: none; }
+.hero__date { padding-block: 10px; font: 400 13px/1.6 var(--font-label); letter-spacing: .4em; text-transform: uppercase; color: var(--graphite); border-block: 1px solid var(--gold); padding-left: .4em; }
+.hero__place { font: italic 500 22px/1.4 var(--font-body); color: var(--muted); }
+.hero__tagline { font: italic 500 19px/1.4 var(--font-body); color: var(--muted); }
+
+/* Entrada (~2,7 s): la foto se desvela de arriba abajo, el filete de oro se traza y las letras se graban */
+.hero:not(.is-static) .hero__photo img { animation: unveil 2s cubic-bezier(.6, 0, .2, 1) both; }
+.hero:not(.is-static) .slab__frame { animation: frame 1.6s var(--ease-out) .6s both; }
+.hero:not(.is-static) .hero__names > * { animation: carve 1.4s var(--ease-out) both; }
+.hero:not(.is-static) .hero__names > :nth-child(1) { animation-delay: 1.1s; }
+.hero:not(.is-static) .hero__names > :nth-child(2) { animation-delay: 1.35s; }
+.hero:not(.is-static) .hero__names > :nth-child(3) { animation-delay: 1.6s; }
+.hero:not(.is-static) .slab__frame > :not(.hero__names) { animation: fade 1.2s ease 2s both; }
+@keyframes unveil { from { clip-path: inset(0 0 100% 0); transform: scale(1.06); } to { clip-path: inset(0); } }
+@keyframes frame { from { opacity: 0; outline-offset: 30px; } }
+@keyframes carve { from { opacity: 0; letter-spacing: .3em; filter: blur(4px); } }
+
+/* ---------- secciones ---------- */
+.head__title { letter-spacing: .06em; font-size: clamp(32px, 4.4vw, 54px); }
+.head__rule { display: grid; justify-items: center; gap: 3px; width: 120px; }
+.head__rule i { display: block; height: 1px; background: var(--gold); width: 100%; }
+.head__rule i:nth-child(2) { width: 70%; }
+.head__rule i:nth-child(3) { width: 36%; }
+.facts { background: var(--marble), #fff; border: 1px solid var(--gold); outline: 1px solid var(--line); outline-offset: 6px; padding-block: 36px; }
+.fact__big { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 30px); letter-spacing: .04em; }
+.fact__note { font-style: italic; color: var(--gold); }
+.chapter__photo { padding: 8px; background: var(--marble), #fff; box-shadow: inset 0 0 0 1px var(--gold); }
+.chapter__meta { color: var(--gold); }
+.chapter__text { font-family: var(--font-body); font-size: clamp(22px, 2.3vw, 27px); }
+
+.schedule { background: var(--marble), var(--stone-2); padding-bottom: var(--space); margin-top: var(--space); border-block: 1px solid var(--gold); }
+.schedule.section { padding-top: var(--space); }
+.plan__mark::before { background: var(--gold); opacity: .5; }
+.plan__mark > * { margin-top: 28px; }
+.tessera { width: 10px; height: 10px; border: 1px solid var(--gold); background: var(--stone); transform: rotate(45deg); }
+.tessera--last { background: var(--gold); }
+.plan__time { font-family: var(--font-display); color: var(--gold); }
+.plan__label { font-family: var(--font-label); letter-spacing: .22em; }
+
+.photos__item { padding: 6px; background: #fff; box-shadow: inset 0 0 0 1px var(--gold); }
+.iban__card { border-color: var(--gold); background: var(--marble), #fff; }
+
+.closing__body { background: linear-gradient(rgb(14 13 12 / .3), rgb(14 13 12 / .3)), var(--nero), #151413; color: var(--stone); }
+.closing .eyebrow { color: var(--gold-hi); }
+.closing__in { position: relative; }
+.closing__title { color: var(--stone); letter-spacing: .06em; }
+.closing__title .amp { color: var(--gold-hi); font-family: var(--font-body); font-style: italic; }
+.closing__text { color: rgb(245 243 240 / .8); font-style: italic; }
+.closing .button { background: var(--gold); border-color: var(--gold); color: #151413; }
+.closing__foot { background: #121110; color: var(--gold-hi); border-top: 1px solid rgb(176 141 87 / .5); }
+
+.rsvp-dialog { background: var(--marble), #fff; }
+.rsvp-dialog .rsvp-title { font-family: var(--font-display); letter-spacing: .06em; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; grid-template-rows: 50svh auto; }
+  .hero__photo { border-right: 0; border-bottom: 1px solid var(--gold); box-shadow: 0 1px 0 3px rgb(255 255 255 / .6), 0 4px 0 0 var(--gold); }
+  .slab { padding: 36px 20px 48px; }
+  .hero__names { font-size: min(50px, calc((100vw - 100px) / (var(--len) * .78))); }
+}
