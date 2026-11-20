@@ -5,7 +5,8 @@ import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.
 import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, stageState, weddingFromHash } from "./stage.js";
 import { setupQuick } from "./quick.js";
 import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./send.js";
-import { setupPricing } from "./pricing.js";
+import { setupPricing, withoutPhotos } from "./pricing.js";
+import { setupKeep, openKeep, closeKeep, keepOpen, refreshKeepPrices } from "./keep.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
 import { captureAttribution } from "./attribution.js";
@@ -59,39 +60,69 @@ async function start() {
   setupStage({
     studio, configFor,
     onEdit: (styleId) => openBuilder(styleId),
-    onKeep: (state) => setupPricing.choose(state),
+    onKeep: () => { track("me_la_quedo_abierto", { estilo: stageState()?.style.id }); openKeep(); },
     onClose: () => hideNudge(),
     onGuest: () => track("probar_como_invitado", { estilo: stageState()?.style.id }),
     onShare: () => track("prueba_compartida", { estilo: stageState()?.style.id }),
   });
 
-  // Guardar la prueba (el email se pide al final, ver send.js). Cada email es un contacto; si
-  // después editan los datos o cambian de estilo, se actualiza su fila sin volver a preguntar.
-  let saved = null; // { phone, email } de la última vez que la guardaron
+  // Contacto de la pareja: el email en el último paso del generador (para ver su web), el móvil al
+  // guardarla o al reservarla. Cada vez que dan algo nuevo, o editan datos o estilo, se actualiza su
+  // fila (la base reconoce a la misma pareja por email o móvil) sin volver a preguntar.
+  let saved = null; // { email, phone, consentText } lo que ya nos han dado
   const saveTrial = async (contact, { wedding, style }) => {
-    await saveLead(leadFromTrial({ ...wedding, ...contact }, style), studio.contact);
-    const key = `studio-lead:${(contact.phone || contact.email).replace(/\s+/g, "").toLowerCase()}`;
+    const all = { ...saved, ...contact };
+    await saveLead(leadFromTrial({ ...wedding, ...all }, style), studio.contact);
+    const key = `studio-lead:${(all.phone || all.email).replace(/\s+/g, "").toLowerCase()}`;
     if (!session.get(key)) { session.set(key, "1"); conversion("lead", { estilo: style.id }); }
-    saved = contact;
-    setupPricing.prefill({ ...wedding, ...contact });
+    saved = all;
+    setupPricing.prefill({ ...wedding, ...all });
   };
+  const known = () => ({ email: saved?.email, phone: saved?.phone, consent: Boolean(saved?.consentText) });
   setupSend({
     getState: () => stageState(),
+    known,
     onOpen: (from) => track("guardar_abierto", { desde: from }),
-    onSave: saveTrial,
+    onSave: (contact, state) => saveTrial({ ...contact, consentText: saved?.consentText || consentFrom("b-consent") }, state),
+  });
+  setupKeep({
+    studio, known,
+    getState: () => stageState(),
+    onReserve: async (contact, tier, state) => {
+      const all = { ...saved, ...contact, consentText: saved?.consentText || consentFrom("k-consent") };
+      const w = state.wedding;
+      await saveLead({
+        ...(w ? leadFromTrial({ ...w, ...all }, state.style) : { name: state.config.event.couple.join(" y "), style: state.style.id }),
+        type: "reserva", tier: tier.id, email: all.email || undefined, phone: all.phone,
+        wedding: withoutPhotos(state.config),
+      }, studio.contact);
+      saved = all;
+      if (w) setupPricing.prefill({ ...w, ...all });
+      conversion("reserva", { tarifa: tier.id, estilo: state.style.id, valor: tier.price[0] });
+    },
+    // Tarifa que se paga al momento: al formulario de Tarifas, que es el que sabe cobrar.
+    onCheckout: (tier, state, contact) => {
+      closeStage();
+      if (state.wedding) setupPricing.prefill({ ...state.wedding, ...saved, ...contact });
+      setupPricing.choose(state);
+      const sel = $("#c-tier");
+      sel.value = tier.id;
+      sel.dispatchEvent(new Event("change"));
+    },
   });
 
   setupBuilder({
     studio, demoPhotos, previewFor,
-    onGenerate: async (wedding, style) => {
+    onGenerate: async (wedding, style, contact) => {
       track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length, ejemplo: wedding.sample ? "si" : "no" });
+      if (contact?.email) saved = { ...saved, ...contact };
       setupPricing.prefill(saved ? { ...wedding, ...saved } : wedding);
       const loading = playLoading(wedding, studio.generator);
       try {
         await Promise.all([prepareStage(wedding, style), loading]);
         openStage();
-        if (saved) saveTrial(saved, { wedding, style }).catch(() => {});
-        else scheduleSaveNudge();
+        if (saved && !wedding.sample) saveTrial({}, { wedding, style }).catch((e) => console.error("[WeddingWebs] contacto:", e));
+        if (!saved?.phone && !wedding.sample) scheduleSaveNudge();
       } catch (e) {
         console.error("[WeddingWebs] vista previa:", e);
         await loading;
@@ -108,7 +139,8 @@ async function start() {
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (sendOpen()) closeSend();
+    if (keepOpen()) closeKeep();
+    else if (sendOpen()) closeSend();
     else if (!$("#builder").hidden) closeBuilder();
     else if (!$("#share-pop").hidden) $("#share-pop").hidden = true;
     else if (!$("#sections-panel").hidden) toggleSectionsPanel(false);
@@ -129,7 +161,7 @@ async function start() {
   afterLoad(() => quick.paint(true).catch((e) => console.error("[WeddingWebs] móvil de la portada:", e)));
 
   // Precios de la base de datos, cuando lleguen.
-  applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); addStructuredData(studio, { faq }); } });
+  applyLivePrices(studio).then((changed) => { if (changed) { setupPricing.refresh(); refreshKeepPrices(); addStructuredData(studio, { faq }); } });
 
   // Desde plantillas.html: ?probar=<estilo> abre el generador y ?ver=<estilo> el ejemplo.
   const params = new URLSearchParams(location.search);
@@ -227,8 +259,13 @@ function leadFromTrial(w, style) {
     photos: w.photos.length,
     // El texto exacto que aceptaron (prueba del consentimiento, RGPD).
     consent: true,
-    consentText: document.querySelector("label[for=b-consent] span")?.textContent.replace(/\s+/g, " ").trim(),
+    consentText: w.consentText || consentFrom("b-consent"),
   };
+}
+
+// El texto exacto de la casilla que marcaron (prueba del consentimiento, RGPD).
+function consentFrom(id) {
+  return document.querySelector(`label[for=${id}] span`)?.textContent.replace(/\s+/g, " ").trim();
 }
 
 // Mientras el aviso de cookies esté abierto, su tamaño en --cookies-h / --cookies-w: el generador

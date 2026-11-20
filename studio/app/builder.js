@@ -3,12 +3,13 @@ import { pickRandom } from "./demo.js";
 import { showInFrame, fitScaled } from "./preview.js";
 
 // Generador paso a paso: una pregunta por pantalla y, al lado, su web cambiando con cada dato
-// (lo que aún no han puesto sale del ejemplo de la plantilla). Sin email: se pide al final, si
-// quieren guardarla (send.js). Recoge los datos de la pareja (ver wedding.js).
-const STEPS = ["nombres", "fecha", "lugar", "estilo", "fotos"];
+// (lo que aún no han puesto sale del ejemplo de la plantilla). El último paso pide el email para
+// ver su web: ya lo han rellenado todo y quieren verla. La pareja de ejemplo no lo pide.
+// Recoge los datos de la pareja (ver wedding.js).
+const STEPS = ["nombres", "fecha", "lugar", "estilo", "fotos", "contacto"];
 // Qué parte de la web enseña el móvil en cada paso, y en algunos campos concretos: así ven
 // cambiar justo lo que están rellenando. "top" es la portada; el resto, la sección de ese nombre.
-const STEP_VIEW = { nombres: "top", fecha: "details", lugar: "details", estilo: "top", fotos: "top" };
+const STEP_VIEW = { nombres: "top", fecha: "details", lugar: "details", estilo: "top", fotos: "top", contacto: "top" };
 const FIELD_VIEW = { "b-name-a": "top", "b-name-b": "top", "b-date": "details", "b-time": "schedule", "b-venue": "details", "b-city": "details" };
 let photos = []; // data URLs ya reducidas
 let opener = null;
@@ -148,6 +149,10 @@ function validStep() {
     if (!d.time) return fail("Falta la hora de la ceremonia.", "b-time");
   }
   if (name === "lugar" && !String(d.venue || "").trim()) return fail("Falta el lugar de la boda.", "b-venue");
+  if (name === "contacto") {
+    if (!/^\S+@\S+\.\S+$/.test(String(d.email || "").trim())) return fail("Revisad el email: ahí os mandamos vuestra web.", "b-mail");
+    if (!d.consent) return fail("Marcad la casilla para que podamos mandárosla.", "b-trial-consent");
+  }
   err.textContent = "";
   return true;
 }
@@ -178,9 +183,7 @@ function go(i) {
   $("#w-bar").style.width = `${((step + 1) / STEPS.length) * 100}%`;
   $("#w-count").textContent = `Paso ${step + 1} de ${STEPS.length}`;
   $("#w-back").hidden = step === 0;
-  $("#w-next").textContent = step === STEPS.length - 1
-    ? (photos.length ? "Crear nuestra web" : "Crear con fotos de ejemplo")
-    : "Siguiente";
+  $("#w-next").textContent = nextLabel();
   $("#b-error").textContent = "";
   if (STEPS[step] === "fecha") countdown();
   const current = $(`#builder .wstep[data-step="${STEPS[step]}"]`);
@@ -214,18 +217,29 @@ function countdown() {
   raf = requestAnimationFrame(tick);
 }
 
+const nextLabel = () => {
+  if (STEPS[step] === "contacto") return "Ver nuestra web";
+  if (STEPS[step] === "fotos") return photos.length ? "Siguiente" : "Seguir con fotos de ejemplo";
+  return "Siguiente";
+};
+
 function generate(sample) {
   const d = data();
   if (d.website) return closeBuilder(); // campo trampa: lo rellena un bot, no una pareja
   const style = chosenStyle();
   closeBuilder();
+  // El email solo va con su propia web (la de ejemplo no se guarda como contacto).
+  const contact = sample ? null : {
+    email: String(d.email || "").trim(),
+    consentText: $("label[for=b-trial-consent] span")?.textContent.replace(/\s+/g, " ").trim(),
+  };
   ctx.onGenerate({
     couple: [d.nameA.trim(), d.nameB.trim()],
     date: d.date, time: d.time,
     venue: d.venue.trim(), city: (d.city || "").trim(),
     photos: [...photos],
     sample,
-  }, style);
+  }, style, contact);
 }
 
 // styleId: el estilo marcado. names: los de la portada (si vienen los dos, empieza por la fecha).
@@ -267,7 +281,7 @@ function renderPhotos(max) {
     box.insertBefore(item, add);
   });
   add.hidden = photos.length >= max;
-  if (STEPS[step] === "fotos") $("#w-next").textContent = photos.length ? "Crear nuestra web" : "Crear con fotos de ejemplo";
+  $("#w-next").textContent = nextLabel();
 }
 
 // Reduce la foto (File o Blob) a 2000 px de lado mayor en JPEG de calidad alta: la pareja tiene

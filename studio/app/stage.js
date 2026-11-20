@@ -50,7 +50,7 @@ export function setupStage(context) {
     e.preventDefault();
     stepStyle(e.key === "ArrowRight" ? 1 : -1);
   });
-  $("#stage-keep").addEventListener("click", () => { closeStage(); ctx.onKeep(state); });
+  $("#stage-keep").addEventListener("click", () => ctx.onKeep(state)); // se abre encima, sin salir de su web
   $("#stage-try").addEventListener("click", () => { closeStage(); ctx.onEdit(state.style.id); });
   $("#stage [data-close]").addEventListener("click", closeStage);
 

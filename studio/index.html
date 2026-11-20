@@ -275,13 +275,13 @@
 <button class="btn btn--small nudge" id="nudge" type="button" hidden>Probar con vuestra boda</button>
 
 <!-- Generador paso a paso (studio/app/builder.js): una pregunta por pantalla y la web cambiando al
-     lado en cada paso. Sin email: se pide al final, si quieren guardarla (ver #send). -->
+     lado en cada paso. El último paso pide el email para ver su web (la pareja de ejemplo no). -->
 <div class="overlay overlay--wizard" id="builder" role="dialog" aria-modal="true" aria-labelledby="builder-title" hidden>
   <div class="wizard">
     <button class="close" type="button" data-close aria-label="Cerrar">×</button>
     <div class="wizard__main">
       <div class="wizard__progress" aria-hidden="true"><span id="w-bar"></span></div>
-      <p class="eyebrow" id="w-count">Paso 1 de 5</p>
+      <p class="eyebrow" id="w-count">Paso 1 de 6</p>
       <form id="builder-form" novalidate>
         <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
@@ -335,6 +335,19 @@
           <p class="hint">Las fotos no salen de vuestro navegador.</p>
         </section>
 
+        <section class="wstep" data-step="contacto" aria-labelledby="w-t-contacto" hidden>
+          <h2 class="wstep__title" id="w-t-contacto">¿A qué email os la mandamos?</h2>
+          <p class="wstep__lead">Vuestra web está lista. Os mandamos el enlace para que no la perdáis y podáis volver a ella.</p>
+          <div class="field">
+            <label for="b-mail">Vuestro email</label>
+            <input type="email" id="b-mail" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nombre@gmail.com" enterkeyhint="go">
+          </div>
+          <label class="consent" for="b-trial-consent">
+            <input type="checkbox" id="b-trial-consent" name="consent" value="si">
+            <span>Acepto que me mandéis mi web y me escribáis sobre ella. Nada de publicidad de terceros, y podéis borrar mis datos cuando os lo pida (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
+          </label>
+        </section>
+
         <p class="error" id="b-error" role="alert"></p>
         <div class="wizard__nav">
           <button class="btn btn--ghost" type="button" id="w-back">Atrás</button>
@@ -353,31 +366,62 @@
   </div>
 </div>
 
-<!-- Guardar la web: el email se pide aquí, cuando ya la han visto (studio/app/send.js). -->
+<!-- Guardar la web: solo el móvil, para mandarles el enlace por WhatsApp (studio/app/send.js). El
+     email y la casilla solo salen si no los dieron ya en el paso a paso (p. ej. enlace compartido). -->
 <div class="overlay" id="send" role="dialog" aria-modal="true" aria-labelledby="send-title" hidden>
   <div class="sheet sheet--small">
     <button class="close" type="button" data-close aria-label="Cerrar">×</button>
     <p class="eyebrow">Vuestra web</p>
-    <h2 id="send-title">¿Os la guardamos?</h2>
-    <p class="wstep__lead">Dejadnos vuestro móvil y os mandamos el enlace por WhatsApp, para que la tengáis a mano y podáis enseñarla.</p>
+    <h2 id="send-title">¿Os la mandamos por WhatsApp?</h2>
+    <p class="wstep__lead">Así la tenéis a mano para enseñarla a la familia. Un mensaje y ya, sin cadenas ni spam.</p>
     <form id="send-form" novalidate>
       <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
       <div class="field">
         <label for="b-phone">Vuestro móvil</label>
-        <input type="tel" id="b-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="600 000 000" required>
+        <input type="tel" id="b-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="600 000 000" enterkeyhint="send" required>
       </div>
-      <div class="field">
-        <label for="b-email">Email <span class="opt">opcional, si también lo queréis por email</span></label>
+      <div class="field" id="send-email-field">
+        <label for="b-email">Email <span class="opt">opcional</span></label>
         <input type="email" id="b-email" name="email" autocomplete="email">
       </div>
-      <label class="consent" for="b-consent">
+      <label class="consent" for="b-consent" id="send-consent">
         <input type="checkbox" id="b-consent" name="consent" value="si" required>
         <span>Acepto que me escribáis por WhatsApp o email sobre mi web. Solo usaremos estos datos para eso, y podéis pedirnos que los borremos cuando queráis (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
       </label>
       <p class="error" id="send-error" role="alert"></p>
-      <button class="btn btn--wide" type="submit" id="send-submit">Guardadla y mandadme el enlace</button>
+      <button class="btn btn--wide" type="submit" id="send-submit">Mandádmela por WhatsApp</button>
     </form>
     <div class="send__thanks" id="send-thanks" hidden></div>
+  </div>
+</div>
+
+<!-- «Me la quedo»: reservar sin salir de su web (studio/app/keep.js). Tarifa, móvil y listo; el
+     email ya lo dieron al probar. Si una tarifa se paga al momento, va al formulario de Tarifas. -->
+<div class="overlay" id="keep" role="dialog" aria-modal="true" aria-labelledby="keep-title" hidden>
+  <div class="sheet sheet--small keep">
+    <button class="close" type="button" data-close aria-label="Cerrar">×</button>
+    <p class="eyebrow" id="keep-names">Vuestra web</p>
+    <h2 id="keep-title">¡Es vuestra! ¿Cómo la queréis?</h2>
+    <form id="keep-form" novalidate>
+      <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <fieldset class="keep__tiers" id="keep-tiers"><legend class="hp">Tarifa</legend></fieldset>
+      <div class="field">
+        <label for="k-phone">Vuestro móvil</label>
+        <input type="tel" id="k-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="600 000 000" enterkeyhint="send" required>
+      </div>
+      <div class="field" id="keep-email-field" hidden>
+        <label for="k-email">Email</label>
+        <input type="email" id="k-email" name="email" autocomplete="email">
+      </div>
+      <label class="consent" for="k-consent" id="keep-consent" hidden>
+        <input type="checkbox" id="k-consent" name="consent" value="si">
+        <span>Acepto que me escribáis por WhatsApp o email sobre mi web (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
+      </label>
+      <p class="error" id="keep-error" role="alert"></p>
+      <button class="btn btn--wide" type="submit" id="keep-submit">Reservarla · 0 € ahora</button>
+      <p class="fineprint keep__fine">No se cobra nada ahora. Os escribimos por WhatsApp para cerrar los detalles y, cuando os encaje, el pago. <a href="legal.html#condiciones" target="_blank">Condiciones</a>.</p>
+    </form>
+    <div class="send__thanks" id="keep-thanks" hidden></div>
   </div>
 </div>
 
@@ -453,8 +497,8 @@
       </div>
     </div>
     <div class="save-nudge" id="save-nudge" role="status" hidden>
-      <p>¿Os la guardamos y os mandamos el enlace?</p>
-      <button class="btn btn--small" type="button" id="save-nudge-yes">Sí, guardadla</button>
+      <p>¿Os la mandamos por WhatsApp para tenerla a mano?</p>
+      <button class="btn btn--small" type="button" id="save-nudge-yes">Sí, mandádmela</button>
       <button class="close" type="button" id="save-nudge-no" aria-label="Ahora no">×</button>
     </div>
     <div class="share-pop" id="share-pop" role="dialog" aria-labelledby="share-title" hidden>
