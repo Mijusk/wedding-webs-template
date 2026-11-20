@@ -14,18 +14,21 @@ export function setupSend(context) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(form));
-    const email = String(d.email || "").trim();
-    if (!/^\S+@\S+\.\S+$/.test(email)) { err.textContent = "Revisad el email: os enviamos ahí el enlace de vuestra web."; return $("#b-email").focus(); }
+    const phone = String(d.phone || "").trim(), email = String(d.email || "").trim();
+    const digits = phone.replace(/\D/g, "");
+    if (!phone) { err.textContent = "Dejadnos vuestro móvil: os mandamos ahí el enlace de vuestra web."; return $("#b-phone").focus(); }
+    if (digits.length < 9 || digits.length > 15 || /[^\d\s+().-]/.test(phone)) { err.textContent = "Revisad el móvil: parece que le falta o le sobra algún número."; return $("#b-phone").focus(); }
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) { err.textContent = "Revisad el email, o dejadlo en blanco."; return $("#b-email").focus(); }
     if (!d.consent) { err.textContent = "Marcad la casilla para que podamos escribiros."; return $("#b-consent").focus(); }
     if (d.website) return closeSend(); // campo trampa: un bot
     err.textContent = "";
     btn.disabled = true; btn.textContent = "Guardando…";
     try {
-      await ctx.onSave(email, ctx.getState());
+      await ctx.onSave({ phone, email }, ctx.getState());
       form.hidden = true;
       const thanks = $("#send-thanks");
       thanks.innerHTML = `<h3>¡Guardada!</h3>
-        <p>Os escribimos a <strong>${esc(email)}</strong> con el enlace de vuestra web. Mientras, podéis seguir probando estilos.</p>
+        <p>Os mandamos el enlace de vuestra web por WhatsApp al <strong>${esc(phone)}</strong>${email ? ` y por email a <strong>${esc(email)}</strong>` : ""}. Mientras, podéis seguir probando estilos.</p>
         <button class="btn btn--small" type="button" data-close-send>Seguir mirando</button>`;
       thanks.hidden = false;
       thanks.querySelector("[data-close-send]").addEventListener("click", closeSend);
@@ -54,7 +57,7 @@ export function openSend(from = "barra") {
   $("#send").hidden = false;
   syncScrollLock();
   const thanks = $("#send-thanks");
-  if (thanks.hidden) $("#b-email").focus();
+  if (thanks.hidden) $("#b-phone").focus();
   else thanks.querySelector("button")?.focus();
 }
 

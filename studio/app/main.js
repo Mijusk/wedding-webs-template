@@ -67,13 +67,13 @@ async function start() {
 
   // Guardar la prueba (el email se pide al final, ver send.js). Cada email es un contacto; si
   // después editan los datos o cambian de estilo, se actualiza su fila sin volver a preguntar.
-  let savedEmail = "";
-  const saveTrial = async (email, { wedding, style }) => {
-    await saveLead(leadFromTrial({ ...wedding, email }, style), studio.contact);
-    const key = `studio-lead:${email.toLowerCase()}`;
+  let saved = null; // { phone, email } de la última vez que la guardaron
+  const saveTrial = async (contact, { wedding, style }) => {
+    await saveLead(leadFromTrial({ ...wedding, ...contact }, style), studio.contact);
+    const key = `studio-lead:${(contact.phone || contact.email).replace(/\s+/g, "").toLowerCase()}`;
     if (!session.get(key)) { session.set(key, "1"); conversion("lead", { estilo: style.id }); }
-    savedEmail = email;
-    setupPricing.prefill({ ...wedding, email });
+    saved = contact;
+    setupPricing.prefill({ ...wedding, ...contact });
   };
   setupSend({
     getState: () => stageState(),
@@ -85,12 +85,12 @@ async function start() {
     studio, demoPhotos, previewFor,
     onGenerate: async (wedding, style) => {
       track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length, ejemplo: wedding.sample ? "si" : "no" });
-      setupPricing.prefill(savedEmail ? { ...wedding, email: savedEmail } : wedding);
+      setupPricing.prefill(saved ? { ...wedding, ...saved } : wedding);
       const loading = playLoading(wedding, studio.generator);
       try {
         await Promise.all([prepareStage(wedding, style), loading]);
         openStage();
-        if (savedEmail) saveTrial(savedEmail, { wedding, style }).catch(() => {});
+        if (saved) saveTrial(saved, { wedding, style }).catch(() => {});
         else scheduleSaveNudge();
       } catch (e) {
         console.error("[WeddingWebs] vista previa:", e);
@@ -215,7 +215,8 @@ async function openSavedTrial(token, styleFor) {
 function leadFromTrial(w, style) {
   return {
     type: "prueba",
-    email: w.email,
+    email: w.email || undefined,
+    phone: w.phone || undefined,
     name: w.couple.join(" y "),
     nameA: w.couple[0],
     nameB: w.couple[1],

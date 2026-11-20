@@ -24,7 +24,11 @@ function doPost(e) {
   try { d = JSON.parse(e.postData.contents); } catch (err) { return respuesta(false, "json"); }
   if (d.website) return respuesta(true); // campo trampa relleno: un bot. Se le dice que sí y no se guarda.
   const email = String(d.email || "").trim().toLowerCase();
-  if (!/^\S+@\S+\.\S+$/.test(email)) return respuesta(false, "email");
+  const movil = String(d.phone || "").trim();
+  // Desde el 18/11/2026 el escaparate pide el móvil y el email es opcional: vale uno de los dos.
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) return respuesta(false, "email");
+  if (!email && movil.replace(/\D/g, "").length < 9) return respuesta(false, "contacto");
+  const quien = email || movil.replace(/\D/g, "");
 
   const cerrojo = LockService.getScriptLock();
   cerrojo.waitLock(10000);
@@ -40,20 +44,20 @@ function doPost(e) {
 
     // Una pareja que vuelve a probar en las últimas 24 h actualiza su fila de prueba
     // (sin tocar el Estado que hayas puesto tú).
-    const previa = d.type === "prueba" ? filaDePrueba(hoja, email) : 0;
+    const previa = d.type === "prueba" ? filaDePrueba(hoja, email, quien) : 0;
     if (previa) hoja.getRange(previa, 1, 1, 11).setValues([fila.slice(0, 11)]);
     else hoja.appendRow(fila);
 
-    if (!previa) avisar(libro, d, email);
+    if (!previa) avisar(libro, d, email, quien);
   } finally {
     cerrojo.releaseLock();
   }
   return respuesta(true);
 }
 
-function avisar(libro, d, email) {
+function avisar(libro, d, email, quien) {
   const cache = CacheService.getScriptCache();
-  const clave = "aviso:" + email + ":" + (d.type || "");
+  const clave = "aviso:" + quien + ":" + (d.type || "");
   if (cache.get(clave)) return;
   const props = PropertiesService.getScriptProperties();
   const hoy = Utilities.formatDate(new Date(), "Europe/Madrid", "yyyy-MM-dd");
@@ -68,10 +72,10 @@ function avisar(libro, d, email) {
   MailApp.sendEmail({
     to: AVISAR_A,
     subject: asunto,
-    body: `${asunto}\nEmail: ${email}\nLugar: ${d.venue || "-"}\nEstilo: ${d.style || "-"}\n\n${libro.getUrl()}`,
+    body: `${asunto}\nMóvil: ${d.phone || "-"}\nEmail: ${email || "-"}\nLugar: ${d.venue || "-"}\nEstilo: ${d.style || "-"}\n\n${libro.getUrl()}`,
   });
 
-  if (RESPUESTA_AUTOMATICA && d.type === "prueba") {
+  if (RESPUESTA_AUTOMATICA && d.type === "prueba" && email) {
     MailApp.sendEmail({
       to: email,
       subject: "Vuestra web de boda",
@@ -82,15 +86,18 @@ function avisar(libro, d, email) {
   }
 }
 
-// Fila de una prueba del mismo email en las últimas 24 h (0 si no hay).
-function filaDePrueba(hoja, email) {
+// Fila de una prueba de la misma pareja (mismo email o, sin email, mismo móvil) en las últimas 24 h
+// (0 si no hay).
+function filaDePrueba(hoja, email, quien) {
   const n = hoja.getLastRow() - 1;
   if (n < 1) return 0;
-  const datos = hoja.getRange(2, 1, n, 3).getValues();
+  const datos = hoja.getRange(2, 1, n, 10).getValues();
   const limite = Date.now() - 24 * 3600 * 1000;
   for (let i = datos.length - 1; i >= 0; i--) {
-    const [fecha, tipo, correo] = datos[i];
-    if (tipo === "prueba" && String(correo).toLowerCase() === email && new Date(fecha).getTime() > limite) return i + 2;
+    const fecha = datos[i][0], tipo = datos[i][1], correo = String(datos[i][2]).toLowerCase();
+    const movil = String(datos[i][9]).replace(/\D/g, "");
+    const misma = email ? correo === email : !correo && movil === quien;
+    if (tipo === "prueba" && misma && new Date(fecha).getTime() > limite) return i + 2;
   }
   return 0;
 }
