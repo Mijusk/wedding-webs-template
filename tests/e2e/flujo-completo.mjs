@@ -34,16 +34,23 @@ try {
   await v.goto(`${SITE}/studio/?utm_source=google&utm_medium=cpc&utm_campaign=e2e-${stamp}&gclid=E2E-${stamp}`, { waitUntil: "networkidle" });
   await v.waitForTimeout(800);
   await v.locator("[data-open-builder]:visible").first().click();
+  // Paso a paso: nombres, fecha, lugar, estilo, fotos y, al final, el email para ver su web.
+  const next = () => v.locator("#builder-form button[type=submit]").click();
   await v.fill("#b-name-a", NAME_A);
   await v.fill("#b-name-b", NAME_B);
+  await next();
   const d = new Date(); d.setMonth(d.getMonth() + 9);
   await v.fill("#b-date", d.toISOString().slice(0, 10));
   await v.fill("#b-time", "18:30");
+  await next();
   await v.fill("#b-venue", "Finca Prueba E2E");
   await v.fill("#b-city", "Toledo");
-  await v.fill("#b-email", EMAIL);
-  await v.check("#b-consent");
-  await v.locator("#builder-form button[type=submit]").click();
+  await next();
+  await next(); // estilo
+  await next(); // fotos (las de ejemplo)
+  await v.fill("#b-mail", EMAIL);
+  await v.check("#b-trial-consent");
+  await next();
   await v.waitForSelector("#stage:not([hidden])", { timeout: 15000 });
   await shot(v, "1-escaparate-vista-previa");
 
@@ -56,7 +63,7 @@ try {
   created.lead = lead.id;
   const first = lead.lead_attribution.find((a) => a.touch === "primero");
   if (first?.utm_campaign !== `e2e-${stamp}` || first?.gclid !== `E2E-${stamp}`) throw new Error(`Atribución incorrecta: ${JSON.stringify(first)}`);
-  if (!lead.consents[0]?.text?.startsWith("Acepto que me escribáis")) throw new Error("Falta el texto exacto del consentimiento");
+  if (!lead.consents[0]?.text?.startsWith("Acepto que me mandéis mi web")) throw new Error("Falta el texto exacto del consentimiento");
   if (lead.partner_a !== NAME_A || lead.city !== "Toledo") throw new Error("Datos del lead incompletos");
   step("La prueba del escaparate crea el lead con su campaña de Google (utm + gclid) y el texto exacto del consentimiento");
   await visitor.close();

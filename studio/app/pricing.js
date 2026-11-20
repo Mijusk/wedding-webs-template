@@ -178,7 +178,7 @@ export function setupPricing({ studio, templateUrl }) {
 }
 
 // Las fotos van como data URLs: demasiado grandes para una celda de Google Sheets.
-function withoutPhotos(config) {
+export function withoutPhotos(config) {
   const isData = (s) => String(s).startsWith("data:");
   return {
     ...config,

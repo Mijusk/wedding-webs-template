@@ -473,6 +473,28 @@ body.has-nudge { padding-bottom: 64px; }
 .send__thanks h3 { font-size: 30px; }
 .send__thanks p { color: var(--muted); }
 
+/* «Me la quedo»: reservar encima de su web (keep.js) */
+#keep { z-index: 56; place-items: center; }
+#keep-form { display: grid; gap: 14px; }
+.sheet:has(#keep-thanks:not([hidden])) > :is(.eyebrow, h2) { display: none; }
+.keep__tiers { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.keep-tier { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; }
+.keep-tier input { position: absolute; opacity: 0; pointer-events: none; }
+.keep-tier__dot { grid-row: span 2; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--bg); }
+.keep-tier__name { font-weight: 600; }
+.keep-tier__badge { margin-left: 6px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.keep-tier__price { grid-row: span 2; font-weight: 600; white-space: nowrap; }
+.keep-tier__summary { grid-column: 2; font-size: 13px; line-height: 1.35; color: var(--muted); }
+.keep-tier:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.keep-tier:has(input:checked) .keep-tier__dot { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 5px, var(--bg) 6px); }
+.keep-tier:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.keep__fine { margin: 0; text-align: center; }
+@media (max-width: 700px) {
+  #keep, #send { place-items: end center; padding: 0; }
+  #keep .sheet, #send .sheet { border-radius: 18px 18px 0 0; max-height: 92svh; overflow: auto; padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+  .sheet--small h2 { font-size: 27px; }
+}
+
 /* Resultado: barra de abajo con el estilo (flechas y deslizar) y las herramientas */
 .stage__view { grid-template-rows: minmax(0, 1fr) auto; gap: 12px; }
 .stage__frame { min-height: 320px; }

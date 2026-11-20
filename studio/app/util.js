@@ -60,7 +60,15 @@ export const priceLabel = ([min, max], currency) =>
 // Mientras haya una capa abierta: sin scroll detrás, y la página de fondo inerte para que
 // el teclado y los lectores de pantalla se queden dentro de la capa.
 export function syncScrollLock() {
-  const open = ["#builder", "#loading", "#stage", "#send"].some((id) => !$(id).hidden);
+  const open = ["#builder", "#loading", "#stage", "#send", "#keep"].some((id) => !$(id).hidden);
   document.body.classList.toggle("locked", open);
   document.querySelectorAll("body > header, body > main, body > footer, #nudge").forEach((el) => { el.inert = open; });
+}
+
+// Móvil de la pareja: un mensaje si no vale, o "" si está bien (9 a 15 cifras, con +, espacios…).
+export function phoneProblem(phone) {
+  const p = String(phone || "").trim(), digits = p.replace(/\D/g, "");
+  if (!p) return "Dejadnos vuestro móvil: os escribimos por WhatsApp.";
+  if (digits.length < 9 || digits.length > 15 || /[^\d\s+().-]/.test(p)) return "Revisad el móvil: parece que le falta o le sobra algún número.";
+  return "";
 }
