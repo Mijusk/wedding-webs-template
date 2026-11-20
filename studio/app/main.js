@@ -4,6 +4,7 @@ import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoR
 import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.js";
 import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, stageState, weddingFromHash } from "./stage.js";
 import { setupQuick } from "./quick.js";
+import { loadSharePhotos } from "./share-photos.js";
 import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./send.js";
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
@@ -62,7 +63,7 @@ async function start() {
     onKeep: (state) => setupPricing.choose(state),
     onClose: () => hideNudge(),
     onGuest: () => track("probar_como_invitado", { estilo: stageState()?.style.id }),
-    onShare: () => track("prueba_compartida", { estilo: stageState()?.style.id }),
+    onShare: (info) => track("prueba_compartida", { estilo: stageState()?.style.id, fotos: info?.fotos ?? 0 }),
   });
 
   // Guardar la prueba (el email se pide al final, ver send.js). Cada email es un contacto; si
@@ -136,10 +137,15 @@ async function start() {
   const pick = (id) => available.find((s) => s.id === id);
   const shared = weddingFromHash();
   if (shared) {
-    // Enlace que les ha pasado su pareja (#boda=…): directos a su web, con fotos de ejemplo.
+    // Enlace que les ha pasado su pareja (#boda=…): directos a su web, con sus fotos si las
+    // compartió (y siguen guardadas: 30 días) o con las de ejemplo.
     history.replaceState(null, "", location.pathname + location.search);
-    track("prueba_abierta_compartida", { estilo: shared.style });
+    track("prueba_abierta_compartida", { estilo: shared.style, fotos: shared.photosId ? "si" : "no" });
     setupPricing.prefill(shared.wedding);
+    if (shared.photosId) {
+      try { shared.wedding.photos = (await loadSharePhotos(shared.photosId)).photos; }
+      catch (e) { console.error("[WeddingWebs] fotos del enlace:", e); }
+    }
     try { await prepareStage(shared.wedding, pick(shared.style) || available[0]); openStage(); scheduleSaveNudge(30000); }
     catch (e) { console.error("[WeddingWebs] enlace compartido:", e); }
   } else if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);

@@ -80,6 +80,48 @@ begin
 end $$;
 reset role;
 
+-- Fotos de pruebas compartidas con la pareja: subir solo al principio, verlas 30 días, borrarlas.
+set local role service_role;
+do $$
+begin
+  perform public.api_share_create('AAAAAAAAAAAAAAAAAAAAAA', 3);
+  assert public.api_share_upload_ok('AAAAAAAAAAAAAAAAAAAAAA', 2) and not public.api_share_upload_ok('AAAAAAAAAAAAAAAAAAAAAA', 3),
+    'FALLO: fotos que se pueden subir';
+  assert not public.api_share_upload_ok('BBBBBBBBBBBBBBBBBBBBBB', 0), 'FALLO: id que no existe';
+  assert public.api_share_get('AAAAAAAAAAAAAAAAAAAAAA') = 3, 'FALLO: ver la prueba compartida';
+  begin perform public.api_share_create('corto', 1); assert false, 'FALLO: id corto'; exception when check_violation then null; end;
+end $$;
+reset role;
+update public.trial_shares set created_at = now() - interval '20 minutes' where id = 'AAAAAAAAAAAAAAAAAAAAAA';
+set local role service_role;
+do $$
+begin
+  assert not public.api_share_upload_ok('AAAAAAAAAAAAAAAAAAAAAA', 0), 'FALLO: subida pasados 15 minutos';
+  assert not exists (select 1 from public.api_shares_expired() where id = 'AAAAAAAAAAAAAAAAAAAAAA'), 'FALLO: caducada antes de tiempo';
+end $$;
+reset role;
+update public.trial_shares set created_at = now() - interval '31 days' where id = 'AAAAAAAAAAAAAAAAAAAAAA';
+set local role service_role;
+do $$
+begin
+  assert public.api_share_get('AAAAAAAAAAAAAAAAAAAAAA') is null, 'FALLO: se ve después de 30 días';
+  assert exists (select 1 from public.api_shares_expired() where id = 'AAAAAAAAAAAAAAAAAAAAAA' and photos = 3), 'FALLO: para borrar';
+  assert public.api_shares_deleted(array['AAAAAAAAAAAAAAAAAAAAAA']) = 1, 'FALLO: marcar borrada';
+  assert not exists (select 1 from public.api_shares_expired() where id = 'AAAAAAAAAAAAAAAAAAAAAA'), 'FALLO: sigue para borrar';
+  raise notice 'OK fotos de pruebas compartidas (15 minutos para subir, 30 días para verlas)';
+end $$;
+reset role;
+set local role anon;
+do $$
+begin
+  begin perform 1 from public.trial_shares; assert false, 'FALLO: anon lee las pruebas compartidas';
+  exception when insufficient_privilege then null; end;
+  begin perform public.api_share_get('AAAAAAAAAAAAAAAAAAAAAA'); assert false, 'FALLO: anon llama a api_share_get';
+  exception when insufficient_privilege then null; end;
+  raise notice 'OK pruebas compartidas cerradas al navegador';
+end $$;
+reset role;
+
 -- Panel (como el dueño)
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';

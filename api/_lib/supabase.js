@@ -64,3 +64,27 @@ export const rpcAs = (token, name, args = {}) => request(`/rest/v1/rpc/${name}`,
 
 // API de administración de usuarios de Supabase Auth (solo servidor).
 export const authAdmin = (path, body) => request(`/auth/v1/admin/${path}`, { method: "POST", body });
+
+// Supabase Storage con la clave secreta (solo servidor): subir bytes, firmar enlaces y borrar.
+// body: bytes (Buffer/Uint8Array, con contentType) o un objeto que se manda como JSON.
+export async function storage(path, { method = "GET", body, contentType, extra = {}, timeoutMs = 15000 } = {}) {
+  const { url, serviceKey } = config();
+  if (!url || !serviceKey) throw new SupabaseError("Supabase no está configurado (SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY).", 503);
+  const raw = body instanceof Uint8Array;
+  const h = headers(serviceKey, extra);
+  if (raw) h["Content-Type"] = contentType || "application/octet-stream";
+  const res = await fetch(`${url}/storage/v1${path}`, {
+    method,
+    headers: h,
+    body: body === undefined ? undefined : raw ? body : JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  if (!res.ok) throw new SupabaseError(data?.message || data?.error || `Storage respondió ${res.status}`, res.status, data);
+  return data;
+}
+
+// Dirección completa de una ruta de Storage que devuelve la API (p. ej. un enlace firmado "/object/sign/…").
+export const storageUrl = (rel) => `${config().url}/storage/v1${rel.startsWith("/") ? rel : `/${rel}`}`;

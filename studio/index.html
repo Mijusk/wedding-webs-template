@@ -459,9 +459,10 @@
     </div>
     <div class="share-pop" id="share-pop" role="dialog" aria-labelledby="share-title" hidden>
       <p class="share-pop__title" id="share-title">Enseñádsela a vuestra pareja</p>
-      <p class="share-pop__note">Un enlace con vuestros nombres, la fecha y el estilo. Las fotos no viajan: solo están en este navegador.</p>
+      <p class="share-pop__note" id="share-note" role="status">Un enlace con vuestros nombres, la fecha, el lugar y el estilo.</p>
       <input class="share-pop__url" id="share-url" type="text" readonly aria-label="Enlace para compartir">
       <div class="share-pop__actions">
+        <button class="btn btn--small" type="button" id="share-native" hidden>Compartir…</button>
         <a class="btn btn--small" id="share-wa" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
         <button class="btn btn--small btn--ghost" type="button" id="share-copy">Copiar enlace</button>
       </div>
