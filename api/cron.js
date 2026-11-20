@@ -1,7 +1,8 @@
 // /api/cron  ·  lo llama Vercel Cron cada mañana (vercel.json > crons) y hace:
 //   · el resumen de respuestas de cada pareja (diario, o semanal los lunes);
-//   · las automatizaciones que toquen (emails, tareas y retención de datos; Panel › Automatizaciones).
-// ?tarea=resumen o ?tarea=automatizaciones para hacer solo una parte.
+//   · las automatizaciones que toquen (emails, tareas y retención de datos; Panel › Automatizaciones);
+//   · el borrado de las fotos de pruebas compartidas que ya tienen 30 días (api/compartir.js).
+// ?tarea=resumen, ?tarea=automatizaciones o ?tarea=fotos para hacer solo una parte.
 //
 // Protegido con CRON_SECRET: Vercel lo envía solo como "Authorization: Bearer <CRON_SECRET>".
 // El panel también puede lanzar las automatizaciones («Revisar ahora»), con la sesión de un administrador.
@@ -11,12 +12,13 @@ import { sendEmail } from "./_lib/avisos.js";
 import { digestEmail } from "./_lib/emails.js";
 import { callerToken } from "./_lib/acceso.js";
 import { runDue } from "./_lib/automatizaciones.js";
+import { deleteExpiredShares } from "./_lib/compartidas.js";
 
 export default async function handler(req, res) {
   if (!isConfigured()) return sendJson(res, 503, { ok: false, error: "no_configurado" });
   const secret = process.env.CRON_SECRET;
   const tarea = new URL(req.url, "http://x").searchParams.get("tarea") || "todo";
-  if (!["todo", "resumen", "automatizaciones"].includes(tarea)) return sendJson(res, 400, { ok: false, error: "tarea" });
+  if (!["todo", "resumen", "automatizaciones", "fotos"].includes(tarea)) return sendJson(res, 400, { ok: false, error: "tarea" });
 
   // Desde el panel: solo administradores, solo automatizaciones, y una vez por minuto.
   if (!(secret && req.headers.authorization === `Bearer ${secret}`)) {
@@ -35,8 +37,12 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { ok: true, repetida: true });
   }
   const out = { ok: true };
-  if (tarea !== "automatizaciones") out.resumen = await digests(req);
-  if (tarea !== "resumen") {
+  if (tarea === "todo" || tarea === "resumen") out.resumen = await digests(req);
+  if (tarea === "todo" || tarea === "fotos") {
+    try { out.fotos = await deleteExpiredShares(); }
+    catch (e) { console.error("fotos compartidas", e.message); out.fotos = { error: e.message }; }
+  }
+  if (tarea === "todo" || tarea === "automatizaciones") {
     try { out.automatizaciones = await runDue(origin(req)); }
     catch (e) { console.error("automatizaciones", e.message); out.automatizaciones = { error: e.message }; }
   }

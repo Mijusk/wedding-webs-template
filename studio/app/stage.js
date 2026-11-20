@@ -1,5 +1,6 @@
 import { $, esc, sleep, syncScrollLock } from "./util.js";
 import { showInFrame } from "./preview.js";
+import { uploadSharePhotos } from "./share-photos.js";
 
 // Pantalla de resultado: la web a tamaño real, con cambio de estilo instantáneo y secciones que
 // se encienden y apagan al momento.
@@ -257,38 +258,80 @@ function renderGuests(fresh) {
     </li>`).join("");
 }
 
-// «Enseñádsela a vuestra pareja»: un enlace con sus datos (sin fotos) en el #, que no llega a
-// ningún servidor. En el móvil, el menú de compartir del sistema; si no, WhatsApp o copiar.
+// «Enseñádsela a vuestra pareja»: un enlace con sus datos en el # (no llega a ningún servidor).
+// Si han puesto fotos, al pulsar se suben en privado (se borran solas a los 30 días) y el enlace
+// lleva su id. En el móvil, el menú de compartir del sistema; si no, WhatsApp o copiar.
+const NOTE_PLAIN = "Un enlace con vuestros nombres, la fecha, el lugar y el estilo.";
+const NOTE_PHOTOS = "Con vuestras fotos. Las guardamos en privado solo para este enlace y se borran solas a los 30 días.";
+let sharing = false;
+
 function setupShare() {
   $("#stage-share").addEventListener("click", async () => {
-    const url = shareUrl();
-    const [a, b] = state.wedding.couple;
+    if (sharing) return;
+    const w = state.wedding;
+    const photos = Array.isArray(w.photos) ? w.photos : [];
+    const [a, b] = w.couple;
     const text = `Mira cómo quedaría nuestra web de boda, ${a} y ${b}:`;
-    ctx.onShare?.();
-    if (navigator.share && matchMedia("(pointer: coarse)").matches) {
-      try { await navigator.share({ title: `${a} & ${b}`, text, url }); return; }
-      catch (e) { if (e?.name === "AbortError") return; }
+    ctx.onShare?.({ fotos: photos.length });
+    const native = Boolean(navigator.share) && matchMedia("(pointer: coarse)").matches;
+    if (!photos.length) {
+      const url = shareUrl();
+      if (native) {
+        try { await navigator.share({ title: `${a} & ${b}`, text, url }); return; }
+        catch (e) { if (e?.name === "AbortError") return; }
+      }
+      return showShare({ url, text, note: NOTE_PLAIN, native: false });
     }
-    $("#share-wa").href = `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
-    $("#share-copy").textContent = "Copiar enlace";
-    $("#share-url").value = url;
-    toggleSectionsPanel(false);
-    $("#share-pop").hidden = false;
-    $("#share-wa").focus();
+    // Con fotos: primero se suben (unos segundos), con el progreso en la propia ventanita.
+    sharing = true;
+    showShare({ url: "", text, note: `Subiendo vuestras fotos para que vuestra pareja las vea… 0 de ${photos.length}`, busy: true });
+    try {
+      const id = await uploadSharePhotos(photos, (done, total) => {
+        $("#share-note").textContent = `Subiendo vuestras fotos para que vuestra pareja las vea… ${done} de ${total}`;
+      });
+      if (!$("#share-pop").hidden) showShare({ url: shareUrl(id), text, note: NOTE_PHOTOS, native });
+    } catch (e) {
+      console.error("[WeddingWebs] fotos del enlace:", e);
+      if (!$("#share-pop").hidden) showShare({ url: shareUrl(), text, native: false,
+        note: "No hemos podido subir las fotos (¿falla la conexión?). Este enlace va con fotos de ejemplo: cerrad y volved a pulsar «Compartir» para intentarlo otra vez." });
+    } finally { sharing = false; }
   });
   $("#share-copy").addEventListener("click", async () => {
     const input = $("#share-url");
     try { await navigator.clipboard.writeText(input.value); $("#share-copy").textContent = "¡Copiado!"; }
     catch { input.focus(); input.select(); $("#share-copy").textContent = "Copiadlo de arriba"; }
   });
+  $("#share-native").addEventListener("click", async () => {
+    const [a, b] = state.wedding.couple;
+    try { await navigator.share({ title: `${a} & ${b}`, text: $("#share-native").dataset.text, url: $("#share-url").value }); }
+    catch { /* cancelado: siguen teniendo WhatsApp y copiar */ }
+  });
   $("#share-close").addEventListener("click", closeShare);
+}
+
+function showShare({ url, text, note, busy = false, native = false }) {
+  const pop = $("#share-pop");
+  $("#share-note").textContent = note;
+  $("#share-url").value = url;
+  $("#share-url").hidden = busy;
+  pop.querySelector(".share-pop__actions").hidden = busy;
+  pop.classList.toggle("is-busy", busy);
+  $("#share-native").hidden = !native;
+  $("#share-native").dataset.text = text;
+  $("#share-wa").href = `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
+  $("#share-copy").textContent = "Copiar enlace";
+  const first = !pop.hidden;
+  toggleSectionsPanel(false);
+  pop.hidden = false;
+  if (!busy) (native ? $("#share-native") : $("#share-wa")).focus();
+  else if (!first) $("#share-close").focus();
 }
 
 function closeShare() { $("#share-pop").hidden = true; }
 
-function shareUrl() {
+function shareUrl(photosId) {
   const w = state.wedding;
-  const data = { c: w.couple, d: w.date, t: w.time, v: w.venue, ci: w.city, s: state.style.id };
+  const data = { c: w.couple, d: w.date, t: w.time, v: w.venue, ci: w.city, s: state.style.id, ...(photosId ? { f: photosId } : {}) };
   const bytes = new TextEncoder().encode(JSON.stringify(data));
   const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   return `${location.origin}${location.pathname}#boda=${b64}`;
@@ -304,6 +347,7 @@ export function weddingFromHash(hash = location.hash) {
     const str = (v, n = 80) => String(v ?? "").trim().slice(0, n);
     const couple = Array.isArray(d.c) ? d.c.slice(0, 2).map((x) => str(x, 24)) : [];
     if (couple.length !== 2 || !couple[0] || !couple[1] || !/^\d{4}-\d{2}-\d{2}$/.test(d.d) || !/^\d{2}:\d{2}$/.test(d.t) || !str(d.v)) return null;
-    return { wedding: { couple, date: d.d, time: d.t, venue: str(d.v), city: str(d.ci), photos: [], shared: true }, style: str(d.s, 40) };
+    const photosId = /^[A-Za-z0-9_-]{22}$/.test(d.f || "") ? d.f : "";
+    return { wedding: { couple, date: d.d, time: d.t, venue: str(d.v), city: str(d.ci), photos: [], shared: true }, style: str(d.s, 40), photosId };
   } catch { return null; }
 }

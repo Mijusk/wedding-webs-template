@@ -523,6 +523,10 @@ body.has-nudge { padding-bottom: 64px; }
 .share-pop__note { font-size: 13px; color: var(--muted); }
 .share-pop__url { width: 100%; font: 13px var(--font-body); color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; }
 .share-pop__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.share-pop.is-busy .share-pop__note::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px;
+  border: 2px solid var(--line); border-top-color: var(--accent, currentColor); border-radius: 50%; animation: share-spin .8s linear infinite; }
+@keyframes share-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .share-pop.is-busy .share-pop__note::before { animation: none; } }
 
 @media (max-width: 560px) {
   /* En el móvil manda la barra de abajo (deslizar): la fila de estilos de arriba deja sitio a la web */
