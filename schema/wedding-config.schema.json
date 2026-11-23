@@ -136,6 +136,7 @@
         }
       }
     },
+    "credit": { "type": "boolean", "title": "Pie «Hecha con WeddingWebs» al final de la web", "default": true },
     "share": {
       "type": "object",
       "title": "Tarjeta para WhatsApp e icono",

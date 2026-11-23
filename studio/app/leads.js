@@ -10,7 +10,10 @@ import { consentForLead } from "./consent.js";
 const KEY = "studio-leads-demo";
 
 export async function saveLead(lead, contactConfig = {}) {
-  const payload = { ...lead, attribution: attribution(), cookieConsent: consentForLead(), page: location.pathname, sentAt: new Date().toISOString() };
+  // eventId: el mismo número viaja al píxel (conversion) y a la API de conversiones del servidor,
+  // para que Meta cuente el lead una sola vez.
+  const eventId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+  const payload = { ...lead, eventId, attribution: attribution(), cookieConsent: consentForLead(), page: location.pathname, sentAt: new Date().toISOString() };
 
   if (contactConfig.endpoint) {
     try {

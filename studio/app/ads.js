@@ -71,8 +71,9 @@ function addScript(src) {
 }
 
 // Conversiones. type: "lead" (envían el formulario «Probar con vuestra boda») o "reserva".
-// data: { estilo, tarifa, valor } sin datos personales.
-export function conversion(type, data = {}) {
+// data: { estilo, tarifa, valor } sin datos personales. eventId: el mismo que se mandó con el lead al
+// servidor, que lo reenvía a Meta por la API de conversiones; con él Meta no lo cuenta dos veces.
+export function conversion(type, data = {}, { eventId } = {}) {
   if (!DEFAULT_EVENTS[type]) return;
   const ev = { ...DEFAULT_EVENTS[type], ...cfg.events?.[type] };
   const clean = Object.fromEntries(Object.entries(data).filter(([, v]) => v != null && v !== ""));
@@ -80,7 +81,7 @@ export function conversion(type, data = {}) {
   if (!on()) return;
   try {
     const value = typeof clean.valor === "number" ? { value: clean.valor, currency: "EUR" } : {};
-    if (loaded.meta && ev.meta) window.fbq?.("track", ev.meta, { content_name: clean.tarifa || clean.estilo, ...value });
+    if (loaded.meta && ev.meta) window.fbq?.("track", ev.meta, { content_name: clean.tarifa || clean.estilo, ...value }, eventId ? { eventID: eventId } : undefined);
     const label = String(ev.googleLabel || "").trim();
     if (loaded.google && label) window.gtag?.("event", "conversion", { send_to: `${googleId()}/${label}`, ...value });
   } catch (e) { console.error("[WeddingWebs] anuncios:", e); }

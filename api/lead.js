@@ -9,6 +9,7 @@ import { rpc, isConfigured } from "./_lib/supabase.js";
 import { sendJson, sendHtml, readJson, queryOf, clientIp, ipHash, origin, forwardToSheet, HttpError, esc } from "./_lib/http.js";
 import { notifyLead } from "./_lib/avisos.js";
 import { runEvent, unsubscribeEmail } from "./_lib/automatizaciones.js";
+import { sendMetaEvent } from "./_lib/meta.js";
 
 const FIELDS = ["type", "email", "name", "nameA", "nameB", "weddingDate", "venue", "city", "style", "photos", "tier",
   "phone", "message", "wedding", "sections", "consent", "consentText", "page", "attribution", "cookieConsent", "sentAt"];
@@ -72,6 +73,14 @@ export default async function handler(req, res) {
     }
     // Bienvenida con su web guardada (si está activa en Panel › Automatizaciones).
     if (r.is_new && r.type === "prueba") tasks.push(runEvent("lead_bienvenida", r.lead_id, origin(req)));
+    // A Meta desde el servidor (API de conversiones), con el mismo eventID que el píxel del navegador.
+    // Solo con el permiso de publicidad y si están META_CAPI_TOKEN y el píxel (ver _lib/meta.js).
+    if ((r.is_new && r.type === "prueba") || r.type === "reserva") {
+      tasks.push(sendMetaEvent({
+        kind: r.type === "reserva" ? "reserva" : "lead", eventId: body.eventId, payload,
+        ip: ipRaw, userAgent: String(req.headers["user-agent"] || "").slice(0, 300), cookies: req.headers.cookie, siteOrigin: origin(req),
+      }));
+    }
     await Promise.all(tasks);
     return sendJson(res, 200, { ok: true });
   } catch (e) {

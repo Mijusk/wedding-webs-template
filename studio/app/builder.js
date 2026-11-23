@@ -1,6 +1,7 @@
 import { $, esc, sleep, syncScrollLock } from "./util.js";
 import { pickRandom } from "./demo.js";
 import { showInFrame, fitScaled } from "./preview.js";
+import { track } from "./analytics.js";
 
 // Generador paso a paso: una pregunta por pantalla y, al lado, su web cambiando con cada dato
 // (lo que aún no han puesto sale del ejemplo de la plantilla). Sin email: se pide al final, si
@@ -14,6 +15,9 @@ let photos = []; // data URLs ya reducidas
 let opener = null;
 let step = 0;
 let ctx = null;
+// Embudo del generador: en Umami, el evento «paso_generador» sale una vez por paso cada vez que se
+// abre, con { paso, numero }. Comparando cuántos llegan a cada número se ve dónde abandona la gente.
+let stepsSeen = new Set();
 
 export function setupBuilder(context) {
   ctx = context;
@@ -174,6 +178,8 @@ function scrollPreview(behavior = "smooth") {
 // Muestra el paso i: barra, contador, botones y el foco en su primer campo.
 function go(i) {
   step = Math.max(0, Math.min(STEPS.length - 1, i));
+  // Los pasos que se saltan (los nombres ya puestos en la portada) cuentan como hechos.
+  for (let k = 0; k <= step; k++) if (!stepsSeen.has(k)) { stepsSeen.add(k); track("paso_generador", { paso: STEPS[k], numero: k + 1 }); }
   document.querySelectorAll("#builder .wstep").forEach((s) => { s.hidden = s.dataset.step !== STEPS[step]; });
   $("#w-bar").style.width = `${((step + 1) / STEPS.length) * 100}%`;
   $("#w-count").textContent = `Paso ${step + 1} de ${STEPS.length}`;
@@ -243,6 +249,7 @@ export function openBuilder(styleId, { names } = {}) {
   $("#b-date").max = inYears(4);
   $("#builder").hidden = false;
   syncScrollLock();
+  stepsSeen = new Set();
   const d = data();
   go(names && d.nameA?.trim() && d.nameB?.trim() ? 1 : 0);
   livePreview(0);

@@ -15,7 +15,7 @@
 // La elección se guarda en localStorage («ww-consent») y viaja con el lead para dejar constancia
 // en la tabla consents (lo elegido en cada categoría, el texto que vieron, fecha e IP).
 // Subir VERSION hace que quien ya eligió vuelva a ver el aviso (p. ej. si cambian las categorías).
-export const VERSION = 2;
+export const VERSION = 3; // v3: la publicidad incluye el email o teléfono cifrado a Meta
 const KEY = "ww-consent";
 const MAX_AGE_DAYS = 365; // la AEPD considera buena práctica no pasar de 24 meses
 const listeners = [];
@@ -31,7 +31,8 @@ export const CATEGORIES = [
     id: "publicidad",
     name: "Publicidad y medición de anuncios",
     text: "Recordamos durante 90 días de qué anuncio o web llegasteis la primera vez, para saber qué publicidad nos trae parejas. "
-      + "Si anunciamos en Instagram, Facebook o Google, también avisamos a Meta o Google de que la visita vino de su anuncio (con sus cookies).",
+      + "Si anunciamos en Instagram, Facebook o Google, también avisamos a Meta o Google de que la visita vino de su anuncio (con sus cookies). "
+      + "Si además nos dejáis vuestro email o teléfono, a Meta se lo mandamos cifrado, para que sepa si visteis su anuncio.",
   },
 ];
 
