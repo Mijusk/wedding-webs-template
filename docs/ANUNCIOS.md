@@ -68,10 +68,49 @@ Haz commit, súbelo y espera a la vista previa de Vercel.
 6. Vuelve a «Configurar cookies», apaga la publicidad y comprueba en F12 › Aplicación › Cookies que
    desaparecen `_fbp`, `_fbc`, `_gcl_au` y `_gcl_aw`.
 
-## 3. Lo que queda para más adelante
+## 3. API de conversiones de Meta (desde el servidor)
 
-- **API de conversiones** (enviar los eventos también desde el servidor, más fiable con
-  bloqueadores): no está hecha. Iría en `api/lead.js` y `api/pedido.js`.
+Cuando una pareja guarda su prueba (lead nuevo) o envía una reserva, `api/lead.js` manda también el
+evento a Meta desde el servidor (`api/_lib/meta.js`). Meta lo junta con el del píxel gracias al
+mismo `eventID` y lo cuenta una sola vez. Sirve para los que tienen bloqueador de anuncios o un
+navegador que corta el píxel, y Meta empareja mejor a la persona con el anuncio que vio.
+
+- Solo se manda con el permiso de **Publicidad** del aviso de cookies (el mismo que el píxel).
+- Sale: email y teléfono **cifrados** (SHA-256), IP, navegador, cookies `_fbp`/`_fbc`, la página y
+  la tarifa. Nunca nombres, fecha ni lugar. Lo explica la página legal.
+- Las reservas que pasan directamente a pagar con Stripe (`/api/pedido`) todavía no se mandan
+  desde el servidor: solo las ve el píxel.
+
+Para activarla, en Vercel › Settings › Environment Variables (Production y Preview):
+
+| Variable | De dónde sale |
+| --- | --- |
+| `META_CAPI_TOKEN` | Administrador de eventos › tu píxel › Configuración › API de conversiones › «Generar identificador de acceso». Es secreta: solo en Vercel, nunca en el código ni en chats. |
+| `META_PIXEL_ID` | Opcional: si no está, usa `studio.json › ads.metaPixelId`. |
+| `META_TEST_EVENT_CODE` | Opcional, solo para probar: el código de «Probar eventos» (p. ej. `TEST12345`). Quítala después. |
+
+Comprobar: con `META_TEST_EVENT_CODE` puesta, abre la web, acepta la publicidad y guarda una
+prueba con tu email. En «Probar eventos» tiene que salir `Lead` dos veces (Navegador y Servidor)
+marcado como «Desduplicado».
+
+## 4. Dónde abandona la gente (embudo del generador)
+
+Con la analítica aceptada, cada paso del generador manda a Umami el evento `paso_generador` con
+`paso` (nombres, fecha, lugar, estilo, fotos) y `numero` (1 a 5), una vez por paso cada vez que
+se abre. En Umami › Eventos › `paso_generador`, filtra por `numero`: el salto más grande entre un
+número y el siguiente es el paso que hay que mejorar. Después vienen `prueba_generada`,
+`guardar_abierto` y `lead_prueba`.
+
+## 5. Pie «Hecha con WeddingWebs» en las webs de boda
+
+Cada web publicada en `/b/<boda>` lleva al final un pie discreto: «Web hecha con WeddingWebs ·
+Haced la vuestra», que enlaza al escaparate con `utm_source=web-boda&utm_campaign=<boda>`. En el
+CRM se ve qué boda trajo a cada pareja nueva. Para quitarlo en una boda (si una pareja de Atelier
+lo pide), pon `"credit": false` en su config.
+
+## 6. Lo que queda para más adelante
+
+- Mandar también la compra pagada con Stripe (`Purchase`) desde el webhook.
 - Si algún día se quiere **remarketing** (enseñar anuncios a quien ya visitó la web), hay que
   añadirlo al texto del aviso de cookies (`studio/app/consent.js`, subiendo `VERSION`) y a la
   página legal antes de activarlo.

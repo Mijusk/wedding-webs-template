@@ -96,9 +96,9 @@ export function setupPricing({ studio, templateUrl }) {
     if (tierOf()?.checkout) return pay(d, btn);
     btn.disabled = true; btn.textContent = "Enviando…";
     try {
-      const { simulated } = await saveLead({ type: "reserva", ...d, wedding: chosen ? withoutPhotos(chosen.config) : null }, studio.contact);
+      const { simulated, payload } = await saveLead({ type: "reserva", ...d, wedding: chosen ? withoutPhotos(chosen.config) : null }, studio.contact);
       const tier = tiers.find((t) => t.id === d.tier);
-      conversion("reserva", { tarifa: tier.id, estilo: d.style, valor: tier.price[0] });
+      conversion("reserva", { tarifa: tier.id, estilo: d.style, valor: tier.price[0] }, { eventId: payload.eventId });
       form.hidden = true;
       $("#contact-thanks").innerHTML = `
         <h3>Recibido, gracias</h3>

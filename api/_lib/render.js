@@ -83,6 +83,12 @@ const previewBadge = (label) => `<div role="note" style="position:fixed;top:10px
   font:600 12px/1.2 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:rgba(20,20,20,.82);color:#fff;
   padding:7px 12px;border-radius:999px;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.2)">${label} · aún no es la web publicada</div>`;
 
+export function creditFooter(origin, slug) {
+  const url = `${origin}/studio/?utm_source=web-boda&utm_medium=referral&utm_campaign=${encodeURIComponent(slug || "boda")}`;
+  return `<p class="ww-credit" style="margin:0;padding:22px 16px 28px;text-align:center;font:400 12px/1.5 system-ui,-apple-system,sans-serif;letter-spacing:.02em;opacity:.62">
+  <a href="${esc(url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">Web hecha con <span style="text-decoration:underline;text-underline-offset:2px">WeddingWebs</span> · Haced la vuestra</a></p>`;
+}
+
 export async function renderWedding(data, { origin, pageUrl }) {
   const template = data.template;
   if (!templateExists(template)) throw new Error(`Plantilla desconocida: ${template}`);
@@ -114,6 +120,10 @@ export async function renderWedding(data, { origin, pageUrl }) {
     : html.replace(/<\/head>/i, () => `${tags}\n</head>`);
   html = html.replace(/<\/head>/i, () =>
     `<script type="application/json" id="wedding-config">${jsonForHtml(config)}</script>\n</head>`);
+  // Pie «Hecha con WeddingWebs» al final de cada web: cada boda la abren decenas de invitados y
+  // algunos se casan pronto. El enlace lleva la UTM de esta boda, así se ve en el CRM qué web trajo a quién.
+  // Se quita con "credit": false en el config de la boda (p. ej. si una pareja de Atelier lo pide).
+  if (config.credit !== false) html = html.replace(/<\/body>(?![\s\S]*<\/body>)/i, () => `${creditFooter(origin, data.slug)}\n</body>`);
   if (data.draft) {
     const badge = previewBadge(data.proposal ? `Propuesta ${Number(data.proposal)}` : "Vista previa");
     html = html.replace(/<\/body>/i, () => `${badge}\n</body>`);

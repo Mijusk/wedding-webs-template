@@ -69,9 +69,9 @@ async function start() {
   // después editan los datos o cambian de estilo, se actualiza su fila sin volver a preguntar.
   let saved = null; // { phone, email } de la última vez que la guardaron
   const saveTrial = async (contact, { wedding, style }) => {
-    await saveLead(leadFromTrial({ ...wedding, ...contact }, style), studio.contact);
+    const { payload } = await saveLead(leadFromTrial({ ...wedding, ...contact }, style), studio.contact);
     const key = `studio-lead:${(contact.phone || contact.email).replace(/\s+/g, "").toLowerCase()}`;
-    if (!session.get(key)) { session.set(key, "1"); conversion("lead", { estilo: style.id }); }
+    if (!session.get(key)) { session.set(key, "1"); conversion("lead", { estilo: style.id }, { eventId: payload.eventId }); }
     saved = contact;
     setupPricing.prefill({ ...wedding, ...contact });
   };
