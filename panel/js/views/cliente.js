@@ -195,7 +195,7 @@ export default async function cliente(ctx) {
     const cents = Math.round(Number(String(data.get("amount")).replace(",", ".")) * 100);
     if (!Number.isFinite(cents) || cents <= 0) return toast("El importe no es válido.", { error: true });
     try {
-      const r = await api("/api/pedido", { accion: "pago", order_id: o.id, importe: cents, forma: data.get("provider"), fecha: new Date(data.get("paid_at")).toISOString() });
+      const r = await api("/api/pedido", { accion: "pago", order_id: o.id, importe: cents, forma: data.get("provider"), fecha: data.get("paid_at") ? new Date(data.get("paid_at")).toISOString() : null });
       toast(r.became_paid
         ? `Pago apuntado: pedido pagado, entrega el ${fmtDate(r.promised)}.${r.invoice?.ok ? ` Factura ${r.invoice.number}.` : r.invoice ? " La factura no se ha podido hacer: mira tus tareas." : ""}`
         : "Pago apuntado.", { timeout: 7000 });
