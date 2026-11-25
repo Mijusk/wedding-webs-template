@@ -100,7 +100,7 @@ export function refundEmail({ names, number, amountCents, invoiceNumber, trackin
   ].filter(Boolean);
   return {
     subject: `Devolución de ${eur(amountCents)} · pedido ${number}`,
-    text: `${lines.join("\n\n")}\n\n${trackingUrl}\n\nWeddingWebs`,
+    text: [...lines, trackingUrl, "WeddingWebs"].filter(Boolean).join("\n\n"),
     html: html(lines.map(esc), trackingUrl ? { url: trackingUrl, label: "Ver el pedido" } : null),
   };
 }

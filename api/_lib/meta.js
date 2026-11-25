@@ -43,7 +43,8 @@ export function normalizePhone(phone) {
 
 function cookie(header, name) {
   const m = String(header || "").match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
-  return m ? decodeURIComponent(m[1]) : "";
+  if (!m) return "";
+  try { return decodeURIComponent(m[1]); } catch { return m[1]; } // un % suelto no puede tumbar el envío
 }
 
 // Permiso de publicidad del aviso de cookies (v1: { granted }; v2: { choices: { publicidad } }).
@@ -103,16 +104,16 @@ async function adsConfig() {
 export async function sendMetaEvent({ kind, eventId, payload, ip, userAgent, cookies, siteOrigin }) {
   const token = process.env.META_CAPI_TOKEN;
   if (!token) return { sent: false, reason: "sin_token" };
-  const { ads, tiers } = await adsConfig();
-  const pixel = String(process.env.META_PIXEL_ID || ads.metaPixelId || "").trim();
-  if (!/^\d{6,20}$/.test(pixel)) return { sent: false, reason: "sin_pixel" };
-  const tier = kind === "reserva" ? tiers.find((t) => t.id === payload?.tier) : null;
-  const value = Array.isArray(tier?.price) ? Number(tier.price[0]) : undefined;
-  const event = buildMetaEvent({ kind, eventId, payload, ip, userAgent, cookies, siteOrigin, value, eventName: ads.events?.[kind]?.meta });
-  if (!event) return { sent: false, reason: "sin_permiso" };
-  const body = { data: [event] };
-  if (process.env.META_TEST_EVENT_CODE) body.test_event_code = process.env.META_TEST_EVENT_CODE;
   try {
+    const { ads, tiers } = await adsConfig();
+    const pixel = String(process.env.META_PIXEL_ID || ads.metaPixelId || "").trim();
+    if (!/^\d{6,20}$/.test(pixel)) return { sent: false, reason: "sin_pixel" };
+    const tier = kind === "reserva" ? tiers.find((t) => t.id === payload?.tier) : null;
+    const value = Array.isArray(tier?.price) ? Number(tier.price[0]) : undefined;
+    const event = buildMetaEvent({ kind, eventId, payload, ip, userAgent, cookies, siteOrigin, value, eventName: ads.events?.[kind]?.meta });
+    if (!event) return { sent: false, reason: "sin_permiso" };
+    const body = { data: [event] };
+    if (process.env.META_TEST_EVENT_CODE) body.test_event_code = process.env.META_TEST_EVENT_CODE;
     const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION()}/${pixel}/events?access_token=${encodeURIComponent(token)}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(4000),
     });

@@ -40,6 +40,11 @@ test("reserva lleva el valor; fbc se rehace con el fbclid del anuncio", () => {
   assert.equal(ev.user_data.fbc, "fb.1.1800000000000.AbC123");
 });
 
+test("una cookie mal formada no rompe el envío", () => {
+  const e = buildMetaEvent({ kind: "lead", payload: { email: "ana@example.com", cookieConsent: { granted: true } }, cookies: "_fbp=fb.1.%E0%A4%A.2", siteOrigin: "https://x.es" });
+  assert.equal(e.user_data.fbp, "fb.1.%E0%A4%A.2");
+});
+
 test("normalización de teléfonos y emails", () => {
   assert.equal(normalizePhone("+34 612 34 56 78"), "34612345678");
   assert.equal(normalizePhone("0033 6 12 34 56 78"), "33612345678");

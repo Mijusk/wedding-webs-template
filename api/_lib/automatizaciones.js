@@ -13,6 +13,7 @@ import { renderTemplate } from "../../lib/email.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const MAX_PER_RUN = 150; // lo que no dé tiempo, al día siguiente (sigue dentro de su plazo)
+const MAX_MS = 35000;    // la función se corta a los 60 s: hay que dejar sitio a las tareas y al borrado de datos
 
 // Nombres de los estilos del escaparate (studio.json). Si no se puede leer: el id con mayúscula.
 let styles = null;
@@ -107,9 +108,13 @@ export async function sendItem(item, site) {
 }
 
 async function sendAll(items, site) {
-  const count = { enviados: 0, simulados: 0, fallidos: 0, repetidos: 0, pendientes: Math.max(items.length - MAX_PER_RUN, 0) };
+  const count = { enviados: 0, simulados: 0, fallidos: 0, repetidos: 0, pendientes: items.length };
+  const start = Date.now();
   for (const item of items.slice(0, MAX_PER_RUN)) {
-    const s = await sendItem(item, site);
+    if (Date.now() - start > MAX_MS) break;
+    // Si uno falla antes de reservarse, los demás siguen y ese se reintenta al día siguiente.
+    const s = await sendItem(item, site).catch((e) => { console.error("automatización", item.code, e.message); return "fallido"; });
+    count.pendientes--;
     if (s === "enviado") count.enviados++;
     else if (s === "simulado") count.simulados++;
     else if (s === "repetido") count.repetidos++;
@@ -119,9 +124,12 @@ async function sendAll(items, site) {
 }
 
 // Todo lo que toca hoy: emails, tareas y retención.
+// Si fallan los emails, las tareas y la retención se hacen igual.
 export async function runDue(site) {
-  const emails = await sendAll(await rpc("api_automation_due"), site);
+  let emails, error = null;
+  try { emails = await sendAll(await rpc("api_automation_due"), site); } catch (e) { error = e; }
   const sweep = await rpc("api_automation_sweep");
+  if (error) throw error;
   return { emails, ...sweep };
 }
 
