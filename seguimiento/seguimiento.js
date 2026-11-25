@@ -267,16 +267,18 @@ function bind(code, p, latest) {
     setTimeout(() => form.mensaje.focus({ preventScroll: true }), 300);
   });
 
+  // (e.currentTarget deja de existir tras un await: el botón se guarda antes.)
   $("[data-approve]")?.addEventListener("click", async (e) => {
-    const n = Number(e.currentTarget.dataset.approve);
+    const btn = e.currentTarget;
+    const n = Number(btn.dataset.approve);
     if (!confirm(`¿Aprobáis la propuesta ${n}? La publicaremos tal cual y os avisaremos.`)) return;
-    e.currentTarget.disabled = true;
+    btn.disabled = true;
     try {
       await api({ accion: "aprobar", c: code, propuesta: n });
       toast("¡Genial! Os avisamos en cuanto esté publicada.");
       start();
     } catch (ex) {
-      e.currentTarget.disabled = false;
+      btn.disabled = false;
       toast(ex.code === "propuesta" ? "Hay una propuesta más nueva: recargad la página." : "No se ha podido enviar. Probad otra vez.", { error: true });
     }
   });
@@ -301,8 +303,8 @@ function bind(code, p, latest) {
   });
 
   $("[data-panel]")?.addEventListener("click", async (e) => {
-    const msg = $("[data-panel-msg]");
-    e.currentTarget.disabled = true;
+    const btn = e.currentTarget, msg = $("[data-panel-msg]");
+    btn.disabled = true;
     try {
       const r = await api({ accion: "panel", c: code });
       const sent = r.enviados.filter((x) => x.status === "enviado").map((x) => x.email);
@@ -311,7 +313,7 @@ function bind(code, p, latest) {
     } catch (ex) {
       msg.textContent = ex.code === "demasiadas" ? "Ya os lo hemos mandado hace poco: mirad el email (y la carpeta de spam)." : "No se ha podido mandar. Probad otra vez en un rato.";
     }
-    e.currentTarget.disabled = false;
+    btn.disabled = false;
   });
 }
 
