@@ -8,6 +8,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+// En Windows, git puede dejar los archivos con finales de línea CRLF: no cuentan como cambios.
+const read = (path) => readFileSync(path, "utf8").replace(/\r\n/g, "\n");
 const dir = join(ROOT, "supabase/migrations");
 const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
 const out = [
@@ -15,11 +17,11 @@ const out = [
   "-- Generado por scripts/unir-migraciones.mjs a partir de supabase/migrations: no lo edites a mano.",
   "-- Cómo usarlo: Supabase > SQL Editor > New query > pega todo este archivo > Run. Ver docs/SUPABASE.md.",
   "",
-  ...files.map((f) => `-- ════════════════ ${f} ════════════════\n\n${readFileSync(join(dir, f), "utf8").trim()}\n`),
+  ...files.map((f) => `-- ════════════════ ${f} ════════════════\n\n${read(join(dir, f)).trim()}\n`),
 ].join("\n");
 const target = join(ROOT, "supabase/instalar.sql");
 if (process.argv.includes("--comprobar")) {
-  if (!existsSync(target) || readFileSync(target, "utf8") !== out) {
+  if (!existsSync(target) || read(target) !== out) {
     console.error("supabase/instalar.sql no está al día: ejecuta node scripts/unir-migraciones.mjs");
     process.exit(1);
   }
