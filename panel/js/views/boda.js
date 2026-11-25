@@ -339,10 +339,18 @@ export default async function boda(ctx) {
     const item = config.schedule[row.dataset.i];
     const v = e.target.value;
     if (v) item[e.target.dataset.s] = v; else if (e.target.dataset.s === "place") delete item.place;
-    config.schedule.sort((a, b) => (a.time < "06:00" ? "3" + a.time : a.time).localeCompare(b.time < "06:00" ? "3" + b.time : b.time));
     markDirty();
   });
-  schedBox.addEventListener("change", (e) => { if (e.target.dataset.s === "time") paintSchedule(); });
+  // Se ordena por hora al salir del programa (o al guardar), no mientras se teclea: repintar quita el foco.
+  function sortSchedule() {
+    const late = (t) => (t < "06:00" ? `3${t}` : t);
+    const next = [...(config.schedule || [])].sort((a, b) => late(a.time).localeCompare(late(b.time)));
+    if (next.every((s, i) => s === config.schedule[i])) return;
+    config.schedule = next;
+    paintSchedule();
+    refresh();
+  }
+  schedBox.addEventListener("focusout", (e) => { if (!schedBox.contains(e.relatedTarget)) sortSchedule(); });
   schedBox.addEventListener("click", (e) => {
     const b = e.target.closest("[data-del-s]");
     if (!b) return;
@@ -574,6 +582,7 @@ export default async function boda(ctx) {
 
   async function save({ quiet = false } = {}) {
     if (config.gifts?.iban) config.gifts.iban = formatIban(config.gifts.iban);
+    sortSchedule();
     const errs = validate(schema, config);
     if (errs.length) { showProblems(errs); return false; }
     problemsBox.hidden = true;
