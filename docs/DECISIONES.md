@@ -204,7 +204,7 @@ La baja y la web guardada van en `api/lead.js`, y el email «web publicada» en 
 
 ## Problemas encontrados que ya estaban en `main`
 
-- **La plantilla Clásica no se pinta** (estilos Olivar, Atardecer y Noche): `js/sections/hero.js` importa `longDate`, que no existe en `js/format.js`; además usa `t` sin definir y `js/main.js` no registra `story`, `gifts` ni `closing`. Parece un cambio a medias. No se ha tocado: hay que decidir cómo debía quedar.
+- **La plantilla Clásica no se pinta** (estilos Olivar, Atardecer y Noche): `js/sections/hero.js` importa `longDate`, que no existe en `js/format.js`; además usa `t` sin definir y `js/main.js` no registra `story`, `gifts` ni `closing`. Parece un cambio a medias. No se ha tocado: hay que decidir cómo debía quedar. **Resuelto:** volvió a la versión que funcionaba y, desde el 25/11/2026, también admite el RSVP ampliado.
 
 ## Pendiente de Luis
 
@@ -213,7 +213,7 @@ La baja y la web guardada van en `api/lead.js`, y el email «web publicada» en 
 3. Proveedor de facturación para Verifactu: tres opciones y mi recomendación en [FACTURACION.md](FACTURACION.md). No corre prisa.
 4. Dominio definitivo, y si las bodas van en ruta (`/b/…`) o en subdominio.
 5. Datos fiscales del vendedor (Panel › Ajustes) para la página legal y las facturas.
-6. Qué hacer con la Clásica.
+6. ~~Qué hacer con la Clásica.~~ Resuelto (ver arriba).
 7. ¿Cobro del 100 % por adelantado en todas las tarifas, o señal en A medida?
 8. ¿Valen las rondas de cambios de las condiciones (0 / las acordadas / 3)? Se cambian en Ajustes › Tarifas.
 9. Revisar los textos nuevos de condiciones y privacidad (`studio/legal.html`).
