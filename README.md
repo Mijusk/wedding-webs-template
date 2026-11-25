@@ -2,7 +2,7 @@
 
 Webs de boda configurables desde un único config. HTML, CSS y JS sin framework ni paso de build.
 
-Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 48 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
+Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 49 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
 
 | Documento | Para qué |
 | --- | --- |
@@ -84,6 +84,7 @@ No hay paso de build. Las plantillas y el escaparate también funcionan con `npx
 | `plantillas/terciopelo/` | Tema oscuro de terciopelo verde, tres velas que se encienden y tiemblan, foto en marco de oro y llamas en el programa.. Autocontenida |
 | `plantillas/grabado/` | Lámina a plumilla de la finca que se dibuja sola, foto como lámina numerada y tipografía Caslon de imprenta.. Autocontenida |
 | `plantillas/jornada/` | «Del día a la noche»: la foto dentro de los nombres que se abre al bajar, cielo que va del día a la noche con la puesta de sol real (`venue.lat/lon`; sin ellas, Madrid), historia de lado, programa a pantalla completa y galería en capas. Todo el movimiento en `js/motion.js`; con «reducir movimiento», quieta. Autocontenida |
+| `plantillas/mesa/` | «La mesa»: la boda como una mesa vista desde arriba. La invitación sobre el plato y, al bajar, se pone la mesa (cubiertos, copas, tarjeta del sitio con el nombre del invitado si entra por su enlace personal), las fotos caen sobre el mantel, el programa es el menú y el cierre se hace de noche con velas. Movimiento en `js/motion.js`, piezas en SVG en `js/props.js`; con «reducir movimiento», la mesa sale ya puesta. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |

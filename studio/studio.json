@@ -187,6 +187,10 @@
     "jornada": {
       "name": "Del día a la noche",
       "url": "../plantillas/jornada/"
+    },
+    "mesa": {
+      "name": "La mesa",
+      "url": "../plantillas/mesa/"
     }
   },
   "styles": [
@@ -213,6 +217,18 @@
         "#161b33"
       ],
       "description": "Bajar por la web es vivir el día: vuestra foto dentro de vuestros nombres, el cielo pasa del sol a las estrellas con la puesta de sol real de vuestra boda y las fotos flotan en capas. La más espectacular."
+    },
+    {
+      "id": "mesa",
+      "name": "La mesa",
+      "template": "mesa",
+      "theme": "mesa",
+      "status": "available",
+      "swatch": [
+        "#ebe5da",
+        "#55603f"
+      ],
+      "description": "Vuestra boda como una mesa vista desde arriba: al bajar se pone la mesa alrededor de la invitación, las fotos caen sobre el mantel, el programa es el menú y al final se encienden las velas. Con el enlace personal, cada invitado ve su nombre en la tarjeta de su sitio."
     },
     {
       "id": "minimal",
