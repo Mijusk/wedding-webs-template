@@ -53,6 +53,14 @@ function message(title, text) {
     <h1>${title}</h1><p class="muted">${text}</p></div></main>`);
 }
 
+function retry() {
+  message("Ahora mismo no podemos abrir vuestro panel", "Comprobad que tenéis internet y volved a intentarlo. No hace falta otro enlace.");
+  const btn = Object.assign(document.createElement("button"), { className: "btn btn--primary", type: "button", textContent: "Volver a intentarlo" });
+  btn.dataset.retry = "";
+  btn.addEventListener("click", () => { btn.disabled = true; enter(); });
+  $(".login__card").append(btn);
+}
+
 function showLogin(error = "") {
   app.removeAttribute("aria-busy");
   app.className = "";
@@ -100,6 +108,8 @@ async function enter() {
     await loadData();
   } catch (e) {
     if (e.status === 401) return showLogin();
+    // Sin conexión o con el servidor caído no se cierra la sesión: su enlace de acceso sirve una sola vez.
+    if (!(e.status >= 400 && e.status < 500 && e.status !== 429)) return retry();
     await supa.signOut().catch(() => {});
     return message("No encontramos vuestra boda", "Este email no tiene ninguna web de boda. Si creéis que es un error, escribid a WeddingWebs.");
   }
