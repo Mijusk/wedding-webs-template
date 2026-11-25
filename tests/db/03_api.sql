@@ -35,7 +35,7 @@ begin
   -- Leads del escaparate: nuevo, repetición y atribución.
   r := public.api_submit_lead('{"type":"prueba","email":" Nueva.Pareja@Example.com ","name":"Bea y Leo","nameA":"Bea","nameB":"Leo",
     "weddingDate":"2027-06-05 18:30","venue":"Finca Prueba","city":"Toledo","style":"minimal","photos":2,
-    "consent":true,"consentText":"Acepto que me escribáis sobre mi web.","page":"/studio/",
+    "consent":true,"consentText":"Acepto que me escribáis sobre mi web.","page":"/studio/","heardFrom":"instagram",
     "attribution":{"first":{"utm_source":"google","utm_campaign":"otono","gclid":"abc","landing_page":"/studio/?utm_source=google"},
                    "last":{"utm_source":"google","utm_campaign":"otono"}}}', '203.0.113.5', 'test');
   assert (r ->> 'ok')::boolean and (r ->> 'is_new')::boolean, 'FALLO: lead nuevo ' || r::text;
@@ -49,10 +49,15 @@ begin
   assert (select trials from public.leads where id = lid) = 2 and (select style from public.leads where id = lid) = 'verbena',
     'FALLO: la repetición no actualiza el lead';
   assert (select utm_source from public.lead_attribution where lead_id = lid and touch = 'primero') = 'google', 'FALLO: primer toque sobrescrito';
+  assert (select heard_from from public.leads where id = lid) = 'instagram', 'FALLO: «cómo nos conocisteis» perdido al repetir sin contestar';
   assert (select utm_campaign from public.lead_attribution where lead_id = lid and touch = 'ultimo') = 'reels', 'FALLO: último toque';
   r2 := public.api_submit_lead('{"type":"reserva","email":"nueva.pareja@example.com","name":"Bea y Leo","tier":"con-cambios","phone":"600 111 222","message":"¿Podéis en verde?"}');
   assert (select tier = 'con-cambios' and reserved_at is not null and phone = '600 111 222' from public.leads where id = lid), 'FALLO: reserva';
   assert (select count(*) from public.activities where lead_id = lid) = 3, 'FALLO: línea de tiempo del lead';
+  r2 := public.api_submit_lead('{"type":"prueba","email":"nueva.pareja@example.com","heardFrom":"recomendacion"}');
+  assert (select heard_from from public.leads where id = lid) = 'recomendacion', 'FALLO: «cómo nos conocisteis» no se actualiza';
+  r2 := public.api_submit_lead('{"type":"prueba","email":"nueva.pareja@example.com","heardFrom":"<script>"}');
+  assert (select heard_from from public.leads where id = lid) = 'recomendacion', 'FALLO: «cómo nos conocisteis» acepta un valor fuera de la lista';
   assert public.api_submit_lead('{"email":"sin-arroba"}') ->> 'error' = 'email', 'FALLO: email no válido aceptado';
   raise notice 'OK leads: nuevo, repetición sin duplicar, reserva y atribución primer/último toque';
 

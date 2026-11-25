@@ -108,7 +108,23 @@ Haced la vuestra», que enlaza al escaparate con `utm_source=web-boda&utm_campai
 CRM se ve qué boda trajo a cada pareja nueva. Para quitarlo en una boda (si una pareja de Atelier
 lo pide), pon `"credit": false` en su config.
 
-## 6. Lo que queda para más adelante
+## 6. «¿Cómo nos habéis conocido?»
+
+La atribución por enlace solo ve los enlaces con `utm`, `gclid` o `fbclid`. No ve el boca a boca
+(escriben la dirección a mano), los enlaces abiertos desde WhatsApp o Instagram sin `utm`, ni a
+quien vuelve otro día sin haber aceptado las cookies de publicidad. Por eso el escaparate pregunta,
+opcional y de un toque, cómo nos conocieron: al guardar la web (botones) y al reservar
+(desplegable, que sale ya con la respuesta si la dieron al guardar).
+
+- Opciones: Instagram, Facebook, Google, Bodas.net, Amigos o familia, La web de otra boda, Otro
+  (`studio/app/heard.js`; las mismas en `panel/js/ui.js` y en la restricción de la base de datos).
+- Se guarda en `leads.heard_from` (migración `20261125000100_como_nos_conocisteis.sql`). Una
+  respuesta nueva sustituye a la anterior; si no contestan, se queda la que había.
+- En el panel: ficha del lead («De dónde vino»), «Editar datos», tabla de leads (bajo «Origen»),
+  filtro «Cómo nos conocieron» (con «No lo dijeron») y la columna en «Exportar».
+- Para decidir en qué gastar, mira las dos cosas juntas: la campaña (enlace) y lo que dicen.
+
+## 7. Lo que queda para más adelante
 
 - Mandar también la compra pagada con Stripe (`Purchase`) desde el webhook.
 - Si algún día se quiere **remarketing** (enseñar anuncios a quien ya visitó la web), hay que

@@ -29,6 +29,12 @@ export const SOURCES = {
   whatsapp: "WhatsApp", email: "Email", telefono: "Teléfono", bodas_net: "Bodas.net", instagram: "Instagram",
   recomendacion: "Recomendación", otro: "Otro",
 };
+// «¿Cómo nos conocisteis?»: lo que contesta la pareja en el escaparate (leads.heard_from).
+// Mismos valores que studio/app/heard.js y que la restricción leads_heard_from de la base de datos.
+export const HEARD_FROM = {
+  instagram: "Instagram", facebook: "Facebook", google: "Google", bodas_net: "Bodas.net",
+  recomendacion: "Amigos o familia", otra_boda: "La web de otra boda", otro: "Otro",
+};
 const LABELS = Object.fromEntries([...LEAD_STATUSES, ...WEDDING_STATUSES, ...ORDER_STATUSES, ["pendiente", "Pendiente"], ["hecha", "Hecha"], ["cancelada", "Cancelada"]]);
 export const statusLabel = (s) => LABELS[s] || s;
 export const statusChip = (s) => html`<span class="status" data-s="${s}">${statusLabel(s)}</span>`;

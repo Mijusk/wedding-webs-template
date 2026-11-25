@@ -211,6 +211,10 @@
           <label for="c-message">Algo más que debamos saber <span class="opt">opcional</span></label>
           <textarea id="c-message" name="message" rows="3"></textarea>
         </div>
+        <div class="field">
+          <label for="c-heard">¿Cómo nos habéis conocido? <span class="opt">opcional</span></label>
+          <select id="c-heard" name="heardFrom"></select>
+        </div>
         <div class="checkout" id="c-checkout" hidden>
           <label class="consent" for="c-invoice">
             <input type="checkbox" id="c-invoice" name="invoice">
@@ -370,6 +374,10 @@
         <label for="b-email">Email <span class="opt">opcional, si también lo queréis por email</span></label>
         <input type="email" id="b-email" name="email" autocomplete="email">
       </div>
+      <fieldset class="field heard">
+        <legend class="label">¿Cómo nos habéis conocido? <span class="opt">opcional</span></legend>
+        <div class="heard__chips" id="b-heard-chips"></div>
+      </fieldset>
       <label class="consent" for="b-consent">
         <input type="checkbox" id="b-consent" name="consent" value="si" required>
         <span>Acepto que me escribáis por WhatsApp o email sobre mi web. Solo usaremos estos datos para eso, y podéis pedirnos que los borremos cuando queráis (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>

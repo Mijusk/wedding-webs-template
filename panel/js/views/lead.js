@@ -1,7 +1,7 @@
 // Ficha de un lead: estado, contacto (WhatsApp, email, llamada), próxima acción, línea de tiempo,
 // tareas, datos de la boda, publicidad y consentimiento.
 import { db } from "../supa.js";
-import { html, raw, render, $, $$, LEAD_STATUSES, SOURCES, STATUS_COLOR, statusChip, fmtDate, fmtDateLong, fmtDateTime, timeAgo, untilDate,
+import { html, raw, render, $, $$, LEAD_STATUSES, SOURCES, HEARD_FROM, STATUS_COLOR, statusChip, fmtDate, fmtDateLong, fmtDateTime, timeAgo, untilDate,
   formDialog, confirmDialog, showDialog, toast, fail, waLink, mailLink, icons } from "../ui.js";
 import { MENSAJES, fillMessage } from "../mensajes.js";
 import { styles, withSamplePhotos, livePreview } from "../catalogo.js";
@@ -127,6 +127,7 @@ export default async function lead(ctx) {
 
         <section class="panel-block">
           <h2>De dónde vino</h2>
+          <p class="small">${l.heard_from ? html`Nos dicen que nos conocieron por <strong>${HEARD_FROM[l.heard_from] || l.heard_from}</strong>.` : html`<span class="muted">No han dicho cómo nos conocieron.</span>`}</p>
           ${first || last ? html`<dl class="facts">
             ${[["Primer toque", first], ["Último toque", last]].filter(([, a]) => a).map(([label, a]) => html`
               <dt>${label}</dt><dd>${[a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean).join(" / ") || "Directo"}
@@ -293,7 +294,10 @@ async function editLead(l, reload) {
         <div class="field"><label for="e-style">Estilo</label><select id="e-style" name="style"><option value="">—</option>${sts.map((s) => html`<option value="${s.id}" ${l.style === s.id ? "selected" : ""}>${s.name}</option>`)}</select></div>
         <div class="field"><label for="e-tier">Tarifa</label><select id="e-tier" name="tier"><option value="">—</option>${["tal-cual", "con-cambios", "a-medida"].map((t) => html`<option ${l.tier === t ? "selected" : ""}>${t}</option>`)}</select></div>
       </div>
-      <div class="field"><label for="e-src">Cómo llegó</label><select id="e-src" name="source">${Object.entries(SOURCES).map(([v, label]) => html`<option value="${v}" ${l.source === v ? "selected" : ""}>${label}</option>`)}</select></div>
+      <div class="grid-2">
+        <div class="field"><label for="e-src">Cómo llegó</label><select id="e-src" name="source">${Object.entries(SOURCES).map(([v, label]) => html`<option value="${v}" ${l.source === v ? "selected" : ""}>${label}</option>`)}</select></div>
+        <div class="field"><label for="e-heard">Cómo nos conocieron</label><select id="e-heard" name="heard_from"><option value="">No lo han dicho</option>${Object.entries(HEARD_FROM).map(([v, label]) => html`<option value="${v}" ${l.heard_from === v ? "selected" : ""}>${label}</option>`)}</select></div>
+      </div>
       <div class="field"><label for="e-msg">Mensaje o notas</label><textarea id="e-msg" name="message">${l.message || ""}</textarea></div>
     </div>`,
   });

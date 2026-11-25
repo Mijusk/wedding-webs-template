@@ -6,6 +6,7 @@ import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, s
 import { setupQuick } from "./quick.js";
 import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./send.js";
 import { setupPricing } from "./pricing.js";
+import { setupHeard, prefillHeard } from "./heard.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
 import { captureAttribution } from "./attribution.js";
@@ -74,7 +75,9 @@ async function start() {
     if (!session.get(key)) { session.set(key, "1"); conversion("lead", { estilo: style.id }, { eventId: payload.eventId }); }
     saved = contact;
     setupPricing.prefill({ ...wedding, ...contact });
+    prefillHeard(contact.heardFrom);
   };
+  setupHeard();
   setupSend({
     getState: () => stageState(),
     onOpen: (from) => track("guardar_abierto", { desde: from }),
@@ -217,6 +220,7 @@ function leadFromTrial(w, style) {
     type: "prueba",
     email: w.email || undefined,
     phone: w.phone || undefined,
+    heardFrom: w.heardFrom || undefined,
     name: w.couple.join(" y "),
     nameA: w.couple[0],
     nameB: w.couple[1],
