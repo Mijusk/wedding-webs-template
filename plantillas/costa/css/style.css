@@ -248,7 +248,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; }
 .travel__in > * { padding: 8px clamp(20px, 4vw, 56px); }
 .travel__in > * + * { border-left: 1px solid var(--line); }
 .travel__in:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
-.travel__place { display: grid; justify-items: center; align-content: start; gap: 12px; text-align: center; }
+.travel__place { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; gap: 12px; text-align: center; }
 .travel__name { font: 400 clamp(26px, 3vw, 36px)/1.2 var(--font-display); color: var(--sea); text-wrap: balance; }
 .travel__address { color: var(--ink); margin-bottom: 18px; text-wrap: balance; }
 .travel__notes { display: grid; align-content: center; gap: 24px; }

@@ -114,7 +114,8 @@ h1, h2 { font-family: var(--font-display); font-weight: 400; }
 
 @media (max-width: 760px) {
   .hero__bar { grid-template-columns: 1fr 1fr; }
-  .hero__names { font-size: 22vw; }
+  /* --len: la palabra más larga de los nombres, para que quepa entera («Maximiliano»). */
+  .hero__names { font-size: min(22vw, calc((100vw - 32px - max(40px, 12vw)) / (var(--len, 6) * .42))); }
   .hero__bar > :nth-child(2) { display: none; }
   .hero__meta { flex-direction: column; gap: 6px; }
   .hero__photo img { aspect-ratio: 4 / 5; }

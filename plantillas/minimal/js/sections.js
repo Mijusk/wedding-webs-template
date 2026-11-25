@@ -25,7 +25,7 @@ export function hero({ event, venue = {}, locale, copy = {} }) {
         <span>${esc(copy.hero?.eyebrow || "")}</span>
         <span>${esc(d.numeric)}</span>
       </div>
-      <h1 class="hero__names"><span class="hero__line"><span>${esc(a)}</span></span><span class="hero__line"><span><em>&amp;</em> ${esc(b)}</span></span></h1>
+      <h1 class="hero__names" style="--len:${Math.max(...`${a} ${b}`.split(/\s+/).map((w) => w.length))}"><span class="hero__line"><span>${esc(a)}</span></span><span class="hero__line"><span><em>&amp;</em> ${esc(b)}</span></span></h1>
       <div class="hero__meta">
         ${event.tagline ? `<p>${esc(event.tagline)}</p>` : "<span></span>"}
         <p>${esc(venue.city || venue.name || "")}</p>
