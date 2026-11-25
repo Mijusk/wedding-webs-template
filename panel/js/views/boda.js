@@ -461,6 +461,11 @@ export default async function boda(ctx) {
   drop.addEventListener("dragleave", () => drop.classList.remove("is-over"));
   drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("is-over"); upload([...e.dataTransfer.files]); });
 
+  async function usedElsewhere(url) {
+    const filter = { select: "config", wedding_id: `eq.${id}` };
+    const snapshots = await Promise.all([db.select("wedding_versions", filter), db.select("wedding_proposals", filter)]);
+    return snapshots.flat().some((s) => JSON.stringify(s.config).includes(url));
+  }
   const saveOrder = async () => {
     await Promise.all(photos.map((p, i) => (p.sort === i ? null : db.update("wedding_assets", { id: `eq.${p.id}` }, { sort: i }).then(() => { p.sort = i; }))));
   };
@@ -473,9 +478,15 @@ export default async function boda(ctx) {
       if (t.dataset.cover) { const [p] = photos.splice(idx, 1); photos.unshift(p); config.event.photoFocus = "50% 50%"; await saveOrder(); }
       else if (t.dataset.left) { [photos[idx - 1], photos[idx]] = [photos[idx], photos[idx - 1]]; await saveOrder(); }
       else if (t.dataset.delPhoto) {
-        if (!(await confirmDialog("¿Borrar esta foto?", "Se borra del almacenamiento. Si la web publicada la usa, dejará de verse cuando publiques los cambios.", "Borrar", true))) return;
-        await storage.remove(BUCKET, photos[idx].path).catch(() => {});
-        await db.remove("wedding_assets", { id: `eq.${photos[idx].id}` });
+        if (!(await confirmDialog("¿Borrar esta foto?", "Si la web publicada la usa, dejará de verse cuando publiques los cambios.", "Borrar", true))) return;
+        // Si la usa una versión publicada o una propuesta, el archivo se queda (la web de los invitados la sigue
+        // enseñando): solo se quita del editor, y se borra de verdad al borrar la boda.
+        const p = photos[idx];
+        if (await usedElsewhere(p.url)) await db.update("wedding_assets", { id: `eq.${p.id}` }, { kind: "otro" });
+        else {
+          await storage.remove(BUCKET, p.path).catch(() => {});
+          await db.remove("wedding_assets", { id: `eq.${p.id}` });
+        }
         photos.splice(idx, 1);
         await saveOrder();
         if (!photos.length) { config.event.photo = base.event.photo; delete config.event.photoFocus; }
