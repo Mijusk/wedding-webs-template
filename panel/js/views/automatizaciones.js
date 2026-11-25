@@ -119,7 +119,8 @@ export default async function automatizaciones(ctx) {
   }
 
   $("[data-run]", el)?.addEventListener("click", async (e) => {
-    e.currentTarget.disabled = true;
+    const btn = e.currentTarget; // tras un await, e.currentTarget ya no existe
+    btn.disabled = true;
     try {
       const { automatizaciones: r } = await api("/api/cron?tarea=automatizaciones", {});
       const m = r.emails;
@@ -128,7 +129,7 @@ export default async function automatizaciones(ctx) {
         + `${r.invitados_borrados ? `, invitados borrados en ${r.invitados_borrados} bodas` : ""}${r.leads_anonimizados ? `, ${r.leads_anonimizados} contactos anonimizados` : ""}.`, { timeout: 8000 });
       reload();
     } catch (ex) {
-      e.currentTarget.disabled = false;
+      btn.disabled = false;
       fail(new Error(ex.status === 429 ? "Espera un minuto antes de volver a revisar." : ex.message));
     }
   });
