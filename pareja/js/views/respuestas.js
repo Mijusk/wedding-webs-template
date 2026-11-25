@@ -27,8 +27,13 @@ export default async function respuestas(ctx) {
   const autoLinked = groups.filter((g) => g.answer?.payload?.emparejada === "auto");
   const s = data.stats;
   const pending = groups.filter((g) => !g.answer && !g.token_revoked_at);
+  // La respuesta guarda el nombre que cada persona tenía entonces: si luego se corrige en la lista, vale el de ahora.
+  const named = (g) => (g.answer.companions || []).map((x) => {
+    const p = g.guests.find((y) => y.id === x.id);
+    return p ? { ...x, name: fullName(p) } : x;
+  });
   const rows = [
-    ...groups.filter((g) => g.answer).map((g) => ({ ...g.answer, group: g })),
+    ...groups.filter((g) => g.answer).map((g) => ({ ...g.answer, companions: named(g), group: g })),
     ...loose.map((a) => ({ ...a, group: null })),
   ].sort((a, b) => b.created_at.localeCompare(a.created_at));
   const shown = rows.filter((r) => filter === "todas" || (filter === "si" ? r.attending : filter === "no" ? !r.attending : false));
