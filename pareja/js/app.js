@@ -165,7 +165,10 @@ async function route() {
     if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
   document.title = `${match.title} · ${couple().join(" y ")}`;
-  const el = $("#view");
+  // Cada pantalla tiene su propia caja: si una termina de cargar o se actualiza cuando ya se ha
+  // cambiado a otra, no pinta encima (por ejemplo, encima de un formulario a medio rellenar).
+  const el = document.createElement("div");
+  $("#view").replaceChildren(el);
   render(el, html`<p class="muted">Cargando…</p>`);
   scrollTo(0, 0);
   try {

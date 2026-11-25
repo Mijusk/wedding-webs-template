@@ -139,7 +139,11 @@ export default async function respuestas(ctx) {
     if (document.hidden || document.querySelector("dialog[open]")) return;
     try {
       const [latest] = await db.select("rsvp_responses", { select: "created_at", wedding_id: `eq.${weddingId}`, order: "created_at.desc", limit: 1 });
-      if ((latest?.created_at || "") !== stamp) { await refreshData(); respuestas(ctx); toast("Ha llegado una respuesta nueva."); }
+      if ((latest?.created_at || "") === stamp) return;
+      await refreshData();
+      if (!el.isConnected) return; // mientras tanto ha cambiado de pantalla
+      respuestas(ctx);
+      toast("Ha llegado una respuesta nueva.");
     } catch { /* sin conexión: se reintenta en el siguiente ciclo */ }
   }, 30000);
   void go;
