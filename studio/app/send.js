@@ -15,6 +15,7 @@ export function setupSend(context) {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(form));
     const phone = String(d.phone || "").trim(), email = String(d.email || "").trim();
+    const heardFrom = d.heardFrom || undefined;
     const digits = phone.replace(/\D/g, "");
     if (!phone) { err.textContent = "Dejadnos vuestro móvil: os mandamos ahí el enlace de vuestra web."; return $("#b-phone").focus(); }
     if (digits.length < 9 || digits.length > 15 || /[^\d\s+().-]/.test(phone)) { err.textContent = "Revisad el móvil: parece que le falta o le sobra algún número."; return $("#b-phone").focus(); }
@@ -24,7 +25,7 @@ export function setupSend(context) {
     err.textContent = "";
     btn.disabled = true; btn.textContent = "Guardando…";
     try {
-      await ctx.onSave({ phone, email }, ctx.getState());
+      await ctx.onSave({ phone, email, heardFrom }, ctx.getState());
       form.hidden = true;
       const thanks = $("#send-thanks");
       thanks.innerHTML = `<h3>¡Guardada!</h3>

@@ -29,7 +29,7 @@ const EMAIL = /^\S+@\S+\.\S+$/;
 const NO_INDEX = { "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer" };
 const norm = (c) => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-const FIELDS = ["email", "name", "nameA", "nameB", "phone", "tier", "style", "weddingDate", "venue", "city", "message",
+const FIELDS = ["email", "name", "nameA", "nameB", "phone", "tier", "style", "weddingDate", "venue", "city", "message", "heardFrom",
   "wedding", "sections", "billing", "startNow", "startNowText", "consent", "consentText", "page", "attribution"];
 
 export default async function handler(req, res) {

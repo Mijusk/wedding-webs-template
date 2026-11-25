@@ -1,18 +1,19 @@
 // Leads: tablero por estados (arrastrar para cambiar) y tabla con filtros.
 import { db } from "../supa.js";
-import { html, render, $, $$, LEAD_STATUSES, SOURCES, STATUS_COLOR, statusChip, stamp, timeAgo, fmtDate, fmtDateTime, untilDate, formDialog, toast, fail, downloadCsv, debounce } from "../ui.js";
+import { html, render, $, $$, LEAD_STATUSES, SOURCES, HEARD_FROM, STATUS_COLOR, statusChip, stamp, timeAgo, fmtDate, fmtDateTime, untilDate, formDialog, toast, fail, downloadCsv, debounce } from "../ui.js";
 import { askLostReason } from "./lead.js";
 
 export default async function leads({ el, query, go, refreshCounts }) {
   const view = query.get("vista") === "tabla" ? "tabla" : "tablero";
   const f = {
-    q: query.get("q") || "", estado: query.get("estado") || "", origen: query.get("origen") || "",
+    q: query.get("q") || "", estado: query.get("estado") || "", origen: query.get("origen") || "", conocieron: query.get("conocieron") || "",
     campana: query.get("campana") || "", desde: query.get("desde") || "", hasta: query.get("hasta") || "",
   };
 
   const params = { select: "*,lead_attribution(touch,utm_source,utm_medium,utm_campaign)", order: "created_at.desc", limit: 2000 };
   if (f.estado && view === "tabla") params.status = `eq.${f.estado}`;
   if (f.origen) params.source = `eq.${f.origen}`;
+  if (f.conocieron) params.heard_from = f.conocieron === "sin" ? "is.null" : `eq.${f.conocieron}`;
   if (f.desde || f.hasta) params.and = `(${[f.desde && `wedding_date.gte.${f.desde}`, f.hasta && `wedding_date.lte.${f.hasta}`].filter(Boolean).join(",")})`;
   if (f.q) {
     const q = f.q.replace(/[(),*]/g, " ").trim();
@@ -31,7 +32,7 @@ export default async function leads({ el, query, go, refreshCounts }) {
 
   render(el, html`
     <div class="page-head">
-      <div><h1>Leads</h1><p>${rows.length} ${rows.length === 1 ? "pareja" : "parejas"}${f.q || f.origen || f.campana || f.desde || f.hasta || (view === "tabla" && f.estado) ? " con estos filtros" : ""}.</p></div>
+      <div><h1>Leads</h1><p>${rows.length} ${rows.length === 1 ? "pareja" : "parejas"}${f.q || f.origen || f.conocieron || f.campana || f.desde || f.hasta || (view === "tabla" && f.estado) ? " con estos filtros" : ""}.</p></div>
       <div class="page-actions">
         <div class="seg" role="group" aria-label="Vista">
           <a href="#/leads?${new URLSearchParams({ ...f, vista: "tablero" })}" aria-current="${view === "tablero"}">Tablero</a>
@@ -45,6 +46,7 @@ export default async function leads({ el, query, go, refreshCounts }) {
       <input type="search" name="q" value="${f.q}" placeholder="Buscar por nombre, email, teléfono o lugar" aria-label="Buscar">
       ${view === "tabla" ? html`<select name="estado" aria-label="Estado"><option value="">Todos los estados</option>${LEAD_STATUSES.map(([v, l]) => html`<option value="${v}" ${f.estado === v ? "selected" : ""}>${l}</option>`)}</select>` : ""}
       <select name="origen" aria-label="Origen"><option value="">Todos los orígenes</option>${Object.entries(SOURCES).map(([v, l]) => html`<option value="${v}" ${f.origen === v ? "selected" : ""}>${l}</option>`)}</select>
+      <select name="conocieron" aria-label="Cómo nos conocieron"><option value="">Cómo nos conocieron: todos</option>${Object.entries(HEARD_FROM).map(([v, l]) => html`<option value="${v}" ${f.conocieron === v ? "selected" : ""}>${l}</option>`)}<option value="sin" ${f.conocieron === "sin" ? "selected" : ""}>No lo dijeron</option></select>
       <select name="campana" aria-label="Campaña"><option value="">Todas las campañas</option>${campaigns.map((c) => html`<option ${f.campana === c ? "selected" : ""}>${c}</option>`)}</select>
       <label class="small muted" for="f-desde">Boda entre</label>
       <input id="f-desde" type="date" name="desde" value="${f.desde}" style="flex:0 1 150px">
@@ -69,7 +71,7 @@ export default async function leads({ el, query, go, refreshCounts }) {
   $("[data-export]", el).addEventListener("click", () => downloadCsv(`leads-${new Date().toISOString().slice(0, 10)}.csv`, rows, [
     ["names", "Pareja"], ["email", "Email"], ["phone", "Teléfono"], [(l) => LEAD_STATUSES.find(([s]) => s === l.status)?.[1], "Estado"],
     ["wedding_date", "Fecha boda"], ["venue", "Lugar"], ["city", "Ciudad"], ["style", "Estilo"], ["tier", "Tarifa"],
-    [(l) => SOURCES[l.source] || l.source, "Origen"], [campaign, "Campaña"], ["created_at", "Entró"], ["next_action", "Próxima acción"],
+    [(l) => SOURCES[l.source] || l.source, "Origen"], [(l) => HEARD_FROM[l.heard_from] || "", "Cómo nos conocieron"], [campaign, "Campaña"], ["created_at", "Entró"], ["next_action", "Próxima acción"],
     ["next_action_at", "Fecha próxima acción"], ["lost_reason", "Motivo de pérdida"],
   ]));
 }
@@ -153,7 +155,7 @@ function table(list, rows, campaign) {
       <td><a href="#/leads/${l.id}">${l.names || l.email || l.phone}</a><div class="small muted">${l.email || l.phone || ""}</div></td>
       <td>${statusChip(l.status)}</td>
       <td class="nowrap">${l.wedding_date ? html`${fmtDate(l.wedding_date)}<div class="small muted">${untilDate(l.wedding_date)}</div>` : html`<span class="muted">—</span>`}</td>
-      <td>${SOURCES[l.source] || l.source}</td>
+      <td>${SOURCES[l.source] || l.source}${l.heard_from ? html`<div class="small muted">Dicen: ${HEARD_FROM[l.heard_from] || l.heard_from}</div>` : ""}</td>
       <td>${campaign(l) || html`<span class="muted">—</span>`}</td>
       <td class="nowrap">${timeAgo(l.created_at)}</td>
       <td>${l.next_action ? html`${l.next_action}<div class="small muted">${fmtDateTime(l.next_action_at)}</div>` : html`<span class="muted">—</span>`}</td>

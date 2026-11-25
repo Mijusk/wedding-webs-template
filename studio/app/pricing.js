@@ -125,7 +125,7 @@ export function setupPricing({ studio, templateUrl }) {
     const [a, b] = c?.event?.couple || [];
     const body = {
       accion: "reservar", email: d.email.trim(), name: d.name.trim(), phone: d.phone?.trim() || undefined,
-      tier: d.tier, style: d.style, message: d.message?.trim() || undefined, billing,
+      tier: d.tier, style: d.style, message: d.message?.trim() || undefined, heardFrom: d.heardFrom || undefined, billing,
       nameA: a, nameB: b, weddingDate: c?.event?.date ? `${c.event.date.slice(0, 10)} ${c.event.date.slice(11, 16)}` : undefined,
       venue: c?.venue?.name, city: c?.venue?.city, wedding: chosen ? withoutPhotos(c) : undefined,
       startNow: true, startNowText: $("#c-start-text").textContent.replace(/\s+/g, " ").trim(),

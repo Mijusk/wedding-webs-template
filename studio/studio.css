@@ -177,6 +177,10 @@ main section, .contact { scroll-margin-top: 80px; }
 .chip:has(input:checked), .chip[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 .chip:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 .chip[aria-disabled="true"], .chip:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+/* «¿Cómo nos habéis conocido?» en «Guardadla» (app/heard.js) */
+.heard legend { margin-bottom: 6px; }
+.heard__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.heard__chips .chip { padding: 6px 12px; font-size: 13px; }
 .swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--sw-a); box-shadow: inset -7px 0 0 var(--sw-b); flex: none; }
 
 /* Botón fijo «Probar con vuestra boda» (app/main.js > setupNudge): pequeño y centrado abajo.

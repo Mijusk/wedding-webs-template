@@ -12,7 +12,7 @@ import { runEvent, unsubscribeEmail } from "./_lib/automatizaciones.js";
 import { sendMetaEvent } from "./_lib/meta.js";
 
 const FIELDS = ["type", "email", "name", "nameA", "nameB", "weddingDate", "venue", "city", "style", "photos", "tier",
-  "phone", "message", "wedding", "sections", "consent", "consentText", "page", "attribution", "cookieConsent", "sentAt"];
+  "phone", "heardFrom", "message", "wedding", "sections", "consent", "consentText", "page", "attribution", "cookieConsent", "sentAt"];
 
 export default async function handler(req, res) {
   const q = queryOf(req);
