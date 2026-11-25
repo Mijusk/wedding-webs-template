@@ -244,7 +244,7 @@ export default async function boda(ctx) {
 
         <details class="sec"><summary>Avanzado: todos los textos (JSON)</summary><div class="sec__body">
           <p class="small muted">El config completo de la web. Útil para cambiar un texto concreto de la plantilla. Se comprueba antes de aplicarlo.</p>
-          <textarea class="code" data-json spellcheck="false"></textarea>
+          <textarea class="code" data-json spellcheck="false" aria-label="Config de la web en JSON"></textarea>
           <div class="btn-row"><button class="btn btn--small" type="button" data-json-apply>Aplicar</button><button class="btn btn--small btn--quiet" type="button" data-json-reset>Deshacer cambios del JSON</button></div>
         </div></details>
       </form>

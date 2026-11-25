@@ -35,12 +35,12 @@ export default async function automatizaciones(ctx) {
       </div>
       ${info.delay || editable ? html`<details class="auto__edit"><summary>${editable ? "Editar el texto" : "Cambiar los días"}${info.delay ? ` · ${a.delay_days} días` : ""}</summary>
         <form class="form stack" data-form style="gap:12px;margin-top:12px">
-          ${info.delay ? html`<div class="field" style="max-width:280px"><label>${info.delay}</label><input name="delay_days" type="number" min="0" max="400" value="${a.delay_days ?? ""}" ${admin ? "" : "disabled"}></div>` : ""}
-          ${a.kind === "email" ? html`<div class="field"><label>Asunto</label><input name="subject" value="${a.subject || ""}" ${admin ? "" : "disabled"}></div>` : ""}
-          ${editable ? html`<div class="field"><label>Texto</label><textarea name="body" rows="9" ${admin ? "" : "disabled"}>${a.body || ""}</textarea>
+          ${info.delay ? html`<div class="field" style="max-width:280px"><label for="d-${a.code}">${info.delay}</label><input id="d-${a.code}" name="delay_days" type="number" min="0" max="400" value="${a.delay_days ?? ""}" ${admin ? "" : "disabled"}></div>` : ""}
+          ${a.kind === "email" ? html`<div class="field"><label for="s-${a.code}">Asunto</label><input id="s-${a.code}" name="subject" value="${a.subject || ""}" ${admin ? "" : "disabled"}></div>` : ""}
+          ${editable ? html`<div class="field"><label for="t-${a.code}">Texto</label><textarea id="t-${a.code}" name="body" rows="9" ${admin ? "" : "disabled"}>${a.body || ""}</textarea>
             <span class="hint">Deja una línea en blanco entre párrafos. Pulsa un hueco para ponerlo donde está el cursor.</span></div>
             <div class="chips">${(info.vars || []).map((v) => html`<button class="tag" type="button" data-insert="{${v}}" title="${VAR_LABELS[v] || v}">{${v}}</button>`)}</div>` : ""}
-          ${a.kind === "email" && a.button_label != null ? html`<div class="field" style="max-width:320px"><label>Texto del botón</label><input name="button_label" value="${a.button_label}" ${admin ? "" : "disabled"}></div>` : ""}
+          ${a.kind === "email" && a.button_label != null ? html`<div class="field" style="max-width:320px"><label for="b-${a.code}">Texto del botón</label><input id="b-${a.code}" name="button_label" value="${a.button_label}" ${admin ? "" : "disabled"}></div>` : ""}
           <div class="btn-row">${admin ? html`<button class="btn btn--primary btn--small" type="submit">Guardar</button>` : ""}
             ${editable ? html`<button class="btn btn--small" type="button" data-preview>Vista previa</button>` : ""}</div>
         </form>
