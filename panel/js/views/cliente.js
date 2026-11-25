@@ -19,7 +19,16 @@ export default async function cliente(ctx) {
   ]);
   if (!c) return render(el, html`<p class="empty"><strong>Este cliente no existe.</strong><a href="#/clientes">Volver</a></p>`);
   setTitle(c.display_name);
-  const reload = () => cliente(ctx);
+  let typed = false; // datos de facturación a medias
+  const reload = async () => {
+    const kept = typed ? [...new FormData($("[data-billing]", el))] : [];
+    await cliente(ctx);
+    if (!kept.length) return;
+    const form = $("[data-billing]", el);
+    kept.forEach(([k, v]) => { form.elements[k].value = v; });
+    form.dispatchEvent(new Event("input"));
+  };
+  ctx.setLeaveGuard((silent) => !typed || (!silent && confirm("Tienes datos de facturación sin guardar. ¿Salir sin guardar?")));
   const isAdmin = ["owner", "admin"].includes(staff.role);
   // El pedido al que se enlaza la web nueva («Crear su web»): el más reciente sin web.
   const openOrder = orders.find((o) => !o.wedding_id && !["cancelado", "reembolsado"].includes(o.status));
@@ -118,18 +127,19 @@ export default async function cliente(ctx) {
       </div>
     </div>`);
 
+  $("[data-billing]", el).addEventListener("input", () => { typed = true; });
   $("[data-billing]", el).addEventListener("submit", async (e) => {
     e.preventDefault();
     const d = Object.fromEntries([...new FormData(e.target)].map(([k, v]) => [k, String(v).trim() || null]));
     d.country = (d.country || "ES").toUpperCase();
     if (d.tax_id) d.tax_id = d.tax_id.toUpperCase().replace(/[\s-]/g, "");
     if (d.tax_id && !validNif(d.tax_id) && d.country === "ES") { $("[data-err]", el).textContent = "El NIF/NIE no parece correcto (revisa la letra)."; return; }
-    try { await db.update("clients", { id: `eq.${id}` }, d); toast("Datos guardados."); reload(); }
+    try { await db.update("clients", { id: `eq.${id}` }, d); typed = false; toast("Datos guardados."); reload(); }
     catch (ex) { fail(ex); }
   });
   $("[data-delete]", el)?.addEventListener("click", async () => {
     if (!(await confirmDialog("¿Borrar este cliente?", "Solo se puede si no tiene pedidos ni facturas.", "Borrar", true))) return;
-    try { await db.remove("clients", { id: `eq.${id}` }); go("/clientes"); } catch (e) { fail(e); }
+    try { await db.remove("clients", { id: `eq.${id}` }); typed = false; go("/clientes"); } catch (e) { fail(e); }
   });
 
   $("[data-new-order]", el).addEventListener("click", async () => {
