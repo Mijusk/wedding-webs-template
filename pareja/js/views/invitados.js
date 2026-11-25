@@ -83,7 +83,7 @@ async function editGroup(ctx, g) {
   const { weddingId } = ctx;
   const people = g ? g.guests.map((p) => ({ ...p })) : [{ first_name: "", last_name: "", is_child: false }];
   let entered = [];
-  const row = (p, i) => html`<div class="people-edit__row" data-i="${i}">
+  const row = (p, i) => html`<div class="people-edit__row" data-i="${i}" data-id="${p.id || ""}">
     <input name="first" value="${p.first_name || ""}" placeholder="Nombre" aria-label="Nombre">
     <input name="last" value="${p.last_name || ""}" placeholder="Apellidos" aria-label="Apellidos">
     <label class="check small"><input type="checkbox" name="child" ${p.is_child ? "checked" : ""}> Niño/a</label>
@@ -110,7 +110,7 @@ async function editGroup(ctx, g) {
       // Antes de que se cierre el diálogo: quién es quién (FormData no dice qué casillas van con qué fila).
       f.closest("dialog").addEventListener("submit", () => {
         entered = [...box.querySelectorAll(".people-edit__row")].map((r) => ({
-          first: r.querySelector("[name=first]").value.trim(), last: r.querySelector("[name=last]").value.trim(),
+          id: r.dataset.id, first: r.querySelector("[name=first]").value.trim(), last: r.querySelector("[name=last]").value.trim(),
           child: r.querySelector("[name=child]").checked,
         })).filter((p) => p.first);
       }, true);
@@ -147,15 +147,17 @@ async function editGroup(ctx, g) {
     let id = g?.id;
     if (g) await db.update("guest_groups", { id: `eq.${g.id}` }, row_);
     else id = (await db.insert("guest_groups", { ...row_, wedding_id: weddingId, sort: Date.now() % 2147483647 }))[0].id;
-    // Personas: se sustituyen por las del formulario (las que ya estaban conservan su identidad si no cambian).
+    // Personas: las que ya estaban conservan su identidad (y con ella su respuesta) aunque se les corrija el nombre.
     const old = g?.guests || [];
     const keep = new Set();
     const inserts = [];
     for (const p of entered) {
-      const match = old.find((o) => !keep.has(o.id) && o.first_name === p.first && (o.last_name || "") === p.last);
+      const match = old.find((o) => o.id === p.id);
       if (match) {
         keep.add(match.id);
-        if (match.is_child !== p.child) await db.update("guests", { id: `eq.${match.id}` }, { is_child: p.child });
+        if (match.first_name !== p.first || (match.last_name || "") !== p.last || match.is_child !== p.child) {
+          await db.update("guests", { id: `eq.${match.id}` }, { first_name: p.first, last_name: p.last || null, is_child: p.child });
+        }
       } else inserts.push({ wedding_id: weddingId, group_id: id, first_name: p.first, last_name: p.last || null, is_child: p.child });
     }
     const gone = old.filter((o) => !keep.has(o.id)).map((o) => o.id);
