@@ -6,12 +6,14 @@ export function demoPhotoUrls({ folder, files } = {}) {
 }
 
 // Pone las fotos de ejemplo en el config de demo de cada plantilla:
-// portada, galería (Clásica) y capítulos de la historia (Editorial).
+// portada, galería (Clásica) y capítulos de la historia (Editorial). La galería lleva al menos
+// dos fotos, o tantas como traiga el ejemplo de la plantilla (las fotos en capas de «Del día a la
+// noche» necesitan más para lucir).
 export function applyDemoPhotos(base, photos) {
   if (!photos.length) return base;
   base.event.photo = photos[0];
   delete base.event.photoFocus;
-  base.gallery = photos.slice(1, 3);
+  base.gallery = photos.slice(1, 1 + Math.max(2, base.gallery?.length || 0));
   base.story?.chapters?.forEach((c, i) => { if (photos[i + 1]) c.photo = photos[i + 1]; });
   return base;
 }

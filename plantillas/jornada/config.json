@@ -1,0 +1,178 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:30:00+02:00",
+    "end": "2027-06-13T03:30:00+02:00",
+    "tagline": "Un día entero, de la primera luz a la última canción",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Verano de 2019",
+        "text": "Nos conocimos en una boda, de madrugada, cuando ya solo quedaban los que bailan. Fue la primera de muchas noches que se nos hicieron cortas.",
+        "photo": "assets/foto-1.jpg",
+        "photoAlt": "Lucía y Martín"
+      },
+      {
+        "meta": "Toledo, 2026",
+        "text": "Siete veranos después, en un mirador sobre los viñedos, Martín sacó un anillo y a Lucía se le olvidó contestar. Dijo que sí al rato.",
+        "photo": "assets/foto-5.jpg",
+        "photoAlt": "Lucía y Martín en los viñedos"
+      },
+      {
+        "meta": "12 de junio de 2027",
+        "text": "Ahora queremos un día entero contigo: de la ceremonia con sol a la última canción con estrellas."
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca Los Almendros",
+    "address": "Camino de la Ermita, 3 · Toledo",
+    "city": "Toledo",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Toledo",
+    "lat": 39.8628,
+    "lon": -4.0273
+  },
+  "schedule": [
+    {
+      "time": "18:30",
+      "label": "Ceremonia",
+      "place": "Bajo el almendro grande"
+    },
+    {
+      "time": "20:00",
+      "label": "Cóctel",
+      "place": "En la terraza, mirando a los viñedos"
+    },
+    {
+      "time": "21:30",
+      "label": "Cena",
+      "place": "En el patio, con la puesta de sol"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Hasta que salga el sol otra vez"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "hint": "Desliza"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "title": "Cuándo y dónde",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Ver en el mapa"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "Cómo empezó todo",
+      "more": "Desliza para seguir"
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "De la primera luz a la última canción",
+      "text": "Horarios orientativos.",
+      "light": {
+        "day": "Con luz de día",
+        "golden": "Hora dorada",
+        "sunset": "Se pone el sol a las {time}",
+        "dusk": "Hora azul",
+        "night": "Ya es de noche"
+      }
+    },
+    "dresscode": {
+      "eyebrow": "Vestimenta",
+      "title": "Qué ponerse",
+      "text": ""
+    },
+    "gallery": {
+      "eyebrow": "Algunos momentos",
+      "title": "Nosotros"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es el regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Te quedas hasta el final?",
+      "text": "Te agradeceremos que nos lo confirmes antes del {deadline}.",
+      "after": "Gracias por quedarte hasta el final. Fue un día para no olvidar.",
+      "today": "Hoy es el día. Nos vemos allí."
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-6.jpg",
+    "assets/foto-3.jpg",
+    "assets/foto-7.jpg",
+    "assets/foto-4.jpg",
+    "assets/foto-8.jpg",
+    "assets/foto-9.jpg"
+  ]
+}

@@ -1,0 +1,198 @@
+/* «Del día a la noche»: el carácter. La maquetación común está en base.css.
+   Los colores del cielo y del texto (--sky --low --ink --muted --line --accent --on-accent) los
+   cambia js/motion.js según la hora de lo que se está leyendo; aquí van los de la mañana, para
+   que la primera pantalla salga bien antes de que corra el JavaScript. */
+:root {
+  --sky: #f5ead7; --low: #f8eddb;
+  --ink: #2b211c; --muted: rgb(43 33 28 / .68); --line: rgb(43 33 28 / .16);
+  --accent: #9a4b2c; --accent-2: #c98a5a; --on-accent: #fbf6ee;
+  --paper: #fffaf2; --paper-2: #f3eadb;
+  --sun: 1; --stars: 0;
+  --font-display: "Instrument Serif", "Didot", Georgia, serif;
+  --font-body: "Instrument Sans", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-label: "Instrument Sans", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --gutter: clamp(20px, 5vw, 64px);
+  --space: clamp(96px, 14vw, 180px);
+  --radius: 999px;
+}
+html { background: var(--sky); }
+body { background: transparent; }
+#app { position: relative; z-index: 1; }
+
+/* ---------- el cielo, detrás de todo ---------- */
+.sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky) 0%, var(--sky) 45%, var(--low) 100%); }
+.sky__sun {
+  position: absolute; left: 92%; top: 0; width: min(40vw, 360px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 246 226 / .8) 0 14%, rgb(255 214 160 / .35) 30%, rgb(255 190 140 / 0) 66%);
+  transform: translate3d(-50%, calc((1 - var(--sun)) * 72vh + 6vh), 0);
+  opacity: clamp(0, calc(var(--sun) * 2 + .6), 1);
+}
+.sky__stars { position: absolute; inset: 0; opacity: var(--stars); }
+.sky__stars svg { width: 100%; height: 100%; fill: #fff7e8; }
+.sky__stars .tw { animation: twinkle 4s ease-in-out infinite; }
+.sky__moon {
+  position: absolute; right: 12%; top: 11vh; width: 46px; aspect-ratio: 1; border-radius: 50%;
+  box-shadow: inset -11px 3px 0 0 #fbf1dc; opacity: var(--stars); transform: rotate(-18deg);
+}
+@keyframes twinkle { 50% { opacity: .25; } }
+
+.eyebrow { color: var(--muted); letter-spacing: .3em; }
+.head__eyebrow { color: var(--accent); }
+.head__title { font-size: clamp(42px, 7vw, 92px); line-height: 1; letter-spacing: -.01em; }
+.link { color: var(--accent); }
+.button { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+
+/* ---------- portada: la foto dentro de los nombres ---------- */
+.hero { height: 235vh; height: 235svh; min-height: 0; }
+.hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate; background: #1b1712; }
+.hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.16); transform-origin: 50% 55%; will-change: transform; }
+.hero__veil { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgb(20 14 10 / 0) 40%, rgb(20 14 10 / .62) 100%); }
+/* Capa del color del cielo y, encima, los nombres rellenos con la misma foto: la caja de las
+   letras ocupa toda la portada, así la foto de dentro de las letras coincide con la de detrás. */
+.hero__mask { position: absolute; inset: 0; background: var(--sky); will-change: opacity; }
+.hero__names {
+  position: absolute; inset: 0; margin: 0; display: grid; align-content: center; justify-items: center; text-align: center;
+  font: 400 min(calc((100vh - 190px) / 2.25), calc(94vw / (var(--len) * .5)))/0.84 var(--font-display); letter-spacing: -.035em;
+  font-size: min(calc((100svh - 190px) / 2.25), calc(94vw / (var(--len) * .5)));
+  color: #6b4a36; background-position: 50% 55%; background-size: cover; background-repeat: no-repeat;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  transform-origin: 50% 52%; will-change: transform, opacity;
+}
+.hero__name { display: block; white-space: nowrap; }
+.hero__amp { display: block; font-style: italic; font-size: .5em; line-height: .9; }
+.hero__frame { position: absolute; inset: 0; display: grid; align-content: space-between; justify-items: center; padding: calc(28px + env(safe-area-inset-top, 0px)) var(--gutter) calc(92px + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
+.hero__eyebrow { color: var(--ink); }
+.hero__date { font: 500 13px/1.5 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--ink); text-align: center; }
+.hero__after {
+  position: absolute; left: 0; right: 0; bottom: 0; display: grid; justify-items: center; gap: 12px; text-align: center; color: #fff8ee;
+  padding: 0 var(--gutter) calc(clamp(40px, 9vh, 96px) + env(safe-area-inset-bottom, 0px)); opacity: 0;
+}
+.hero__after .eyebrow { color: rgb(255 248 238 / .85); }
+.hero__tagline { font: italic 400 clamp(28px, 4.4vw, 54px)/1.1 var(--font-display); max-width: 18em; text-wrap: balance; }
+.hero__place { font: 500 12px/1.5 var(--font-label); letter-spacing: .26em; text-transform: uppercase; color: rgb(255 248 238 / .85); }
+.hero__hint {
+  position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  display: grid; justify-items: center; gap: 8px; font: 500 11px/1 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--muted);
+}
+.hero__hint::after { content: ""; width: 1px; height: 26px; background: currentColor; animation: hint 2.2s var(--ease-out) infinite; transform-origin: top; }
+@keyframes hint { 0% { transform: scaleY(0); } 55% { transform: scaleY(1); transform-origin: top; } 56% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* Con la vista previa del escaparate o una pantalla horizontal baja, los nombres en una línea */
+@media (min-aspect-ratio: 5/4) {
+  .hero__names { display: block; white-space: nowrap; font-size: min(calc((100vh - 190px) * .8), calc(94vw / (var(--total) * .39))); }
+  .hero__name, .hero__amp { display: inline; }
+  .hero__amp { font-size: .62em; margin-inline: .08em; }
+}
+
+/* ---------- lo esencial: tarjetas como polaroids ---------- */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 340px)); justify-content: center; gap: clamp(20px, 4vw, 56px); }
+.card {
+  display: grid; justify-items: center; align-content: start; gap: 8px; text-align: center;
+  padding: clamp(28px, 4vw, 44px) 24px clamp(36px, 5vw, 56px); background: var(--paper); color: #2b211c;
+  box-shadow: 0 1px 2px rgb(43 33 28 / .08), 0 22px 50px -18px rgb(43 33 28 / .35); will-change: transform;
+}
+.card:first-child { transform: rotate(-2.6deg); }
+.card:last-child { transform: rotate(2.2deg); }
+.card .eyebrow { color: #8a7a6e; margin-bottom: 4px; }
+.card__big { font: 400 clamp(28px, 3vw, 36px)/1.15 var(--font-display); text-wrap: balance; }
+.card__small { color: #4a3d35; }
+.card__note { font: italic 400 20px/1.3 var(--font-display); color: #9a4b2c; }
+.card__note.is-today { font-style: normal; font-weight: 500; }
+.card__link { margin-top: 10px; }
+.card .link { color: #9a4b2c; }
+
+/* ---------- historia: de lado ---------- */
+.story { padding-top: var(--space); }
+.hs__stage { position: relative; overflow: hidden; }
+.hs.is-pinned .hs__stage { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid; align-items: center; }
+.hs__word {
+  position: absolute; left: 0; top: 50%; translate: 0 -50%; white-space: nowrap; pointer-events: none;
+  font: italic 400 clamp(180px, 34vw, 460px)/1 var(--font-display); color: transparent; -webkit-text-stroke: 1px var(--line);
+}
+.hs__track { position: relative; display: flex; align-items: center; gap: clamp(20px, 4vw, 64px); padding-inline: var(--gutter); width: max-content; will-change: transform; }
+.hs__intro, .hs__card { flex: none; width: min(84vw, 520px); }
+.hs__intro { display: grid; gap: 18px; }
+.hs__intro .eyebrow { color: var(--accent); }
+.hs__title { font-size: clamp(52px, 9vw, 120px); line-height: .95; letter-spacing: -.02em; text-wrap: balance; }
+.hs__more { font: 500 12px/1.5 var(--font-label); letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
+.hs__card { display: grid; gap: 22px; align-content: center; }
+.hs__card.has-photo { width: min(84vw, 460px); }
+.hs__photo { overflow: hidden; }
+.hs__photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; max-height: 52vh; max-height: 52svh; }
+.hs__body { display: grid; gap: 10px; }
+.hs__num { font: italic 400 46px/1 var(--font-display); color: var(--accent); }
+.hs__text { font: 400 clamp(21px, 2.2vw, 27px)/1.45 var(--font-display); text-wrap: pretty; }
+.hs__card:not(.has-photo) .hs__text { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.25; }
+.hs:not(.is-pinned) .hs__word, .hs:not(.is-pinned) .hs__more { display: none; }
+
+/* ---------- programa: cada momento, su cielo ---------- */
+.schedule .head { margin-bottom: 0; }
+.moments { display: grid; }
+.moment { min-height: 100vh; min-height: 100svh; display: grid; align-items: center; overflow: hidden; }
+.moment__in { display: grid; justify-items: center; gap: clamp(8px, 2vh, 20px); text-align: center; }
+.moment__time {
+  display: block; white-space: nowrap; color: var(--accent); will-change: transform;
+  font: 400 min(clamp(130px, 33vw, 420px), 44vh)/.8 var(--font-display); letter-spacing: -.04em; font-variant-numeric: lining-nums;
+}
+.moment__what { display: grid; justify-items: center; gap: 8px; padding-inline: var(--gutter); will-change: transform, opacity; }
+.moment__light { color: var(--muted); }
+.moment__label { font: italic 400 min(clamp(44px, 7vw, 86px), 11vh)/1 var(--font-display); }
+.moment__place { color: var(--muted); max-width: 26em; text-wrap: balance; }
+
+/* ---------- galería: fotos en capas ---------- */
+.gallery { padding-top: var(--space); }
+.layers__stage { position: relative; }
+.layers__names {
+  position: absolute; top: 50%; left: 0; translate: 0 -50%; white-space: nowrap; pointer-events: none;
+  font: 400 clamp(160px, 30vw, 420px)/1 var(--font-display); letter-spacing: -.03em; color: var(--ink); opacity: .09;
+}
+.layers .head { position: relative; z-index: 1; }
+.layers__photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-inline: var(--gutter); }
+.layer { overflow: hidden; box-shadow: 0 26px 60px -24px rgb(0 0 0 / .55); }
+.layer img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+
+html:not(.is-still) .layers__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+html:not(.is-still) .layers .head { position: absolute; left: 0; right: 0; top: clamp(70px, 14vh, 140px); }
+html:not(.is-still) .layers__photos { display: block; position: absolute; inset: 0; padding: 0; }
+html:not(.is-still) .layer {
+  position: absolute; top: 0; left: calc(var(--x) * 1%); width: calc(var(--w) * 1%);
+  z-index: calc(var(--depth) * 10); will-change: transform; transform: translate3d(0, 120vh, 0);
+}
+@media (min-width: 761px) {
+  html:not(.is-still) .layer { width: calc(var(--w) * .5%); left: calc(var(--x) * 1% + 4%); }
+}
+
+/* ---------- regalo y cierre, ya de noche ---------- */
+.iban__card { background: var(--paper); color: #2b211c; border-color: transparent; }
+.iban__card .eyebrow { color: #8a7a6e; }
+.iban__card .link { color: #9a4b2c; }
+.closing__body { padding-block: calc(var(--space) * 1.2) var(--space); }
+.closing__moon { display: none; }
+.closing__title { font-size: clamp(54px, 9vw, 120px); letter-spacing: -.02em; }
+.closing__foot { color: var(--muted); }
+
+/* ---------- formulario de confirmación: siempre claro, aunque sea de noche ---------- */
+.rsvp-dialog {
+  --ink: #2b211c; --muted: rgb(43 33 28 / .68); --line: rgb(43 33 28 / .18);
+  --accent: #9a4b2c; --on-accent: #fbf6ee; --paper: #fffaf2; --paper-2: #f3eadb;
+  border-radius: 14px;
+}
+.rsvp-dialog .rsvp-title { font-style: italic; }
+.rsvp-pill { box-shadow: 0 14px 34px rgb(0 0 0 / .28); }
+
+/* ---------- móvil ---------- */
+@media (max-width: 760px) {
+  .cards { grid-template-columns: minmax(0, 340px); gap: 26px; }
+  .moment__time { font-size: min(clamp(110px, 36vw, 200px), 30vh); }
+}
+
+/* ---------- sin movimiento: todo en su sitio, solo cambia el cielo ---------- */
+.is-still .hero { height: auto; }
+.is-still .hero__stage { position: relative; }
+.is-still .hero__photo { transform: none; }
+.is-still .hero__after, .is-still .hero__veil, .is-still .hero__hint { display: none; }
+.is-still .card { transform: none !important; }
+.is-still .hs__track { flex-direction: column; width: auto; align-items: stretch; }
+.is-still .hs__intro, .is-still .hs__card { width: auto; max-width: 640px; margin-inline: auto; }
+.is-still .moment { min-height: 70vh; }

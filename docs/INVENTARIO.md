@@ -4,9 +4,9 @@ Lo que había antes de empezar el SaaS, para no romper nada.
 
 ## Plantillas y estilos
 
-- **45 maquetaciones**: la Clásica (raíz del repositorio) y 44 carpetas en `plantillas/`: acuarela, azulejo, bordado, botanica, caligrafia, capilla, carrete, carta, cartografia, chocolate, ciudades, costa, cuento, cumbre, editorial, encaje, estrellas, etiqueta, feston, galeria, grabado, jardin, kintsugi, laca, lacre, lino, marmol, minimal, monograma, negro, origami, palacio, partitura, perla, postal, regencia, riviera, seda, terciopelo, toile, vegetal, vendimia, verbena y villa.
-- **47 estilos** en el escaparate (`studio/studio.json > styles`): uno por maquetación, y la Clásica con tres (Olivar, Atardecer y Noche), que solo cambian `config.theme`.
-- Todas cargan su config con `js/config.js > loadConfig()` y guardan el RSVP con `js/storage.js`. Son 45 copias idénticas de cada archivo: ahí está el único punto de enganche con la base de datos.
+- **46 maquetaciones**: la Clásica (raíz del repositorio) y 45 carpetas en `plantillas/`: acuarela, azulejo, bordado, botanica, caligrafia, capilla, carrete, carta, cartografia, chocolate, ciudades, costa, cuento, cumbre, editorial, encaje, estrellas, etiqueta, feston, galeria, grabado, jardin, jornada, kintsugi, laca, lacre, lino, marmol, minimal, monograma, negro, origami, palacio, partitura, perla, postal, regencia, riviera, seda, terciopelo, toile, vegetal, vendimia, verbena y villa.
+- **48 estilos** en el escaparate (`studio/studio.json > styles`): uno por maquetación, y la Clásica con tres (Olivar, Atardecer y Noche), que solo cambian `config.theme`.
+- Todas cargan su config con `js/config.js > loadConfig()` y guardan el RSVP con `js/storage.js`. Son 46 copias idénticas de cada archivo: ahí está el único punto de enganche con la base de datos.
 
 ## Secciones (`config.sections`)
 
@@ -27,8 +27,8 @@ Lo que había antes de empezar el SaaS, para no romper nada.
 
 - Comunes a todas: `locale`, `event` (pareja, fecha con zona, fin, frase, foto, encuadre, texto alternativo), `venue` (nombre, dirección, ciudad, mapa), `schedule`, `gifts` (titular, IBAN), `rsvp` (fecha límite, botón, destino), `copy` (todos los textos, por sección) y `sections`.
 - Casi todas: `story.chapters` y `gallery`.
-- Propios: `venue.lat/lon` (Costa, Noche estrellada, Cartografía), `cities` y `copy_en` (Dos ciudades, bilingüe), `copy.letter` (Carta), `copy.envelope` (Lacre), `copy.museum` (Galería), `copy.story.labels` y `copy.schedule.notes` (etiquetas de la historia y del programa en las plantillas desde Vendimia), `copy.hero.*` (textos de portada: cosecha, escala, canción, altitud...), etc.
-- Esquema completo: [`schema/wedding-config.schema.json`](../schema/wedding-config.schema.json). Las 45 configs de ejemplo lo cumplen (`npm run validar`).
+- Propios: `venue.lat/lon` (Costa, Noche estrellada, Cartografía, Del día a la noche), `cities` y `copy_en` (Dos ciudades, bilingüe), `copy.letter` (Carta), `copy.envelope` (Lacre), `copy.museum` (Galería), `copy.story.labels` y `copy.schedule.notes` (etiquetas de la historia y del programa en las plantillas desde Vendimia), `copy.hero.*` (textos de portada: cosecha, escala, canción, altitud...), etc.
+- Esquema completo: [`schema/wedding-config.schema.json`](../schema/wedding-config.schema.json). Las 46 configs de ejemplo lo cumplen (`npm run validar`).
 
 ## Integraciones
 
