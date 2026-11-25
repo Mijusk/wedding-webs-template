@@ -165,6 +165,7 @@ function closest(written, g) {
 
 const WHY = {
   duplicado: "Ese grupo ya había contestado desde su enlace: puede que sea la misma respuesta dos veces. Si la unís, cuenta la más reciente.",
+  "mismo-grupo": "Varias personas de ese grupo han contestado por separado. Al unir una respuesta, cuenta como la de todo el grupo (la más reciente).",
   varios: "Se parece a más de un grupo de vuestra lista.",
   parecido: "Se parece, pero no es igual.",
 };

@@ -29,6 +29,14 @@ test("una letra mal escrita en el apellido sigue siendo casi seguro", () => {
   assert.equal(one("Marta Sanchez").group.id, "g2");
 });
 
+test("dos personas del mismo grupo que contestan por separado no se unen solas (una taparía a la otra)", () => {
+  const two = matchAnswers([{ name: "Marta Sánchez", payload: {} }, { name: "Pablo Gil", payload: {} }], groups);
+  assert.deepEqual(two.map((m) => [m.group.id, m.kind, m.reason]), [["g2", "sugerencia", "mismo-grupo"], ["g2", "sugerencia", "mismo-grupo"]]);
+  // Grupos distintos, o la misma persona dos veces: siguen siendo seguras.
+  assert.deepEqual(matchAnswers([{ name: "Marta Sánchez", payload: {} }, { name: "José García", payload: {} }], groups).map((m) => m.kind), ["seguro", "seguro"]);
+  assert.deepEqual(matchAnswers([{ name: "Pablo Gil", payload: {} }, { name: "pablo gil", payload: {} }], groups).map((m) => m.kind), ["seguro", "seguro"]);
+});
+
 test("diminutivos («Pepe», «Nacho») se sugieren, no se unen solos", () => {
   const m = one("Pepe García");
   assert.equal(m.group.id, "g1");

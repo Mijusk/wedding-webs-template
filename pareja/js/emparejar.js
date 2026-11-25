@@ -158,5 +158,10 @@ export function matchAnswers(answers, groups) {
       others: ranked.slice(1, 3).map((r) => r.group),
     });
   }
+  // Dos personas del mismo grupo que han contestado cada una por su lado: en un grupo solo cuenta la
+  // respuesta más reciente, así que unirlas solas taparía a una de las dos. Que decida la pareja.
+  const names = new Map();
+  for (const m of out.filter((x) => x.kind === "seguro")) names.set(m.group.id, new Set([...(names.get(m.group.id) || []), nameKey(m.answer.name)]));
+  for (const m of out) if (m.kind === "seguro" && names.get(m.group.id).size > 1) Object.assign(m, { kind: "sugerencia", reason: "mismo-grupo" });
   return out;
 }
