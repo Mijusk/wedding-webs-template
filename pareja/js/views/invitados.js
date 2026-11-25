@@ -2,7 +2,7 @@
 import { db } from "/panel/js/supa.js";
 import { html, raw, str, render, $, $$, formDialog, confirmDialog, toast, fail, debounce, downloadCsv, icons } from "/panel/js/ui.js";
 import { readXlsx } from "/lib/xlsx.js";
-import { parseCsv } from "/panel/js/csv.js";
+import { decodeCsv, parseCsv } from "/panel/js/csv.js";
 import { parseGuestRows, TEMPLATE_ROWS } from "../lista.js";
 import { loadGuests, inviteUrl, inviteMessage, statusOf, whatsapp, copy, fullName, noModule } from "../comun.js";
 
@@ -172,7 +172,7 @@ async function importFile(ctx, file, existing) {
   const { weddingId } = ctx;
   let rows;
   try {
-    rows = /\.csv$/i.test(file.name) ? parseCsv(await file.text()) : await readXlsx(await file.arrayBuffer());
+    rows = /\.csv$/i.test(file.name) ? parseCsv(decodeCsv(await file.arrayBuffer())) : await readXlsx(await file.arrayBuffer());
   } catch (e) {
     return fail(new Error(`No se ha podido leer «${file.name}». Guardadlo como Excel (.xlsx) o CSV. (${e.message})`));
   }

@@ -1,7 +1,7 @@
 // Importador único de la hoja de Google "Contactos" (la de integrations/leads.gs) a los leads.
 import { db } from "../supa.js";
 import { html, render, $, toast, fail } from "../ui.js";
-import { parseCsv, rowsToObjects } from "../csv.js";
+import { decodeCsv, parseCsv, rowsToObjects } from "../csv.js";
 
 export default async function importar({ el, go }) {
   render(el, html`
@@ -23,7 +23,7 @@ export default async function importar({ el, go }) {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      rows = rowsToObjects(parseCsv(await file.text())).filter((r) => r.email);
+      rows = rowsToObjects(parseCsv(decodeCsv(await file.arrayBuffer()))).filter((r) => r.email);
     } catch (ex) { return fail(new Error(`No se ha podido leer el archivo: ${ex.message}`)); }
     if (!rows.length) {
       return render($("[data-preview]", el), html`<p class="problems">No encuentro ninguna fila con la columna «Email». ¿Es la pestaña «Contactos»?</p>`);
