@@ -68,6 +68,11 @@ export default async function boda(ctx) {
   const tzOf = () => config.timeZone || "Europe/Madrid";
   const yes = rsvp.filter((r) => r.attending).length;
 
+  // La ficha se repinta sobre el mismo elemento: se sueltan los oyentes de la vez anterior. Si no, Ctrl+S
+  // guardaría también la copia vieja de la boda.
+  el.bodaListeners?.abort();
+  const { signal } = (el.bodaListeners = new AbortController());
+
   render(el, html`
     <a class="back" href="#/bodas">← Bodas</a>
     <div class="page-head">
@@ -264,6 +269,7 @@ export default async function boda(ctx) {
     refresh();
   };
   preview.update(config);
+  signal.addEventListener("abort", () => preview.destroy());
 
   // ── Campos simples (data-path) ──
   form.addEventListener("input", (e) => {
@@ -551,7 +557,7 @@ export default async function boda(ctx) {
     preview.setTemplate(template);
     preview.update(config);
     $("[data-preview-note]", el).textContent = "Así se verá con los cambios de ahora (aún sin guardar).";
-  });
+  }, { signal });
   $$("[data-restore]", el).forEach((b) => b.addEventListener("click", async () => {
     if (dirty && !(await confirmDialog("Tienes cambios sin guardar", "Si vuelves a otra versión, se pierden.", "Seguir", true))) return;
     try { await db.rpc("restore_wedding_version", { p_version_id: b.dataset.restore }); dirty = false; toast("Borrador restaurado. Pulsa Publicar para ponerlo online."); boda(ctx); }
@@ -603,6 +609,8 @@ export default async function boda(ctx) {
       return true;
     } catch (e) { fail(e); return false; }
   }
+  // Antes de algo que repinta la ficha: lo que esté a medias se guarda en el borrador, no se pierde.
+  const saveFirst = async () => !dirty || save({ quiet: true });
   $("[data-save]", el).addEventListener("click", () => save());
 
   $("[data-publish]", el).addEventListener("click", async () => {
@@ -645,6 +653,7 @@ export default async function boda(ctx) {
       if (e.target.closest("[data-close]")) dlg.close();
       if (e.target.closest("[data-copy]")) { await navigator.clipboard?.writeText(previewUrl).catch(() => {}); toast("Enlace copiado."); }
       if (e.target.closest("[data-rotate]")) {
+        if (!(await saveFirst())) return;
         try {
           const token = Array.from(crypto.getRandomValues(new Uint8Array(24)), (b) => b.toString(16).padStart(2, "0")).join("");
           await db.update("weddings", { id: `eq.${id}` }, { preview_token: token });
@@ -664,7 +673,7 @@ export default async function boda(ctx) {
     const ok = await confirmDialog(to === "retirada" ? "¿Retirar la web?" : "¿Quitar la web de internet?",
       to === "retirada" ? "Los invitados verán que ya no está disponible. Se puede volver a publicar." : "Vuelve a borrador: el enlace dejará de funcionar hasta que la publiques de nuevo.",
       to === "retirada" ? "Retirar" : "Quitar", true);
-    if (!ok) return;
+    if (!ok || !(await saveFirst())) return;
     try { await db.rpc("unpublish_wedding", { p_wedding_id: id, p_status: to }); boda(ctx); } catch (e) { fail(e); }
   }));
   $("[data-delete]", el)?.addEventListener("click", async () => {
@@ -692,13 +701,14 @@ export default async function boda(ctx) {
   $("[data-add-couple]", el).addEventListener("click", async () => {
     const email = $("[data-couple-email]", el).value.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(email)) return toast("Escribe un email válido.", { error: true });
+    if (!(await saveFirst())) return;
     try {
       await db.insert("couple_users", { wedding_id: id, email, name: $("[data-couple-name]", el).value.trim() || null });
       toast("Acceso dado. Ahora mándales el enlace."); boda(ctx);
     } catch (e) { fail(e); }
   });
   $$("[data-del-couple]", el).forEach((b) => b.addEventListener("click", async () => {
-    if (!(await confirmDialog("¿Quitar el acceso?", "Ya no podrá entrar en el panel de esta boda.", "Quitar", true))) return;
+    if (!(await confirmDialog("¿Quitar el acceso?", "Ya no podrá entrar en el panel de esta boda.", "Quitar", true)) || !(await saveFirst())) return;
     try { await db.remove("couple_users", { id: `eq.${b.dataset.delCouple}` }); boda(ctx); } catch (e) { fail(e); }
   }));
   $$("[data-access]", el).forEach((b) => b.addEventListener("click", async () => {
@@ -739,6 +749,7 @@ export default async function boda(ctx) {
 
   // ── Propuestas y cambios ──
   $$("[data-req]", el).forEach((b) => b.addEventListener("click", async () => {
+    if (!(await saveFirst())) return;
     try {
       await db.update("change_requests", { id: `eq.${b.dataset.req}` }, {
         status: b.dataset.to, resolved_at: new Date().toISOString(), resolved_by: staff.id,
@@ -754,7 +765,7 @@ export default async function boda(ctx) {
       text: "La pareja la verá debajo de su mensaje, en su página de seguimiento.",
       body: html`<div class="field"><label for="rp">Respuesta</label><textarea id="rp" name="reply" rows="3">${r.reply || ""}</textarea></div>`,
     });
-    if (!data) return;
+    if (!data || !(await saveFirst())) return;
     try { await db.update("change_requests", { id: `eq.${r.id}` }, { reply: String(data.get("reply")).trim() || null }); boda(ctx); }
     catch (e) { fail(e); }
   }));
@@ -786,7 +797,7 @@ export default async function boda(ctx) {
   });
 
   // Guardar con Ctrl/Cmd + S
-  el.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); } });
+  el.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); } }, { signal });
 }
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o?.[k] !== undefined).map((k) => [k, o[k]]));
