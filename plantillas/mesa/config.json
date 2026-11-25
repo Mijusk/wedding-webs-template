@@ -1,0 +1,173 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Elena",
+      "Tomás"
+    ],
+    "date": "2027-09-18T13:00:00+02:00",
+    "end": "2027-09-19T01:00:00+02:00",
+    "tagline": "Una comida larga, de las que acaban bailando",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Elena y Tomás"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Barcelona, 2018",
+        "text": "Nos sentaron juntos en la boda de unos amigos porque no conocíamos a nadie más. Fuimos los últimos en levantarnos de la mesa.",
+        "photo": "assets/foto-1.jpg",
+        "photoAlt": "Elena y Tomás"
+      },
+      {
+        "meta": "Cadaqués, 2026",
+        "text": "Ocho años y muchas sobremesas después, Tomás lo preguntó entre el segundo plato y el postre. Elena dijo que sí antes de que acabara la frase.",
+        "photo": "assets/foto-5.jpg",
+        "photoAlt": "Elena y Tomás en Cadaqués"
+      },
+      {
+        "meta": "18 · 09 · 2027",
+        "text": "Ahora queremos sentarnos contigo: una comida larga, sin prisa, con las personas que más queremos alrededor de la misma mesa."
+      }
+    ]
+  },
+  "venue": {
+    "name": "Masía El Roure",
+    "address": "Camí de la Font, 12 · Begur, Girona",
+    "city": "Begur",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Begur%2C%20Girona"
+  },
+  "schedule": [
+    {
+      "time": "13:00",
+      "label": "Ceremonia",
+      "place": "En el jardín de los olivos"
+    },
+    {
+      "time": "14:00",
+      "label": "Aperitivo",
+      "place": "Bajo la pérgola, con vermut y música"
+    },
+    {
+      "time": "15:30",
+      "label": "Comida",
+      "place": "En la mesa larga del patio"
+    },
+    {
+      "time": "18:30",
+      "label": "Baile",
+      "place": "Hasta que se acaben las velas"
+    }
+  ],
+  "gifts": {
+    "holder": "Elena Puig y Tomás Ferrer",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-08-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "hint": "Desliza",
+      "seat": "Tu sitio",
+      "seatNote": "Te hemos guardado sitio en nuestra mesa",
+      "seatNoteOne": "{name}, este es tu sitio",
+      "seatNoteMany": "{name}, este es vuestro sitio"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "title": "Cuándo y dónde",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Ver en el mapa"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "De sobremesa"
+    },
+    "schedule": {
+      "eyebrow": "El programa",
+      "title": "Menú del día",
+      "text": "Horarios orientativos."
+    },
+    "dresscode": {
+      "eyebrow": "Vestimenta",
+      "title": "Qué ponerse",
+      "text": "Elegante de día. Tejidos ligeros y calzado cómodo: la ceremonia es sobre césped."
+    },
+    "gallery": {
+      "eyebrow": "Algunos momentos",
+      "title": "Sobre la mesa"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es el regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta",
+      "envelope": "Para los novios"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Te guardamos sitio?",
+      "text": "Confírmanoslo antes del {deadline} y preparamos tu sitio en la mesa.",
+      "after": "Gracias por sentaros a nuestra mesa. Fue la mejor sobremesa de nuestra vida.",
+      "today": "Hoy es el día. La mesa ya está puesta."
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "dresscode",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-2.jpg",
+    "assets/foto-6.jpg",
+    "assets/foto-3.jpg",
+    "assets/foto-7.jpg",
+    "assets/foto-4.jpg",
+    "assets/foto-8.jpg"
+  ]
+}
