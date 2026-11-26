@@ -112,16 +112,19 @@ export function renderStyleCards(grid, { studio, styles, urlOf, withTheme }, { l
   if (!("IntersectionObserver" in window)) return boxes.forEach(load);
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) { load(e.target); io.unobserve(e.target); }
-  }, { rootMargin: "250px 0px" });
+  }, { rootMargin: "250px 60%" }); // también la siguiente de la fila que se desliza (móvil)
   boxes.forEach((b) => io.observe(b));
 }
 
-// En la portada solo caben dos filas; si hay más, el resto se ve en plantillas.html.
+// En la portada solo caben dos filas; si hay más, el resto se ve en plantillas.html. En el
+// móvil van en una fila que se desliza de lado (studio.css): ocho, para ver unos cuantos de un
+// vistazo sin cargar decenas de webs a la vez.
 export function limitToTwoRows(grid, more) {
   const cards = [...grid.children];
+  const phone = matchMedia("(max-width: 600px)");
   const fit = () => {
     const cols = getComputedStyle(grid).gridTemplateColumns.split(" ").length;
-    const max = Math.max(cols * 2, 4);
+    const max = phone.matches ? 8 : Math.max(cols * 2, 4);
     cards.forEach((c, i) => { c.hidden = i >= max; });
     more.hidden = cards.length <= max;
     more.querySelector("[data-count]").textContent = `Ver todas las plantillas (${cards.length})`;

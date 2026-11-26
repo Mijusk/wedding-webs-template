@@ -76,6 +76,7 @@
 main:has(> .hero) { padding-top: 40px; grid-template-columns: minmax(0, 1fr); }
 .hero { display: grid; gap: clamp(36px, 5vw, 64px); overflow: clip; padding-block: 8px 24px; min-width: 0; grid-template-columns: minmax(0, 1fr); }
 .hero__head { display: grid; justify-items: center; gap: 22px; text-align: center; }
+.hero__eyebrow { text-wrap: balance; }
 .hero__title { font-size: clamp(42px, 6.4vw, 100px); line-height: 1; letter-spacing: -.02em; max-width: 17ch; }
 .hero__foot { display: grid; justify-items: center; gap: 24px; text-align: center; }
 .hero__foot .lead { max-width: 56ch; }

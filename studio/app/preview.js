@@ -19,12 +19,28 @@ function send(frame, config) {
   frame.contentWindow?.postMessage({ type: "wedding:config", config }, location.origin);
 }
 
+// Las vistas previas que cambian mientras escriben (data-still: la del paso a paso y la de la
+// portada) se pintan de nuevo con cada cambio, y la plantilla repetía su entrada (los nombres que
+// suben, la foto que se asienta) a cada letra. La primera vez se ve la entrada; después, quieta.
+function holdStill(frame) {
+  if (!("still" in frame.dataset)) return;
+  try {
+    const doc = frame.contentDocument;
+    if (!doc?.head || doc.getElementById("ww-still")) return;
+    const style = doc.createElement("style");
+    style.id = "ww-still";
+    style.textContent = "*,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important}";
+    doc.head.append(style);
+  } catch { /* otra página: se deja como está */ }
+}
+
 // Devuelve una promesa que se cumple cuando la plantilla ya tiene el config, o falla si no llega a cargar.
 export function showInFrame(frame, templateUrl, config) {
   configs.set(frame, config);
   const target = new URL(templateUrl, location.href);
   target.hash = "preview";
   if (frame.dataset.src === target.href && frame.dataset.ready) {
+    holdStill(frame);
     send(frame, config);
     return Promise.resolve();
   }

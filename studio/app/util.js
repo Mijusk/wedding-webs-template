@@ -1,3 +1,5 @@
+import { refreshViewport } from "./viewport.js";
+
 export const $ = (sel, root = document) => root.querySelector(sel);
 
 export const esc = (s) =>
