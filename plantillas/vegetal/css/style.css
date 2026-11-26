@@ -465,3 +465,7 @@ h1, h2 { font-family: var(--font-display); font-weight: 400; }
   .hero__sheet { padding-bottom: 56px; }
   .hero__lede { display: block; margin-top: 22px; max-width: 26em; font-size: 15px; line-height: 1.7; color: #3c3d3f; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

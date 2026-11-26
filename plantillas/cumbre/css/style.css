@@ -127,3 +127,7 @@ h1, h2, h3 { font-weight: 300; font-variation-settings: "opsz" 144; }
   .hero__sun { bottom: 27%; }
   .hero__ridges { height: 34%; left: -70%; right: auto; width: 240%; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

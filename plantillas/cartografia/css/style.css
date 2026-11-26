@@ -184,3 +184,7 @@ body { isolation: isolate; }
   .stop { width: 28px; height: 28px; font-size: 12px; }
   .plan__label { font-size: 17px; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

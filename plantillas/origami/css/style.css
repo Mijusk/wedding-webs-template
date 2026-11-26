@@ -123,3 +123,7 @@ body { font-weight: 300; font-size: 16px; line-height: 1.8; }
   .fact + .fact { margin-top: 0; padding-top: 36px; }
 }
 @media (prefers-reduced-motion: reduce) { .garland__thread { animation: none; } }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

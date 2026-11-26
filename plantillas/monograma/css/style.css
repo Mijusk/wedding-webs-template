@@ -243,3 +243,7 @@ body .rsvp-dialog { border-radius: 0; text-align: center; }
   .hero .mono__ring, .closing__mono .mono__ring { stroke-dashoffset: 0 !important; }
   .hero .mono__letters > g, .hero .mono__orn, .hero .anim, .closing__mono .mono__letters, .closing__mono .mono__orn { opacity: 1 !important; filter: none !important; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

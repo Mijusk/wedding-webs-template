@@ -317,3 +317,7 @@ body .rsvp-thanks p { font-size: 19px; }
   .name::after { display: none; }
   .hero__cue::after { transform: none; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

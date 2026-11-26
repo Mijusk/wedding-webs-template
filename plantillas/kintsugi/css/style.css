@@ -154,3 +154,7 @@ body {
   .chapter { text-align: left; }
   .fact + .fact { border-top: 0; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

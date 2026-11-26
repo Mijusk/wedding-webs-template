@@ -124,3 +124,7 @@ body { font-weight: 300; font-size: 17px; line-height: 1.8; background: var(--ve
   .hero__names { font-size: min(70px, calc((100vw - 48px) / (var(--len) * .7))); }
 }
 @media (prefers-reduced-motion: reduce) { .flame, .flame::after, .hero__text::before, .frame::after { animation: none !important; } }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

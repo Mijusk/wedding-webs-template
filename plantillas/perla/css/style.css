@@ -100,3 +100,7 @@ body { font-weight: 300; font-size: 15px; line-height: 1.9; letter-spacing: .01e
   .hero__date { gap: 12px; letter-spacing: .36em; }
   .hero__photo { height: 38svh; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

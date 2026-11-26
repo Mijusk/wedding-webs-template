@@ -117,3 +117,7 @@ body { font-weight: 300; font-size: 16px; line-height: 1.8; background: radial-g
   .arch { width: min(360px, 88%); justify-self: center; }
 }
 @media (prefers-reduced-motion: reduce) { .foil { animation: none; } }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

@@ -169,3 +169,7 @@ body { font-size: 19px; line-height: 1.6; }
   .label__names { font-size: min(54px, calc((100vw - 110px) / (var(--len) * .55))); }
   .story .chapters { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }
