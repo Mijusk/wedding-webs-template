@@ -11,7 +11,7 @@ Para quien programe (Luis no lo necesita para usar el panel).
 | Webs de boda | `/b/<slug>` → `api/boda.js` | Función de Vercel que pinta la plantilla con el config de la base de datos. |
 | API pública | `api/rsvp.js`, `api/lead.js`, `api/productos.js` | Funciones de Vercel. Hablan con Supabase con la clave secreta. |
 | Panel | `panel/` | Estático. Habla con Supabase desde el navegador con la clave publicable; la RLS decide qué ve cada uno. |
-| Panel de la pareja | `pareja/` | Estático, como el panel. Entra con `/pareja/#acceso=<clave>` (lo genera `api/pareja.js`). |
+| Panel de la pareja | `pareja/` | Estático, como el panel. Entra con su enlace de siempre `/pareja/#llave=<clave>` (`couple_users.access_key`; `api/pareja.js` lo cambia por una sesión). |
 | Seguimiento del pedido | `seguimiento/` + `api/pedido.js` | Estático. `/seguimiento/<código>` habla con `/api/pedido` (sin sesión: el código es la llave). |
 | Cobros | `api/pedido.js`, `api/stripe.js` | Página de pago de Stripe y sus avisos firmados. `/pagar/<código>` lleva directo a pagar. |
 | Facturas en PDF | `api/factura.js` | PDF propio (`api/_lib/pdf.js`), para el panel (con sesión) o la pareja (con su código). |

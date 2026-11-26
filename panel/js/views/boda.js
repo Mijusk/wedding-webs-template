@@ -725,21 +725,42 @@ export default async function boda(ctx) {
   $$("[data-access]", el).forEach((b) => b.addEventListener("click", async () => {
     b.disabled = true;
     try {
-      const { link } = await api("/api/pareja", { accion: "enlace", wedding_id: id, email: b.dataset.access });
+      const ask = () => api("/api/pareja", { accion: "enlace", wedding_id: id, email: b.dataset.access });
+      // siempre: su enlace de siempre (sirve todas las veces). Si aún falta la migración, uno de un solo uso.
+      let { link, siempre } = await ask();
       const c = couples.find((x) => x.email === b.dataset.access);
-      const msg = `¡Hola${c?.name ? `, ${c.name}` : ""}! Con este enlace entráis en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Sirve una vez y caduca en unas horas; después os quedáis dentro en ese móvil: ${link}`;
+      const hola = `¡Hola${c?.name ? `, ${c.name}` : ""}!`;
+      const msg = () => (siempre
+        ? `${hola} Este es vuestro enlace para entrar en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Guardadlo: os sirve siempre, desde cualquier móvil y sin contraseña: ${link}`
+        : `${hola} Con este enlace entráis en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Sirve una vez y caduca en unas horas; después os quedáis dentro en ese móvil: ${link}`);
       const dlg = document.createElement("dialog");
-      render(dlg, html`<div class="dlg"><h2>Enlace de acceso</h2>
-        <p class="muted">Para ${b.dataset.access}. Sirve una sola vez y caduca en unas horas. Si caduca, genera otro.</p>
+      const paint = () => render(dlg, html`<div class="dlg"><h2>${siempre ? "Su enlace de siempre" : "Enlace de acceso"}</h2>
+        <p class="muted">Para ${b.dataset.access}. ${siempre
+          ? "Es siempre el mismo y sirve todas las veces, desde cualquier móvil: que lo guarden y entren con él cuando quieran."
+          : "Sirve una sola vez y caduca en unas horas. Si caduca, genera otro."}</p>
         <div class="link-box"><input readonly value="${link}"><button class="btn btn--small" type="button" data-copy-link>Copiar</button></div>
-        <div class="btn-row"><a class="btn btn--small btn--primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a></div>
-        <p class="small muted">No lo abras tú: se gastaría.</p>
+        <div class="btn-row"><a class="btn btn--small btn--primary" href="https://wa.me/?text=${encodeURIComponent(msg())}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a>
+          ${siempre ? html`<button class="btn btn--small btn--quiet" type="button" data-new-key>Cambiar enlace</button>` : ""}</div>
+        <p class="small muted">${siempre
+          ? "No lo abras en este navegador: entrarías como ellos y saldrías de tu panel. Para mirar, usa «Ver su panel»."
+          : "No lo abras tú: se gastaría."}</p>
         <div class="dlg__actions"><button class="btn" type="button" data-close>Cerrar</button></div></div>`);
+      paint();
       document.body.append(dlg);
       dlg.addEventListener("close", () => dlg.remove());
       dlg.addEventListener("click", async (e) => {
         if (e.target.closest("[data-close]")) dlg.close();
         if (e.target.closest("[data-copy-link]")) { await navigator.clipboard?.writeText(link).catch(() => {}); toast("Enlace copiado."); }
+        if (e.target.closest("[data-new-key]")) {
+          if (!(await confirmDialog("¿Cambiar su enlace?", "El que tienen ahora deja de servir para entrar y tendrás que mandarles el nuevo. Solo hace falta si se lo han pasado a quien no debían.", "Cambiar", true))) return;
+          try {
+            const key = Array.from(crypto.getRandomValues(new Uint8Array(24)), (x) => x.toString(16).padStart(2, "0")).join("");
+            await db.update("couple_users", { id: `eq.${c.id}` }, { access_key: key });
+            ({ link, siempre } = await ask());
+            paint();
+            toast("Enlace cambiado. Mándales el nuevo.");
+          } catch (err) { fail(err); }
+        }
       });
       dlg.showModal();
     } catch (e) { fail(new Error(e.code === "no_es_pareja" ? "Ese email no tiene acceso a ninguna boda activa." : e.message)); }

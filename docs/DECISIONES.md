@@ -69,6 +69,11 @@ El enlace es `/pareja/#acceso=<clave>` y el navegador canjea la clave por la ses
 - el email lo mandamos nosotros (Resend), con nuestro texto en español, sin depender del correo de Supabase.
 Luis puede generar el enlace desde el panel y mandarlo por WhatsApp (sin emails configurados también funciona).
 
+### 2026-11-26 · Enlace de siempre en vez del de un solo uso
+Las parejas entran y salen muchas veces al mes. Con el enlace de un solo uso, al volver a pulsar el del WhatsApp o al cambiar de móvil tenían que escribir su email (y, sin emails conectados, pedirle otro enlace a Luis). Ahora cada pareja tiene una clave fija (`couple_users.access_key`) y su enlace `/pareja/#llave=<clave>` sirve todas las veces y desde cualquier móvil. Al abrirlo, `/api/pareja` (accion `entrar`) lo cambia por una clave de un solo uso de Supabase, que el navegador canjea como antes. Si ya estaba dentro y el enlace falla, entra igual.
+- Es como el enlace personal de los invitados o el código del seguimiento: quien tenga el enlace entra. Por eso el panel tiene «Cambiar enlace»: el viejo deja de servir para entrar (los móviles que ya estaban dentro siguen dentro; para echarlos, «Quitar acceso»).
+- El email de «Enviadme el enlace» también manda el de siempre.
+
 ### La pareja no lee la tabla de bodas
 Tiene las notas internas de Luis. Ve su boda con `pareja_resumen()` y cambia solo lo permitido con `pareja_guardar()`.
 

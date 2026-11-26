@@ -1,5 +1,5 @@
 // Sesión de los paneles (panel/js/supa.js) con un navegador y un Supabase de mentira. Lo importante: no
-// cerrar la sesión por un corte de red (el enlace de acceso de las parejas sirve una sola vez).
+// cerrar la sesión por un corte de red, y entrar con el enlace de siempre de las parejas.
 import { test, before, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 
@@ -8,6 +8,8 @@ const real = { fetch: globalThis.fetch, localStorage: Object.getOwnPropertyDescr
 const store = new Map();
 let token; // qué responde la renovación de la sesión
 let used;  // claves de refresco usadas
+let pareja; // qué responde /api/pareja
+let sent;  // lo que se ha mandado a /api/pareja y a /auth/v1/verify
 let supa;
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status });
@@ -22,6 +24,11 @@ before(async () => {
   globalThis.fetch = async (url, init = {}) => {
     if (url === "/api/panel-config") return json({ ok: true, supabaseUrl: "http://sb", supabaseKey: "sb_publishable_x", siteUrl: "http://x" });
     if (url.startsWith("http://sb/auth/v1/token")) { used.push(JSON.parse(init.body).refresh_token); return token(); }
+    if (url === "/api/pareja") { sent.push(JSON.parse(init.body)); return pareja(); }
+    if (url === "http://sb/auth/v1/verify") {
+      sent.push(JSON.parse(init.body));
+      return json({ access_token: "de-la-llave", refresh_token: "r-llave", expires_in: 3600 });
+    }
     return json([]);
   };
   supa = await import("../../panel/js/supa.js");
@@ -34,6 +41,8 @@ after(() => {
 
 beforeEach(async () => {
   used = [];
+  sent = [];
+  pareja = () => json({ ok: true, acceso: "clave-de-un-uso" });
   token = () => json({ access_token: "nuevo", refresh_token: "r2", expires_in: 3600 });
   store.set(KEY, JSON.stringify(session("r1", -10))); // caducada: toca renovar
   await supa.init();
@@ -71,4 +80,20 @@ test("si otra pestaña ya la ha renovado, usa la suya sin gastar otra clave", as
 test("varias peticiones a la vez renuevan una sola vez", async () => {
   await Promise.all([supa.db.select("x"), supa.db.select("y"), supa.db.select("z")]);
   assert.deepEqual(used, ["r1"]);
+});
+
+test("enlace de siempre: el servidor da una clave de un solo uso y se canjea por la sesión", async () => {
+  await supa.enterWithKey("llave-de-siempre-0123456789abcdef");
+  assert.deepEqual(sent, [
+    { accion: "entrar", llave: "llave-de-siempre-0123456789abcdef" },
+    { type: "email", token_hash: "clave-de-un-uso" },
+  ]);
+  assert.equal(saved().refresh_token, "r-llave");
+});
+
+test("enlace de siempre que ya no vale: falla sin cerrar la sesión que había", async () => {
+  pareja = () => json({ ok: false, error: "llave" }, 404);
+  await assert.rejects(supa.enterWithKey("llave-cambiada-0123456789abcdef"), { status: 404 });
+  assert.equal(sent.length, 1, "no se intenta canjear nada");
+  assert.ok(saved(), "la sesión de antes sigue guardada");
 });

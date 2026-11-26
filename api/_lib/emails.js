@@ -6,13 +6,15 @@ const html = (paragraphs, button) => emailHtml(paragraphs, button);
 
 const names = (couple) => (Array.isArray(couple) ? couple.filter(Boolean).join(" y ") : "");
 
-export function accessEmail({ link, couple }) {
+export function accessEmail({ link, couple, forever = false }) {
   const who = names(couple);
   const subject = who ? `Entrad en la web de ${who}` : "Entrad en vuestra web de boda";
   const lines = [
     "¡Hola!",
     "Con este enlace entráis en el panel de vuestra web de boda: invitados, respuestas, horario y regalo.",
-    "El enlace sirve una sola vez y caduca en unas horas. Después os quedáis dentro en ese móvil u ordenador.",
+    forever
+      ? "Guardad este email: el enlace os sirve siempre, desde cualquier móvil u ordenador y sin contraseña."
+      : "El enlace sirve una sola vez y caduca en unas horas. Después os quedáis dentro en ese móvil u ordenador.",
   ];
   return {
     subject,

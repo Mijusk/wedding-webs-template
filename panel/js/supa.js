@@ -100,6 +100,13 @@ export async function verifyLink(tokenHash) {
   return session;
 }
 
+// Enlace de siempre de las parejas (/pareja/#llave=…): sirve todas las veces. Nuestro servidor lo cambia
+// por una clave de un solo uso y esa se canjea aquí, como la del enlace mágico.
+export async function enterWithKey(key) {
+  const { acceso } = await api("/api/pareja", { accion: "entrar", llave: key });
+  return verifyLink(acceso);
+}
+
 // Llamadas a nuestras funciones de /api con la sesión de quien está dentro.
 export async function api(path, body) {
   await ensureFresh();
