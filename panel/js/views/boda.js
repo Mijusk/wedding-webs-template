@@ -1,12 +1,13 @@
 // Editor de una boda: formulario a la izquierda y la web de verdad a la derecha, al momento.
 // Guardar = borrador (no cambia lo que ven los invitados). Publicar = versión nueva online.
-import { db, storage, siteUrl, api } from "../supa.js";
+import { db, storage, siteUrl, weddingUrl, api } from "../supa.js";
 import { html, raw, render, $, $$, statusChip, fmtDate, fmtDateTime, formDialog, confirmDialog, showDialog, toast, fail, debounce, downloadCsv, icons } from "../ui.js";
 import { styles, baseConfig, sectionInfo, livePreview, toConfig, utcOffset } from "../catalogo.js";
 import { validate } from "/lib/config-schema.js";
 import { prepare } from "/lib/fotos.js";
 import { loadSchema } from "./nueva-boda.js";
 import { formatIban, ibanOk } from "/lib/iban.js";
+import { textGroups, setText, plain } from "../textos.js";
 
 const BUCKET = "wedding-assets";
 const TZS = [["Europe/Madrid", "Península y Baleares"], ["Atlantic/Canary", "Canarias"], ["Europe/Lisbon", "Portugal"], ["Europe/London", "Reino Unido"], ["Europe/Paris", "Francia, Italia, Alemania…"], ["America/Mexico_City", "México"], ["America/New_York", "Nueva York"]];
@@ -57,7 +58,7 @@ export default async function boda(ctx) {
 
   setLeaveGuard((silent) => !dirty || (!silent && confirm("Tienes cambios sin guardar en esta boda. ¿Salir sin guardar?")));
 
-  const publicUrl = `${siteUrl()}/b/${w.slug}`;
+  const publicUrl = weddingUrl(w.slug); // maria-y-pablo.weddingwebstudio.es si está activado (lib/direccion.js)
   const previewUrl = `${publicUrl}?vista=${w.preview_token}`;
   const style = () => sts.find((s) => s.template === template && s.theme === config.theme) || sts.find((s) => s.template === template);
   const sectionsAvailable = () => [...new Set([...(base.sections || []), ...(config.sections || [])])];
@@ -242,6 +243,13 @@ export default async function boda(ctx) {
             : html`<p class="muted small">Cada vez que publiques se guarda una versión; desde aquí puedes volver a cualquiera.</p>`}
         </div></details>
 
+        <details class="sec" data-texts-sec><summary>Textos de la web</summary><div class="sec__body">
+          <p class="small muted">Todos los textos de la plantilla, sección por sección. Para encontrar uno, escribe un trozo tal como se ve en la web.</p>
+          <div class="field"><label for="f-tsearch">Buscar un texto</label><input id="f-tsearch" type="search" data-texts-search autocomplete="off" placeholder="Por ejemplo: confirmar"></div>
+          <p class="small muted" data-texts-none hidden>Ningún texto con eso. Prueba con otra palabra.</p>
+          <div data-texts></div>
+        </div></details>
+
         <details class="sec"><summary>Avanzado: todos los textos (JSON)</summary><div class="sec__body">
           <p class="small muted">El config completo de la web. Útil para cambiar un texto concreto de la plantilla. Se comprueba antes de aplicarlo.</p>
           <textarea class="code" data-json spellcheck="false" aria-label="Config de la web en JSON"></textarea>
@@ -282,6 +290,8 @@ export default async function boda(ctx) {
       setPath(config, t.dataset.path, v);
       if (t.dataset.iban !== undefined) ibanHint();
       markDirty();
+    } else if (t.dataset.text) {
+      if (setText(config, t.dataset.text, t.value)) markDirty();
     } else if (t.dataset.row) {
       markDirty();
     }
@@ -574,6 +584,37 @@ export default async function boda(ctx) {
     try { await db.rpc("restore_wedding_version", { p_version_id: b.dataset.restore }); dirty = false; toast("Borrador restaurado. Pulsa Publicar para ponerlo online."); boda(ctx); }
     catch (e) { fail(e); }
   }));
+
+  // ── Textos de la web (sin JSON) ──
+  const textsBox = $("[data-texts]", el);
+  const textsSearch = $("[data-texts-search]", el);
+  const paintTexts = () => {
+    render(textsBox, html`${textGroups(config, info).map((g, gi) => html`<fieldset class="texts-group" data-texts-group>
+      <legend>${g.name}${g.hidden ? html` <span class="muted small">(sección oculta)</span>` : ""}</legend>
+      ${g.fields.map((f, fi) => html`<div class="field" data-texts-field><label for="t-${gi}-${fi}">${f.label}</label>${f.long
+        ? html`<textarea id="t-${gi}-${fi}" data-text="${f.path}" rows="3">${f.value}</textarea>`
+        : html`<input id="t-${gi}-${fi}" data-text="${f.path}" value="${f.value}">`}</div>`)}
+    </fieldset>`)}`);
+    filterTexts();
+  };
+  const filterTexts = () => {
+    const q = plain(textsSearch.value.trim());
+    let any = false;
+    $$("[data-texts-group]", el).forEach((g) => {
+      let shown = 0;
+      $$("[data-texts-field]", g).forEach((f) => {
+        const ok = !q || plain(`${f.querySelector("label").textContent} ${f.querySelector("[data-text]").value}`).includes(q);
+        f.hidden = !ok;
+        if (ok) shown++;
+      });
+      g.hidden = !shown;
+      any ||= shown > 0;
+    });
+    $("[data-texts-none]", el).hidden = any;
+  };
+  $("[data-texts-sec]", el).addEventListener("toggle", (e) => { if (e.target.open) paintTexts(); });
+  textsSearch.addEventListener("input", filterTexts);
+  textsSearch.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); });
 
   // ── JSON ──
   const jsonBox = $("[data-json]", el);

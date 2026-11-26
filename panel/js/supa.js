@@ -2,6 +2,7 @@
 // ni CDNs de terceros: el panel no carga nada de fuera, igual que las plantillas.
 // Usa la clave PUBLICABLE (la da /api/panel-config). Lo que cada usuario puede ver o cambiar lo decide
 // la seguridad por filas de la base de datos, no este archivo.
+import * as direccion from "../../lib/direccion.js";
 
 const SESSION_KEY = "ww-panel-session";
 let cfg = null;
@@ -40,6 +41,10 @@ export async function init() {
 }
 
 export const siteUrl = () => cfg?.siteUrl || location.origin;
+// Dirección pública de una web de boda: maria-y-pablo.<dominio> si está activado, o <web>/b/<slug>.
+export const weddingDomain = () => cfg?.weddingDomain || null;
+export const weddingUrl = (slug) => direccion.weddingUrl(slug, { site: siteUrl(), domain: cfg?.weddingDomain });
+export const inviteUrl = (slug, token) => direccion.inviteUrl(slug, token, { site: siteUrl(), domain: cfg?.weddingDomain });
 export const connected = () => ({ emails: Boolean(cfg?.emails), pagos: Boolean(cfg?.pagos) });
 export const currentSession = () => session;
 export const onAuthChange = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };

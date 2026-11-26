@@ -38,6 +38,12 @@ const redirects = rules(vercel.redirects);
 const rewrites = rules(vercel.rewrites);
 const headerRules = rules(vercel.headers);
 const fill = (dest, groups = {}) => dest.replace(/:(\w+)/g, (_, k) => encodeURIComponent(groups[k] ?? ""));
+// Condiciones "has" / "missing" de vercel.json (solo las de tipo host, que son las que usamos).
+const hostIs = (c, host) => c.type === "host" && new RegExp(`^${c.value}$`).test(host);
+const conditionsOk = (rule, host) => (rule.has || []).every((c) => hostIs(c, host)) && !(rule.missing || []).some((c) => hostIs(c, host));
+// middleware.js de la raíz, como en Vercel: antes que los archivos. Para probar un subdominio de boda en local:
+//   curl -H "Host: lucia-y-martin.weddingwebstudio.es" http://localhost:3000/
+const middleware = existsSync(join(ROOT, "middleware.js")) ? await import(pathToFileURL(join(ROOT, "middleware.js")).href) : null;
 
 const MIME = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8",
@@ -87,15 +93,20 @@ const server = http.createServer(async (req, res) => {
     }
     for (const rule of redirects) {
       const m = rule.re.exec(url.pathname);
-      if (m) {
+      if (m && conditionsOk(rule, url.hostname)) {
         res.statusCode = rule.permanent ? 308 : 307;
         res.setHeader("Location", fill(rule.destination, m.groups) + url.search);
         return res.end();
       }
     }
-    // Como en Vercel: primero los archivos que existen; luego las reescrituras.
     let path = url.pathname;
-    if (!path.startsWith("/api/") && !staticFile(path)) {
+    let rewritten = false;
+    if (middleware && path === "/") {
+      const to = (await middleware.default(new Request(url)))?.headers.get("x-middleware-rewrite");
+      if (to) { const dest = new URL(to); req.url = dest.pathname + dest.search; path = dest.pathname; rewritten = true; }
+    }
+    // Como en Vercel: primero los archivos que existen; luego las reescrituras.
+    if (!rewritten && !path.startsWith("/api/") && !staticFile(path)) {
       for (const rule of rewrites) {
         const m = rule.re.exec(path);
         if (!m) continue;

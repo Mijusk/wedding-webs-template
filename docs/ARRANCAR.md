@@ -8,7 +8,7 @@ Para quien programe (Luis no lo necesita para usar el panel).
 | --- | --- | --- |
 | Escaparate | `studio/` | Estático, como siempre. |
 | Plantillas | raíz y `plantillas/` | Estáticas. Leen el config de la página (bodas de la base de datos) o de su `config.json`. |
-| Webs de boda | `/b/<slug>` → `api/boda.js` | Función de Vercel que pinta la plantilla con el config de la base de datos. |
+| Webs de boda | `/b/<slug>` y `<slug>.weddingwebstudio.es` → `api/boda.js` | Función de Vercel que pinta la plantilla con el config de la base de datos. El subdominio lo resuelve `middleware.js`; la dirección de cada boda sale de `lib/direccion.js` ([DOMINIOS.md](DOMINIOS.md)). |
 | API pública | `api/rsvp.js`, `api/lead.js`, `api/productos.js` | Funciones de Vercel. Hablan con Supabase con la clave secreta. |
 | Panel | `panel/` | Estático. Habla con Supabase desde el navegador con la clave publicable; la RLS decide qué ve cada uno. |
 | Panel de la pareja | `pareja/` | Estático, como el panel. Entra con su enlace de siempre `/pareja/#llave=<clave>` (`couple_users.access_key`; `api/pareja.js` lo cambia por una sesión). |

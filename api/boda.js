@@ -6,7 +6,7 @@
 // Una sola ruta sirve todas las bodas con cualquiera de las 27 plantillas. La plantilla no cambia:
 // solo recibe su config desde aquí en vez de desde config.json.
 import { rpc, isConfigured } from "./_lib/supabase.js";
-import { sendHtml, queryOf, origin, clientIp, ipHash } from "./_lib/http.js";
+import { sendHtml, queryOf, origin, clientIp, ipHash, weddingLink } from "./_lib/http.js";
 import { renderWedding, renderNotFound } from "./_lib/render.js";
 
 const NO_INDEX = { "X-Robots-Tag": "noindex, nofollow" };
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
   }
 
   const base = origin(req);
-  const pageUrl = `${base}/b/${data.slug}`;
+  const pageUrl = weddingLink(base, data.slug);
   let html;
   try {
     html = await renderWedding(data, { origin: base, pageUrl });

@@ -1,9 +1,10 @@
 // Utilidades de las pantallas de la pareja.
-import { db, siteUrl } from "/panel/js/supa.js";
+import { db, weddingUrl, inviteUrl as invite } from "/panel/js/supa.js";
 import { html, waLink, fmtDateLong } from "/panel/js/ui.js";
 
-export const webUrl = (slug) => `${siteUrl()}/b/${slug}`;
-export const inviteUrl = (slug, token) => `${siteUrl()}/b/${slug}?i=${encodeURIComponent(token)}`;
+// maria-y-pablo.weddingwebstudio.es si el subdominio está activado; si no, <web>/b/<slug> (lib/direccion.js).
+export const webUrl = (slug) => weddingUrl(slug);
+export const inviteUrl = (slug, token) => invite(slug, token);
 
 // Grupos con sus personas y la respuesta vigente de cada grupo; y las respuestas sin grupo.
 export async function loadGuests(weddingId) {

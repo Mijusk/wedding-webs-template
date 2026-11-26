@@ -9,6 +9,7 @@ Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos*
 | [docs/SUPABASE.md](docs/SUPABASE.md) | Ponerlo en marcha: crear el proyecto, pegar la base de datos y las claves en Vercel. Sin terminal. |
 | [docs/STRIPE.md](docs/STRIPE.md) | Cobros: crear la cuenta de Stripe y conectarla. Sin terminal. |
 | [docs/FACTURACION.md](docs/FACTURACION.md) | Cómo factura la web, Verifactu y qué proveedor elegir. |
+| [docs/DOMINIOS.md](docs/DOMINIOS.md) | Que cada boda tenga su dirección: maria-y-pablo.weddingwebstudio.es. Sin terminal. |
 | [docs/EMAILS.md](docs/EMAILS.md) | Que los emails salgan de verdad: Resend y tu dominio. Sin terminal. |
 | [docs/ARRANCAR.md](docs/ARRANCAR.md) | Trabajar en local y pasar las pruebas. |
 | [docs/DECISIONES.md](docs/DECISIONES.md) | Por qué está hecho así, y lo que falta por decidir. |
