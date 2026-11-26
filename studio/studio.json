@@ -199,6 +199,18 @@
       "theme": "editorial"
     },
     {
+      "id": "ocaso",
+      "name": "Ocaso",
+      "template": "editorial",
+      "theme": "ocaso",
+      "status": "available",
+      "swatch": [
+        "#eceee6",
+        "#8c4220"
+      ],
+      "description": "La Editorial en verde oliva y naranja de puesta de sol: foto a pantalla completa, vuestra historia en capítulos y una página que atardece al bajar."
+    },
+    {
       "id": "minimal",
       "name": "Minimal",
       "template": "minimal",

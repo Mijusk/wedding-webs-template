@@ -1,0 +1,49 @@
+/* Estilo «Ocaso» de la plantilla Editorial: el verde oliva de la tarde y el naranja de la puesta de sol.
+   Sale de la web de Maria y Philipp (rama maria-philipp), que usaba esta misma página con su paleta.
+   Solo cambia los colores de cada hora; todo lo demás es la Editorial (css/theme.css). */
+
+@property --paper   { syntax: "<color>"; inherits: true; initial-value: #eceee6; }
+@property --paper-2 { syntax: "<color>"; inherits: true; initial-value: #e1e5d9; }
+@property --ink     { syntax: "<color>"; inherits: true; initial-value: #1e2419; }
+@property --muted   { syntax: "<color>"; inherits: true; initial-value: #5b6353; }
+@property --line    { syntax: "<color>"; inherits: true; initial-value: #c7ccbc; }
+@property --accent  { syntax: "<color>"; inherits: true; initial-value: #4d5f36; }
+
+/* Tarde: bruma con un punto de verde, el oliva de un save-the-date */
+:root {
+  --paper: #eceee6;
+  --paper-2: #e1e5d9;
+  --ink: #1e2419;
+  --muted: #5b6353;
+  --line: #c7ccbc;
+  --accent: #4d5f36;
+
+  /* Texto sobre la foto de portada */
+  --photo-accent: #f3c48c;
+  --photo-shade: 22 17 14;
+}
+
+/* Atardecer: el naranja de la puesta de sol */
+:root[data-hour="dusk"] {
+  --paper: #ecd5c3;
+  --paper-2: #e3c6b0;
+  --ink: #2b1f1a;
+  --muted: #6e5648;
+  --line: #d4b8a3;
+  --accent: #8c4220;
+}
+
+/* Hora azul */
+:root[data-hour="blue"] {
+  --accent: #f2c29a;
+}
+
+/* Noche */
+:root[data-hour="night"] {
+  --paper: #15171a;
+  --paper-2: #1e2125;
+  --ink: #eee7dc;
+  --muted: #a39d93;
+  --line: #2f3236;
+  --accent: #e4b77c;
+}
