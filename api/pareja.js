@@ -9,7 +9,7 @@
 //
 // (Todo en una función para no pasar del límite de funciones del plan de Vercel.)
 import { rpc, isConfigured } from "./_lib/supabase.js";
-import { sendJson, readJson, clientIp, ipHash, origin, HttpError } from "./_lib/http.js";
+import { sendJson, readJson, clientIp, ipHash, origin, HttpError, inviteLink } from "./_lib/http.js";
 import { magicLink, magicToken, keyLink, callerToken, isStaff, canManage } from "./_lib/acceso.js";
 import { sendEmail } from "./_lib/avisos.js";
 import { accessEmail, reminderEmail } from "./_lib/emails.js";
@@ -96,7 +96,7 @@ async function recordatorio(req, res, body) {
   const base = origin(req);
   let enviados = 0, simulados = 0, fallidos = 0;
   for (const g of conEmail) {
-    const link = `${base}/b/${w.slug}?i=${encodeURIComponent(g.token)}`;
+    const link = inviteLink(base, w.slug, g.token);
     const r = await sendEmail({ to: g.email, template: "recordatorio_rsvp", weddingId: body.wedding_id,
       ...reminderEmail({ group: g.name, link, couple: w.couple, deadline: w.deadline }) });
     if (r.status === "enviado") enviados++; else if (r.status === "simulado") simulados++; else fallidos++;

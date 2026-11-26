@@ -10,6 +10,7 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { rpc, config } from "./supabase.js";
 import { sendEmail } from "./avisos.js";
 import { renderTemplate } from "../../lib/email.js";
+import { weddingLink, inviteLink } from "./http.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const MAX_PER_RUN = 150; // lo que no dé tiempo, al día siguiente (sigue dentro de su plazo)
@@ -59,8 +60,8 @@ function linkFor(item, site) {
   switch (l.type) {
     case "prueba": return `${site}/studio/?prueba=${encodeURIComponent(l.token)}`;
     case "seguimiento": return `${site}/seguimiento/${pretty(l.code)}`;
-    case "web": return `${site}/b/${l.slug}`;
-    case "invitacion": return `${site}/b/${l.slug}?i=${encodeURIComponent(l.token)}`;
+    case "web": return weddingLink(site, l.slug);
+    case "invitacion": return inviteLink(site, l.slug, l.token);
     case "panel": return `${site}/pareja/`;
     default: return null;
   }
@@ -70,7 +71,7 @@ async function varsFor(item, site, link) {
   const v = { ...(item.vars || {}) };
   if (v.estilo !== undefined) v.estilo = await styleName(v.estilo);
   v.enlace = link || "";
-  if (item.link?.slug) v.enlace_web = `${site}/b/${item.link.slug}`;
+  if (item.link?.slug) v.enlace_web = weddingLink(site, item.link.slug);
   v.enlace_panel = `${site}/pareja/`;
   if (v.resenas) {
     v.enlaces_resena = [v.resenas.google && `Google: ${v.resenas.google}`, v.resenas.bodas_net && `Bodas.net: ${v.resenas.bodas_net}`]

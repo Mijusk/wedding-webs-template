@@ -1,5 +1,5 @@
 // Nueva boda: lo mínimo (pareja, fecha, lugar y estilo) y al editor. Si viene de un lead, ya está relleno.
-import { db } from "../supa.js";
+import { db, weddingDomain } from "../supa.js";
 import { html, render, $, debounce } from "../ui.js";
 import { styles, newWeddingConfig, utcOffset } from "../catalogo.js";
 import { validate, describe } from "/lib/config-schema.js";
@@ -47,7 +47,9 @@ export default async function nuevaBoda({ el, query, go }) {
       </fieldset>
       <div class="field">
         <label for="w-slug">Dirección de la web</label>
-        <div class="link-box"><span class="muted">${location.origin}/b/</span><input id="w-slug" name="slug" pattern="[a-z0-9][a-z0-9-]{1,58}[a-z0-9]" required></div>
+        <div class="link-box">${weddingDomain()
+          ? html`<span class="muted">https://</span><input id="w-slug" name="slug" pattern="[a-z0-9][a-z0-9-]{1,58}[a-z0-9]" required><span class="muted">.${weddingDomain()}</span>`
+          : html`<span class="muted">${location.origin}/b/</span><input id="w-slug" name="slug" pattern="[a-z0-9][a-z0-9-]{1,58}[a-z0-9]" required>`}</div>
         <span class="hint">Solo minúsculas, números y guiones. Es lo que verán los invitados en el enlace.</span>
       </div>
       <p class="error" data-err></p>
@@ -89,6 +91,12 @@ export default async function nuevaBoda({ el, query, go }) {
       const [w] = await db.insert("weddings", {
         slug: d.slug, template: st.template, config, lead_id: lead?.id || null, client_id: client?.id || lead?.client_id || null,
       });
+      // La pareja recibe acceso a su panel al momento (si dejó email): solo falta mandarle su enlace.
+      const email = String(client?.email || lead?.email || "").trim().toLowerCase();
+      if (/^\S+@\S+\.\S+$/.test(email)) {
+        await db.insert("couple_users", { wedding_id: w.id, email, name: `${d.a.trim()} y ${d.b.trim()}` })
+          .catch((e) => { if (e.code !== "23505") console.warn("No se ha podido dar acceso a la pareja", e); });
+      }
       if (order) await db.update("orders", { id: `eq.${order.id}` }, { wedding_id: w.id });
       go(`/bodas/${w.id}`);
     } catch (ex) {

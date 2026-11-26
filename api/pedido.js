@@ -16,7 +16,7 @@
 import { rpc, rpcAs, isConfigured, SupabaseError } from "./_lib/supabase.js";
 import { sendJson, readJson, queryOf, clientIp, ipHash, origin, HttpError } from "./_lib/http.js";
 import { stripeConfigured, createCheckout, expireCheckout, formatCode, StripeError } from "./_lib/stripe.js";
-import { callerToken, isStaff, magicLink } from "./_lib/acceso.js";
+import { callerToken, isStaff, magicLink, keyLink } from "./_lib/acceso.js";
 import { sendEmail, notifyLuis } from "./_lib/avisos.js";
 import { accessEmail, proposalEmail } from "./_lib/emails.js";
 import { trackingUrl, afterPayment } from "./_lib/cobros.js";
@@ -166,9 +166,11 @@ async function panel(req, res, body) {
   if (!emails.length) return sendJson(res, 409, { ok: false, error: "sin_panel" });
   const site = origin(req);
   const results = await Promise.all(emails.map(async (email) => {
-    const link = await magicLink(email, site);
+    // Su enlace de siempre (sin la migración del enlace de siempre, el de un solo uso, como antes).
+    const key = (await rpc("api_couple_access", { p_email: email }))?.access_key;
+    const link = key ? keyLink(key, site) : await magicLink(email, site);
     const r = await sendEmail({ to: email, template: "acceso_pareja", weddingId: c.wedding_id,
-      ...accessEmail({ link, couple: String(c.names || "").split(" y ") }) });
+      ...accessEmail({ link, couple: String(c.names || "").split(" y "), forever: Boolean(key) }) });
     return { email: mask(email), status: r.status };
   }));
   return sendJson(res, 200, { ok: true, enviados: results });

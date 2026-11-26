@@ -18,7 +18,24 @@
     {
       "source": "/",
       "destination": "/studio/",
-      "permanent": false
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "www.weddingwebstudio.es"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "destination": "/studio/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "[a-z0-9-]+\\.weddingwebstudio\\.es"
+        }
+      ]
     },
     {
       "source": "/(supabase|scripts|tests|docs)/:path*",

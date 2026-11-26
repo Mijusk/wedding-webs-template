@@ -308,7 +308,7 @@ function bind(code, p, latest) {
     try {
       const r = await api({ accion: "panel", c: code });
       const sent = r.enviados.filter((x) => x.status === "enviado").map((x) => x.email);
-      msg.textContent = sent.length ? `Listo: mirad el email (${sent.join(", ")}). El enlace sirve una vez.`
+      msg.textContent = sent.length ? `Listo: mirad el email (${sent.join(", ")}). Guardadlo: el enlace os sirve siempre.`
         : "Ahora mismo no podemos mandar emails. Escribidnos y os pasamos el enlace.";
     } catch (ex) {
       msg.textContent = ex.code === "demasiadas" ? "Ya os lo hemos mandado hace poco: mirad el email (y la carpeta de spam)." : "No se ha podido mandar. Probad otra vez en un rato.";

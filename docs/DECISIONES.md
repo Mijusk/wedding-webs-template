@@ -51,6 +51,13 @@ El escaparate manda a `/api/lead`; si falla, manda a la hoja de Google de siempr
 ### Bodas en ruta `/b/<slug>`
 Es lo único que funciona sin decidir el dominio. La base ya tiene `custom_domain` y `api/boda.js` acepta `?host=`; el subdominio o el dominio propio se activan cuando Luis decida (pendiente 5).
 
+### 2026-11-26 · Subdominio por boda: maria-y-pablo.weddingwebstudio.es
+Luis lo prefiere porque queda mejor. Decisiones:
+- **Un comodín `*.weddingwebstudio.es` en Vercel, con el DNS en Cloudflare.** Vercel solo hace el certificado de un comodín si puede responder a `_acme-challenge`: se le delega ese nombre (2 registros NS) y Cloudflare sigue llevando el resto, correo incluido. Así no hay que dar de alta nada por boda (ni llamar a la API de Vercel, ni el límite de 50 dominios del plan Hobby).
+- **`middleware.js` solo para la raíz `/`.** Vercel sirve antes los archivos que las reglas de `vercel.json`, y en la raíz está el `index.html` de la Clásica. Todo lo demás de la boda (estilos, fotos, `/api/rsvp`) son los mismos archivos en cualquier dominio. La redirección de `/` a `/studio/` lleva condición de host para no aplicarse en los subdominios.
+- **Interruptor `WEDDING_DOMAIN`.** Hasta que el DNS funciona, los enlaces siguen siendo `/b/…`, para no mandar a nadie a una dirección que aún no abre. `/b/<slug>` no se retira nunca.
+- **El dominio propio de cada pareja (`mariaypablo.es`) sigue sin hacer.** Necesitaría pasos a mano por boda (comprarlo, DNS, añadirlo en Vercel) y solo tiene sentido para el plan alto.
+
 ### Región de las funciones: Fráncfort (`fra1`)
 La misma zona que la base de datos: menos espera en cada petición.
 
@@ -216,7 +223,7 @@ La baja y la web guardada van en `api/lead.js`, y el email «web publicada» en 
 1. ¿El RSVP ampliado (grupos, acompañantes, alergias, autobús) entra en el plan de 139 € o solo en el de 249 €? Ya no bloquea: es una casilla en Panel › Ajustes › Tarifas.
 2. ¿Autónomo o sociedad? Cambia la fecha de Verifactu y los datos de las facturas. Se rellena en Panel › Ajustes.
 3. Proveedor de facturación para Verifactu: tres opciones y mi recomendación en [FACTURACION.md](FACTURACION.md). No corre prisa.
-4. Dominio definitivo, y si las bodas van en ruta (`/b/…`) o en subdominio.
+4. ~~Dominio definitivo, y si las bodas van en ruta (`/b/…`) o en subdominio.~~ Resuelto: `weddingwebstudio.es` y subdominio por boda. Falta activarlo: [DOMINIOS.md](DOMINIOS.md).
 5. Datos fiscales del vendedor (Panel › Ajustes) para la página legal y las facturas.
 6. ~~Qué hacer con la Clásica.~~ Resuelto (ver arriba).
 7. ¿Cobro del 100 % por adelantado en todas las tarifas, o señal en A medida?

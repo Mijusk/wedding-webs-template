@@ -1,5 +1,6 @@
 // Utilidades HTTP comunes a las funciones de /api. Solo usan la API de Node, así funcionan igual
 // en Vercel y en el servidor local (scripts/servidor-local.mjs).
+import { weddingUrl, inviteUrl } from "../../lib/direccion.js";
 import { createHash, createHmac } from "node:crypto";
 import { config } from "./supabase.js";
 
@@ -67,6 +68,10 @@ export function ipHash(ip) {
   const key = createHash("sha256").update(`ip-hash:${config().serviceKey}`).digest();
   return createHmac("sha256", key).update(String(ip)).digest("base64url").slice(0, 22);
 }
+
+// Dirección de una web de boda y enlace personal de invitados (subdominio si WEDDING_DOMAIN está puesta).
+export const weddingLink = (site, slug) => weddingUrl(slug, { site, domain: process.env.WEDDING_DOMAIN });
+export const inviteLink = (site, slug, token) => inviteUrl(slug, token, { site, domain: process.env.WEDDING_DOMAIN });
 
 export function origin(req) {
   const site = (process.env.SITE_URL || "").replace(/\/+$/, "");
