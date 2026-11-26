@@ -44,20 +44,26 @@ export default async function handler(req, res) {
 }
 
 async function digests(req) {
+  try { return await sendDigests(req); }
+  catch (e) { console.error("resumen", e.message); return { error: e.message }; } // que no impida lo demás del aviso
+}
+
+async function sendDigests(req) {
   const due = await rpc("api_digests_due");
-  const sent = [];
-  let simulados = 0, fallidos = 0;
+  let enviados = 0, simulados = 0, fallidos = 0;
   for (const d of due) {
     const r = await sendEmail({
       to: d.email, template: `resumen_${d.digest}`, weddingId: d.wedding_id,
       ...digestEmail({ couple: d.couple, nuevas: d.nuevas, stats: d.stats, link: `${origin(req)}/pareja/#/respuestas` }),
     });
     // Solo se marca como enviado si ha salido de verdad: si el email aún no está configurado, se
-    // mandará cuando lo esté (con todo lo acumulado).
-    if (r.status === "enviado") sent.push(d.couple_user_id);
-    else if (r.status === "simulado") simulados++;
+    // mandará cuando lo esté (con todo lo acumulado). Uno a uno: si la función se corta a medias, los
+    // que ya han salido no se repiten al día siguiente.
+    if (r.status === "enviado") {
+      enviados++;
+      await rpc("api_digest_sent", { p_ids: [d.couple_user_id] }).catch((e) => console.error("resumen", e.message));
+    } else if (r.status === "simulado") simulados++;
     else fallidos++;
   }
-  if (sent.length) await rpc("api_digest_sent", { p_ids: sent });
-  return { pendientes: due.length, enviados: sent.length, simulados, fallidos };
+  return { pendientes: due.length, enviados, simulados, fallidos };
 }

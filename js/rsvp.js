@@ -1,5 +1,5 @@
 import { saveRsvp } from "./storage.js";
-import { esc, dayMonth, weddingPhase, rsvpClosed } from "./format.js";
+import { esc, fill, dayMonth, weddingPhase, rsvpClosed } from "./format.js";
 
 export function mountRsvp(root, config) {
   const { rsvp = {}, event } = config;
@@ -17,7 +17,7 @@ export function mountRsvp(root, config) {
       ${closed
         ? `<p class="note">${esc(rsvp.closedText || "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.")}</p>`
         : deadline ? `<p class="note">Confírmanos antes del ${esc(deadline)}.</p>` : ""}
-      <form id="rsvp-form" novalidate${closed ? " hidden" : ""}>
+      <form class="rsvp-form" id="rsvp-form" novalidate${closed ? " hidden" : ""}>
         <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <div class="field">
           <label for="rsvp-name">Nombre y apellidos</label>
@@ -42,7 +42,7 @@ export function mountRsvp(root, config) {
 
   const $ = (id) => root.querySelector(`#${id}`);
   const panel = $("rsvp-panel"), fab = $("rsvp-open"), form = $("rsvp-form");
-  const toggle = (open) => { panel.hidden = !open; fab.setAttribute("aria-expanded", open); if (open) $("rsvp-name").focus(); };
+  const toggle = (open) => { panel.hidden = !open; fab.setAttribute("aria-expanded", open); if (open) form.querySelector("input:not([name=website])")?.focus(); };
 
   fab.addEventListener("click", () => toggle(panel.hidden));
   $("rsvp-close").addEventListener("click", () => toggle(false));
@@ -51,23 +51,39 @@ export function mountRsvp(root, config) {
   root._onKey = (e) => { if (e.key === "Escape") toggle(false); };
   document.addEventListener("keydown", root._onKey);
 
+  // RSVP ampliado (acompañantes, alergias, autobús, enlace personal): solo si el servidor lo activa
+  // para esta boda, con el mismo módulo que las demás plantillas.
+  let ext = null;
+  if (rsvp.extended && !closed) {
+    import("/lib/rsvp-ampliado.js")
+      .then((m) => { ext = m.enhance(form, config, { esc, fill, dateParts: (iso) => ({ dayMonth: dayMonth(iso) }) }); })
+      .catch(() => { /* sin el módulo: sigue el formulario sencillo */ });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
     const name = (data.name || "").trim();
     const err = $("rsvp-error");
     if (data.website) { form.hidden = true; return; } // campo trampa: un bot
-    if (name.length < 2) { err.textContent = "Escribe tu nombre para saber quién eres."; return $("rsvp-name").focus(); }
-    if (!data.attending) { err.textContent = "Marca si vienes o no."; return; }
+    let entry = { name, attending: data.attending, song: (data.song || "").trim() };
+    if (ext) {
+      const r = ext.collect();
+      if (r.error) { err.textContent = r.error; r.focus?.focus(); return; }
+      entry = r.entry;
+    } else {
+      if (name.length < 2) { err.textContent = "Escribe tu nombre para saber quién eres."; return $("rsvp-name").focus(); }
+      if (!data.attending) { err.textContent = "Marca si vienes o no."; return; }
+    }
     err.textContent = "";
 
     const btn = $("rsvp-submit");
     btn.disabled = true; btn.textContent = "Enviando…";
     try {
-      await saveRsvp({ name, attending: data.attending, song: (data.song || "").trim() }, rsvp);
+      await saveRsvp(entry, rsvp);
       form.hidden = true;
       const thanks = $("rsvp-thanks");
-      thanks.innerHTML = data.attending === "si"
+      thanks.innerHTML = ext ? ext.thanks(entry) : data.attending === "si"
         ? `<h2>¡Gracias, ${esc(name.split(" ")[0])}!</h2><p>Te esperamos. ${data.song ? `Tomamos nota de «${esc(data.song)}».` : ""}</p>`
         : `<h2>Te echaremos de menos</h2><p>Gracias por avisarnos, ${esc(name.split(" ")[0])}.</p>`;
       thanks.hidden = false;

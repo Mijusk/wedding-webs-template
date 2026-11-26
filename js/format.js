@@ -33,5 +33,9 @@ export function rsvpClosed({ event, rsvp = {} }, now = Date.now()) {
 }
 
 
+// "Hola, {name}" + { name: "Ana" } -> "Hola, Ana", ya escapado para el HTML.
+export const fill = (template, vars = {}) =>
+  esc(String(template ?? "").replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? ""));
+
 export const esc = (s) =>
-  String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

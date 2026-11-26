@@ -7,6 +7,25 @@
 //   TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID   aviso instantáneo al móvil por Telegram (opcional)
 import { insert } from "./supabase.js";
 
+const MAX_WAIT_MS = 2000;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Resend admite pocos envíos por segundo. Si pide ir más despacio (429) no ha mandado nada: se espera lo que
+// diga y se reintenta (dos veces como mucho), en vez de dar por perdido un email que no se repetirá.
+async function resend(body, key, timeoutMs) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (res.status !== 429 || attempt >= 2) return res;
+    const seconds = Number(res.headers.get("retry-after"));
+    await sleep(Math.min(Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 1000, MAX_WAIT_MS));
+  }
+}
+
 // attachments: [{ filename, content: Buffer }] (p. ej. la factura en PDF). meta: datos para el registro.
 // replyTo: a quién van las respuestas (p. ej. el email de Luis). headers: cabeceras extra (baja en un clic).
 export async function sendEmail({ to, subject, text, html, template, leadId, clientId, weddingId, attachments, meta, replyTo, headers }) {
@@ -15,17 +34,12 @@ export async function sendEmail({ to, subject, text, html, template, leadId, cli
   let status = "simulado", providerId = null, error = null;
   if (key && from && to) {
     try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from, to: [to], subject, text, html,
-          ...(replyTo ? { reply_to: replyTo } : {}),
-          ...(headers ? { headers } : {}),
-          ...(attachments?.length ? { attachments: attachments.map((a) => ({ filename: a.filename, content: Buffer.from(a.content).toString("base64") })) } : {}),
-        }),
-        signal: AbortSignal.timeout(attachments?.length ? 10000 : 5000),
-      });
+      const res = await resend(JSON.stringify({
+        from, to: [to], subject, text, html,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+        ...(headers ? { headers } : {}),
+        ...(attachments?.length ? { attachments: attachments.map((a) => ({ filename: a.filename, content: Buffer.from(a.content).toString("base64") })) } : {}),
+      }), key, attachments?.length ? 10000 : 5000);
       const data = await res.json().catch(() => ({}));
       if (res.ok) { status = "enviado"; providerId = data.id || null; }
       else { status = "fallido"; error = data.message || `HTTP ${res.status}`; }

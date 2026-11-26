@@ -60,6 +60,7 @@
 /* Respuestas */
 .answer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 13px 0; border-top: 1px solid var(--line); }
 .answer:first-child { border-top: 0; }
+.answer__who, .answer__detail, .group__name, .group__people, .group__extra { min-width: 0; overflow-wrap: anywhere; }
 .answer__who { font-weight: 600; }
 .answer__detail { grid-column: 1 / -1; font-size: 14px; color: var(--muted); }
 .answer__detail q { quotes: "«" "»"; }

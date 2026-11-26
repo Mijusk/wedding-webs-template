@@ -8,7 +8,7 @@ export function details({ event, venue }) {
     <div>
       <p class="eyebrow">Dónde</p>
       <p class="value">${esc(venue.name)}</p>
-      <p>${esc(venue.address)}</p>
+      ${venue.address ? `<p>${esc(venue.address)}</p>` : ""}
       ${venue.mapsUrl ? `<p><a href="${esc(venue.mapsUrl)}" target="_blank" rel="noopener">Ver en el mapa</a></p>` : ""}
     </div>
   </section>`;

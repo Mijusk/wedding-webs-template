@@ -175,7 +175,8 @@ function renderShell() {
       <button type="button" data-more>${raw(icons.more)}Más</button>
     </nav>
   </div>`);
-  app.addEventListener("click", async (e) => {
+  // En .shell (que se crea al entrar) y no en app: al volver a entrar no se acumulan oyentes.
+  $(".shell").addEventListener("click", async (e) => {
     if (e.target.closest("[data-logout]")) { await supa.signOut(); }
     if (e.target.closest("[data-more]")) {
       const dlg = showDialog(html`<div class="dlg"><h2>Más</h2><nav class="sheet-menu">

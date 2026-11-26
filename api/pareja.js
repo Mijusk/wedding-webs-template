@@ -1,19 +1,22 @@
 // POST /api/pareja  ·  acceso de las parejas y recordatorios.  {"accion": ..., ...}
 //
-//   acceso        {email}               Público. Si el email es de una pareja, le manda el enlace de acceso.
+//   acceso        {email}               Público. Si el email es de una pareja, le manda su enlace de siempre.
 //                                       Siempre responde lo mismo (no dice qué emails existen).
+//   entrar        {llave}               Público. Cambia el enlace de siempre (/pareja/#llave=…) por una
+//                                       clave de un solo uso que el navegador canjea por una sesión.
 //   enlace        {wedding_id, email}   Solo el equipo. Devuelve el enlace para mandarlo por WhatsApp.
 //   recordatorio  {wedding_id}          La pareja o el equipo. Email a los grupos que no han contestado.
 //
 // (Todo en una función para no pasar del límite de funciones del plan de Vercel.)
 import { rpc, isConfigured } from "./_lib/supabase.js";
 import { sendJson, readJson, clientIp, ipHash, origin, HttpError } from "./_lib/http.js";
-import { magicLink, callerToken, isStaff, canManage } from "./_lib/acceso.js";
+import { magicLink, magicToken, keyLink, callerToken, isStaff, canManage } from "./_lib/acceso.js";
 import { sendEmail } from "./_lib/avisos.js";
 import { accessEmail, reminderEmail } from "./_lib/emails.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const EMAIL = /^\S+@\S+\.\S+$/;
+const LLAVE = /^[A-Za-z0-9_-]{24,200}$/;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return sendJson(res, 405, { ok: false }, { Allow: "POST" });
@@ -24,6 +27,7 @@ export default async function handler(req, res) {
 
   try {
     if (body.accion === "acceso") return await acceso(req, res, body);
+    if (body.accion === "entrar") return await entrar(req, res, body);
     if (body.accion === "enlace") return await enlace(req, res, body);
     if (body.accion === "recordatorio") return await recordatorio(req, res, body);
     return sendJson(res, 400, { ok: false, error: "accion" });
@@ -44,10 +48,23 @@ async function acceso(req, res, body) {
   if (!porIp || !porEmail) return sendJson(res, 429, { ok: false, error: "demasiadas" }, { "Retry-After": "900" });
   const couple = await rpc("api_couple_access", { p_email: email });
   if (couple) {
-    const link = await magicLink(couple.email, origin(req));
-    await sendEmail({ to: couple.email, template: "acceso_pareja", ...accessEmail({ link, couple: couple.couple }) });
+    // Sin la migración del enlace de siempre aún no hay llave: se manda el de un solo uso, como antes.
+    const forever = Boolean(couple.access_key);
+    const link = forever ? keyLink(couple.access_key, origin(req)) : await magicLink(couple.email, origin(req));
+    await sendEmail({ to: couple.email, template: "acceso_pareja", ...accessEmail({ link, couple: couple.couple, forever }) });
   }
   return sendJson(res, 200, { ok: true });
+}
+
+async function entrar(req, res, body) {
+  const llave = String(body.llave || "");
+  if (!LLAVE.test(llave)) return sendJson(res, 404, { ok: false, error: "llave" });
+  if (!(await rpc("api_hit_rate_limit", { p_key: `entrar:${ipHash(clientIp(req))}`, p_max: 30, p_window_seconds: 900 }))) {
+    return sendJson(res, 429, { ok: false, error: "demasiadas" }, { "Retry-After": "900" });
+  }
+  const couple = await rpc("api_couple_key", { p_key: llave });
+  if (!couple) return sendJson(res, 404, { ok: false, error: "llave" });
+  return sendJson(res, 200, { ok: true, acceso: await magicToken(couple.email) });
 }
 
 async function enlace(req, res, body) {
@@ -57,8 +74,9 @@ async function enlace(req, res, body) {
   if (!UUID.test(body.wedding_id || "") || !EMAIL.test(email)) return sendJson(res, 400, { ok: false, error: "datos" });
   const couple = await rpc("api_couple_access", { p_email: email });
   if (!couple) return sendJson(res, 404, { ok: false, error: "no_es_pareja" });
+  if (couple.access_key) return sendJson(res, 200, { ok: true, link: keyLink(couple.access_key, origin(req)), siempre: true });
   const link = await magicLink(couple.email, origin(req));
-  return sendJson(res, 200, { ok: true, link });
+  return sendJson(res, 200, { ok: true, link, siempre: false });
 }
 
 async function recordatorio(req, res, body) {

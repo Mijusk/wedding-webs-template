@@ -8,7 +8,7 @@
   --surface-2: #fbf9f7;
   --ink: #1f1a24;
   --muted: #6b6370;
-  --faint: #958d99;
+  --faint: #736c77;
   --line: #e6dfdd;
   --line-strong: #d2c9c7;
   --accent: #7d2a4b;
@@ -121,6 +121,8 @@ p { margin: 0; }
 .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 20px; margin-bottom: 22px; }
 .page-head h1 { font: 400 clamp(28px, 4vw, 38px)/1.05 var(--display); }
 .page-head p { color: var(--muted); margin-top: 6px; }
+/* Emails, enlaces y mensajes larguísimos: se parten en vez de ensanchar la página en el móvil */
+.page-head > div, .page-head h1, .who__contact a, .row__title, .row__sub, .summary-note { min-width: 0; overflow-wrap: anywhere; }
 .page-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .back { display: inline-block; margin-bottom: 10px; color: var(--muted); font-size: 14px; text-decoration: none; }
 .back:hover { color: var(--ink); }
@@ -325,7 +327,7 @@ a.row:hover .row__title { text-decoration: underline; }
 
 /* Editor de boda: formulario a la izquierda, la web de verdad a la derecha */
 .editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 460px); gap: 20px; align-items: start; }
-.editor__form { display: grid; gap: 12px; min-width: 0; }
+.editor__form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
 .editor__preview { position: sticky; top: 76px; display: grid; gap: 10px; justify-items: center; }
 .editor__bar { position: sticky; top: 64px; z-index: 15; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 0; background: var(--paper); }
 .dirty { font-size: 13px; color: var(--warn); font-weight: 600; }
@@ -348,7 +350,7 @@ details.sec > summary::-webkit-details-marker { display: none; }
 details.sec > summary::after { content: ""; width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; transition: transform .15s; }
 details.sec[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
 details.sec > summary .summary-note { margin-left: auto; font-weight: 400; font-size: 13px; color: var(--muted); }
-details.sec > .sec__body { padding: 0 16px 16px; display: grid; gap: 12px; }
+details.sec > .sec__body { padding: 0 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .repeat { display: grid; gap: 8px; }
 .repeat__row { display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: start; }
 .repeat__row--story { grid-template-columns: minmax(0, 1fr) auto; }

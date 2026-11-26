@@ -55,9 +55,9 @@ export default async function ajustes(ctx) {
           <p class="small muted" style="margin-bottom:10px">Precio final con IVA. El escaparate las lee de aquí (si no responde, usa las de studio.json). «RSVP ampliado»: qué tarifas incluyen la lista de invitados con enlaces personales. «Pago en la web»: se puede pagar al momento desde el escaparate (no con precios «desde»). «Rondas»: cambios de diseño incluidos; vacío = los que acordéis (corregir erratas nunca cuenta).</p>
           <form class="form" data-products>
             ${products.map((pr) => html`<div class="grid-3" data-product="${pr.id}" style="align-items:end">
-              <div class="field"><label>Nombre</label><input name="name" value="${pr.name}"></div>
-              <div class="grid-2"><div class="field"><label>Precio con IVA (€)</label><input name="price" inputmode="decimal" value="${(pr.price_cents / 100).toFixed(2).replace(".", ",")}"></div>
-                <div class="field"><label>Rondas</label><input name="rounds" inputmode="numeric" placeholder="acordadas" value="${pr.revision_rounds ?? ""}"></div></div>
+              <div class="field"><label for="n-${pr.id}">Nombre</label><input id="n-${pr.id}" name="name" value="${pr.name}"></div>
+              <div class="grid-2"><div class="field"><label for="p-${pr.id}">Precio con IVA (€)</label><input id="p-${pr.id}" name="price" inputmode="decimal" value="${(pr.price_cents / 100).toFixed(2).replace(".", ",")}"></div>
+                <div class="field"><label for="r-${pr.id}">Rondas</label><input id="r-${pr.id}" name="rounds" inputmode="numeric" placeholder="acordadas" value="${pr.revision_rounds ?? ""}"></div></div>
               <div class="btn-row" style="padding-bottom:8px">
                 <label class="check"><input type="checkbox" name="online" ${pr.online_checkout ? "checked" : ""}> pago en la web</label>
                 <label class="check"><input type="checkbox" name="from" ${pr.price_is_from ? "checked" : ""}> «desde»</label>
@@ -131,8 +131,9 @@ export default async function ajustes(ctx) {
     e.preventDefault();
     try {
       for (const row of $$("[data-product]", el)) {
-        const cents = Math.round(Number(row.querySelector("[name=price]").value.replace(",", ".")) * 100);
-        if (!Number.isFinite(cents) || cents < 0) throw new Error("Algún precio no es un número válido.");
+        const price = row.querySelector("[name=price]").value.trim();
+        const cents = Math.round(Number(price.replace(",", ".")) * 100);
+        if (!price || !Number.isFinite(cents) || cents < 0) throw new Error("Algún precio no es un número válido.");
         const roundsText = row.querySelector("[name=rounds]").value.trim();
         const rounds = roundsText === "" ? null : Number(roundsText);
         if (rounds !== null && !(Number.isInteger(rounds) && rounds >= 0 && rounds <= 20)) throw new Error("Las rondas son un número de 0 a 20 (o vacío).");

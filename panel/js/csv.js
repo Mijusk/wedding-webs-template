@@ -1,3 +1,9 @@
+// Bytes de un .csv -> texto. Excel en Windows guarda «CSV (delimitado por comas)» en Windows-1252, no en
+// UTF-8: si se leyera como UTF-8, «José Núñez» perdería las tildes y la eñe.
+export function decodeCsv(buffer) {
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(buffer); } catch { return new TextDecoder("windows-1252").decode(buffer); }
+}
+
 // Lector de CSV (comillas, saltos de línea dentro de celdas, separador , o ;) sin dependencias.
 export function parseCsv(text) {
   text = text.replace(/^﻿/, "");

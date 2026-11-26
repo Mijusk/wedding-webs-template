@@ -18,12 +18,24 @@ export class ApiError extends Error {
   }
 }
 
+// Otra pestaña ha entrado, ha renovado la sesión o ha salido: esta se entera al momento.
+addEventListener("storage", (e) => {
+  if (e.key !== SESSION_KEY) return;
+  const had = Boolean(session);
+  session = stored();
+  if (had !== Boolean(session)) listeners.forEach((fn) => fn(session));
+});
+
+function stored() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch { return null; }
+}
+
 export async function init() {
   const res = await fetch("/api/panel-config", { cache: "no-store" });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.ok) throw new ApiError("El panel aún no está conectado a Supabase (faltan las variables en Vercel).", res.status, "no_configurado");
   cfg = data;
-  try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch { session = null; }
+  session = stored();
   return cfg;
 }
 
@@ -88,6 +100,13 @@ export async function verifyLink(tokenHash) {
   return session;
 }
 
+// Enlace de siempre de las parejas (/pareja/#llave=…): sirve todas las veces. Nuestro servidor lo cambia
+// por una clave de un solo uso y esa se canjea aquí, como la del enlace mágico.
+export async function enterWithKey(key) {
+  const { acceso } = await api("/api/pareja", { accion: "entrar", llave: key });
+  return verifyLink(acceso);
+}
+
 // Llamadas a nuestras funciones de /api con la sesión de quien está dentro.
 export async function api(path, body) {
   await ensureFresh();
@@ -144,14 +163,30 @@ export function consumeUrlSession() {
   return h.get("type") || "magiclink";
 }
 
+const isFresh = (s) => s.expires_at * 1000 - Date.now() > 60_000;
+
 async function ensureFresh() {
-  if (!session) return;
-  if (session.expires_at * 1000 - Date.now() > 60_000) return;
-  refreshing ||= auth("token?grant_type=refresh_token", { refresh_token: session.refresh_token })
-    .then(saveSession)
-    .catch(() => saveSession(null))
-    .finally(() => { refreshing = null; });
+  if (!session || isFresh(session)) return;
+  refreshing ||= oneTabAtATime(refresh).finally(() => { refreshing = null; });
   await refreshing;
+}
+
+// La clave de refresco sirve una sola vez: si otra pestaña ya la ha usado, vale la sesión que dejó guardada.
+// Sin navigator.locks (navegadores antiguos) se renueva sin esperar turno, como antes.
+const oneTabAtATime = (fn) => (navigator.locks ? navigator.locks.request(SESSION_KEY, fn) : fn());
+
+async function refresh() {
+  const other = stored();
+  if (other && other.refresh_token !== session?.refresh_token) session = other;
+  if (!session || isFresh(session)) return;
+  try {
+    saveSession(await auth("token?grant_type=refresh_token", { refresh_token: session.refresh_token }));
+  } catch (e) {
+    // Solo se cierra la sesión si Supabase dice que ya no vale. Sin conexión, con límite de peticiones o
+    // si falla el servidor, se conserva: las parejas entran con un enlace que sirve una sola vez.
+    if (e.status >= 400 && e.status < 500 && e.status !== 429) saveSession(null);
+    else throw new ApiError("Ahora mismo no hay conexión. Comprueba internet y vuelve a intentarlo.", e.status || 0, "sin_conexion");
+  }
 }
 
 // ── Datos (PostgREST) ──────────────────────────────────────

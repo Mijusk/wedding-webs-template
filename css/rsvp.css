@@ -31,9 +31,11 @@ fieldset.field { border: 0; margin: 0; padding: 0; }
 .error { color: var(--error); font-size: 14px; margin: 0; min-height: 1.2em; }
 .submit { background: var(--ink); color: var(--paper); border: 0; border-radius: 4px; padding: 12px; font: 500 15px var(--font-body); cursor: pointer; }
 .submit:disabled { opacity: .6; cursor: wait; }
-.note { font-size: 13px; color: var(--muted); margin: 0; }
+.note, .rsvp-note { font-size: 13px; color: var(--muted); margin: 0; }
+.rsvp-greeting { margin-top: 10px; font-size: 15px; color: var(--ink); }
 .thanks { display: grid; gap: 10px; }
 .thanks p { margin: 0; }
+.thanks h3 { margin: 0; font: 400 28px/1.15 var(--font-display); }
 .close { float: right; background: none; border: 0; font-size: 22px; line-height: 1; color: var(--muted); cursor: pointer; }
 
 /* Campo trampa para bots: invisible para personas y lectores de pantalla */

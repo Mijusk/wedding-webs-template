@@ -68,6 +68,11 @@ export default async function boda(ctx) {
   const tzOf = () => config.timeZone || "Europe/Madrid";
   const yes = rsvp.filter((r) => r.attending).length;
 
+  // La ficha se repinta sobre el mismo elemento: se sueltan los oyentes de la vez anterior. Si no, Ctrl+S
+  // guardaría también la copia vieja de la boda.
+  el.bodaListeners?.abort();
+  const { signal } = (el.bodaListeners = new AbortController());
+
   render(el, html`
     <a class="back" href="#/bodas">← Bodas</a>
     <div class="page-head">
@@ -239,7 +244,7 @@ export default async function boda(ctx) {
 
         <details class="sec"><summary>Avanzado: todos los textos (JSON)</summary><div class="sec__body">
           <p class="small muted">El config completo de la web. Útil para cambiar un texto concreto de la plantilla. Se comprueba antes de aplicarlo.</p>
-          <textarea class="code" data-json spellcheck="false"></textarea>
+          <textarea class="code" data-json spellcheck="false" aria-label="Config de la web en JSON"></textarea>
           <div class="btn-row"><button class="btn btn--small" type="button" data-json-apply>Aplicar</button><button class="btn btn--small btn--quiet" type="button" data-json-reset>Deshacer cambios del JSON</button></div>
         </div></details>
       </form>
@@ -264,6 +269,7 @@ export default async function boda(ctx) {
     refresh();
   };
   preview.update(config);
+  signal.addEventListener("abort", () => preview.destroy());
 
   // ── Campos simples (data-path) ──
   form.addEventListener("input", (e) => {
@@ -339,10 +345,18 @@ export default async function boda(ctx) {
     const item = config.schedule[row.dataset.i];
     const v = e.target.value;
     if (v) item[e.target.dataset.s] = v; else if (e.target.dataset.s === "place") delete item.place;
-    config.schedule.sort((a, b) => (a.time < "06:00" ? "3" + a.time : a.time).localeCompare(b.time < "06:00" ? "3" + b.time : b.time));
     markDirty();
   });
-  schedBox.addEventListener("change", (e) => { if (e.target.dataset.s === "time") paintSchedule(); });
+  // Se ordena por hora al salir del programa (o al guardar), no mientras se teclea: repintar quita el foco.
+  function sortSchedule() {
+    const late = (t) => (t < "06:00" ? `3${t}` : t);
+    const next = [...(config.schedule || [])].sort((a, b) => late(a.time).localeCompare(late(b.time)));
+    if (next.every((s, i) => s === config.schedule[i])) return;
+    config.schedule = next;
+    paintSchedule();
+    refresh();
+  }
+  schedBox.addEventListener("focusout", (e) => { if (!schedBox.contains(e.relatedTarget)) sortSchedule(); });
   schedBox.addEventListener("click", (e) => {
     const b = e.target.closest("[data-del-s]");
     if (!b) return;
@@ -447,6 +461,11 @@ export default async function boda(ctx) {
   drop.addEventListener("dragleave", () => drop.classList.remove("is-over"));
   drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("is-over"); upload([...e.dataTransfer.files]); });
 
+  async function usedElsewhere(url) {
+    const filter = { select: "config", wedding_id: `eq.${id}` };
+    const snapshots = await Promise.all([db.select("wedding_versions", filter), db.select("wedding_proposals", filter)]);
+    return snapshots.flat().some((s) => JSON.stringify(s.config).includes(url));
+  }
   const saveOrder = async () => {
     await Promise.all(photos.map((p, i) => (p.sort === i ? null : db.update("wedding_assets", { id: `eq.${p.id}` }, { sort: i }).then(() => { p.sort = i; }))));
   };
@@ -459,9 +478,15 @@ export default async function boda(ctx) {
       if (t.dataset.cover) { const [p] = photos.splice(idx, 1); photos.unshift(p); config.event.photoFocus = "50% 50%"; await saveOrder(); }
       else if (t.dataset.left) { [photos[idx - 1], photos[idx]] = [photos[idx], photos[idx - 1]]; await saveOrder(); }
       else if (t.dataset.delPhoto) {
-        if (!(await confirmDialog("¿Borrar esta foto?", "Se borra del almacenamiento. Si la web publicada la usa, dejará de verse cuando publiques los cambios.", "Borrar", true))) return;
-        await storage.remove(BUCKET, photos[idx].path).catch(() => {});
-        await db.remove("wedding_assets", { id: `eq.${photos[idx].id}` });
+        if (!(await confirmDialog("¿Borrar esta foto?", "Si la web publicada la usa, dejará de verse cuando publiques los cambios.", "Borrar", true))) return;
+        // Si la usa una versión publicada o una propuesta, el archivo se queda (la web de los invitados la sigue
+        // enseñando): solo se quita del editor, y se borra de verdad al borrar la boda.
+        const p = photos[idx];
+        if (await usedElsewhere(p.url)) await db.update("wedding_assets", { id: `eq.${p.id}` }, { kind: "otro" });
+        else {
+          await storage.remove(BUCKET, p.path).catch(() => {});
+          await db.remove("wedding_assets", { id: `eq.${p.id}` });
+        }
         photos.splice(idx, 1);
         await saveOrder();
         if (!photos.length) { config.event.photo = base.event.photo; delete config.event.photoFocus; }
@@ -543,7 +568,7 @@ export default async function boda(ctx) {
     preview.setTemplate(template);
     preview.update(config);
     $("[data-preview-note]", el).textContent = "Así se verá con los cambios de ahora (aún sin guardar).";
-  });
+  }, { signal });
   $$("[data-restore]", el).forEach((b) => b.addEventListener("click", async () => {
     if (dirty && !(await confirmDialog("Tienes cambios sin guardar", "Si vuelves a otra versión, se pierden.", "Seguir", true))) return;
     try { await db.rpc("restore_wedding_version", { p_version_id: b.dataset.restore }); dirty = false; toast("Borrador restaurado. Pulsa Publicar para ponerlo online."); boda(ctx); }
@@ -574,6 +599,7 @@ export default async function boda(ctx) {
 
   async function save({ quiet = false } = {}) {
     if (config.gifts?.iban) config.gifts.iban = formatIban(config.gifts.iban);
+    sortSchedule();
     const errs = validate(schema, config);
     if (errs.length) { showProblems(errs); return false; }
     problemsBox.hidden = true;
@@ -594,6 +620,8 @@ export default async function boda(ctx) {
       return true;
     } catch (e) { fail(e); return false; }
   }
+  // Antes de algo que repinta la ficha: lo que esté a medias se guarda en el borrador, no se pierde.
+  const saveFirst = async () => !dirty || save({ quiet: true });
   $("[data-save]", el).addEventListener("click", () => save());
 
   $("[data-publish]", el).addEventListener("click", async () => {
@@ -636,6 +664,7 @@ export default async function boda(ctx) {
       if (e.target.closest("[data-close]")) dlg.close();
       if (e.target.closest("[data-copy]")) { await navigator.clipboard?.writeText(previewUrl).catch(() => {}); toast("Enlace copiado."); }
       if (e.target.closest("[data-rotate]")) {
+        if (!(await saveFirst())) return;
         try {
           const token = Array.from(crypto.getRandomValues(new Uint8Array(24)), (b) => b.toString(16).padStart(2, "0")).join("");
           await db.update("weddings", { id: `eq.${id}` }, { preview_token: token });
@@ -655,7 +684,7 @@ export default async function boda(ctx) {
     const ok = await confirmDialog(to === "retirada" ? "¿Retirar la web?" : "¿Quitar la web de internet?",
       to === "retirada" ? "Los invitados verán que ya no está disponible. Se puede volver a publicar." : "Vuelve a borrador: el enlace dejará de funcionar hasta que la publiques de nuevo.",
       to === "retirada" ? "Retirar" : "Quitar", true);
-    if (!ok) return;
+    if (!ok || !(await saveFirst())) return;
     try { await db.rpc("unpublish_wedding", { p_wedding_id: id, p_status: to }); boda(ctx); } catch (e) { fail(e); }
   }));
   $("[data-delete]", el)?.addEventListener("click", async () => {
@@ -683,33 +712,55 @@ export default async function boda(ctx) {
   $("[data-add-couple]", el).addEventListener("click", async () => {
     const email = $("[data-couple-email]", el).value.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(email)) return toast("Escribe un email válido.", { error: true });
+    if (!(await saveFirst())) return;
     try {
       await db.insert("couple_users", { wedding_id: id, email, name: $("[data-couple-name]", el).value.trim() || null });
       toast("Acceso dado. Ahora mándales el enlace."); boda(ctx);
     } catch (e) { fail(e); }
   });
   $$("[data-del-couple]", el).forEach((b) => b.addEventListener("click", async () => {
-    if (!(await confirmDialog("¿Quitar el acceso?", "Ya no podrá entrar en el panel de esta boda.", "Quitar", true))) return;
+    if (!(await confirmDialog("¿Quitar el acceso?", "Ya no podrá entrar en el panel de esta boda.", "Quitar", true)) || !(await saveFirst())) return;
     try { await db.remove("couple_users", { id: `eq.${b.dataset.delCouple}` }); boda(ctx); } catch (e) { fail(e); }
   }));
   $$("[data-access]", el).forEach((b) => b.addEventListener("click", async () => {
     b.disabled = true;
     try {
-      const { link } = await api("/api/pareja", { accion: "enlace", wedding_id: id, email: b.dataset.access });
+      const ask = () => api("/api/pareja", { accion: "enlace", wedding_id: id, email: b.dataset.access });
+      // siempre: su enlace de siempre (sirve todas las veces). Si aún falta la migración, uno de un solo uso.
+      let { link, siempre } = await ask();
       const c = couples.find((x) => x.email === b.dataset.access);
-      const msg = `¡Hola${c?.name ? `, ${c.name}` : ""}! Con este enlace entráis en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Sirve una vez y caduca en unas horas; después os quedáis dentro en ese móvil: ${link}`;
+      const hola = `¡Hola${c?.name ? `, ${c.name}` : ""}!`;
+      const msg = () => (siempre
+        ? `${hola} Este es vuestro enlace para entrar en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Guardadlo: os sirve siempre, desde cualquier móvil y sin contraseña: ${link}`
+        : `${hola} Con este enlace entráis en el panel de vuestra web de boda (invitados, respuestas, horario y regalo). Sirve una vez y caduca en unas horas; después os quedáis dentro en ese móvil: ${link}`);
       const dlg = document.createElement("dialog");
-      render(dlg, html`<div class="dlg"><h2>Enlace de acceso</h2>
-        <p class="muted">Para ${b.dataset.access}. Sirve una sola vez y caduca en unas horas. Si caduca, genera otro.</p>
+      const paint = () => render(dlg, html`<div class="dlg"><h2>${siempre ? "Su enlace de siempre" : "Enlace de acceso"}</h2>
+        <p class="muted">Para ${b.dataset.access}. ${siempre
+          ? "Es siempre el mismo y sirve todas las veces, desde cualquier móvil: que lo guarden y entren con él cuando quieran."
+          : "Sirve una sola vez y caduca en unas horas. Si caduca, genera otro."}</p>
         <div class="link-box"><input readonly value="${link}"><button class="btn btn--small" type="button" data-copy-link>Copiar</button></div>
-        <div class="btn-row"><a class="btn btn--small btn--primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a></div>
-        <p class="small muted">No lo abras tú: se gastaría.</p>
+        <div class="btn-row"><a class="btn btn--small btn--primary" href="https://wa.me/?text=${encodeURIComponent(msg())}" target="_blank" rel="noopener">${raw(icons.whatsapp)} Mandar por WhatsApp</a>
+          ${siempre ? html`<button class="btn btn--small btn--quiet" type="button" data-new-key>Cambiar enlace</button>` : ""}</div>
+        <p class="small muted">${siempre
+          ? "No lo abras en este navegador: entrarías como ellos y saldrías de tu panel. Para mirar, usa «Ver su panel»."
+          : "No lo abras tú: se gastaría."}</p>
         <div class="dlg__actions"><button class="btn" type="button" data-close>Cerrar</button></div></div>`);
+      paint();
       document.body.append(dlg);
       dlg.addEventListener("close", () => dlg.remove());
       dlg.addEventListener("click", async (e) => {
         if (e.target.closest("[data-close]")) dlg.close();
         if (e.target.closest("[data-copy-link]")) { await navigator.clipboard?.writeText(link).catch(() => {}); toast("Enlace copiado."); }
+        if (e.target.closest("[data-new-key]")) {
+          if (!(await confirmDialog("¿Cambiar su enlace?", "El que tienen ahora deja de servir para entrar y tendrás que mandarles el nuevo. Solo hace falta si se lo han pasado a quien no debían.", "Cambiar", true))) return;
+          try {
+            const key = Array.from(crypto.getRandomValues(new Uint8Array(24)), (x) => x.toString(16).padStart(2, "0")).join("");
+            await db.update("couple_users", { id: `eq.${c.id}` }, { access_key: key });
+            ({ link, siempre } = await ask());
+            paint();
+            toast("Enlace cambiado. Mándales el nuevo.");
+          } catch (err) { fail(err); }
+        }
       });
       dlg.showModal();
     } catch (e) { fail(new Error(e.code === "no_es_pareja" ? "Ese email no tiene acceso a ninguna boda activa." : e.message)); }
@@ -730,6 +781,7 @@ export default async function boda(ctx) {
 
   // ── Propuestas y cambios ──
   $$("[data-req]", el).forEach((b) => b.addEventListener("click", async () => {
+    if (!(await saveFirst())) return;
     try {
       await db.update("change_requests", { id: `eq.${b.dataset.req}` }, {
         status: b.dataset.to, resolved_at: new Date().toISOString(), resolved_by: staff.id,
@@ -745,7 +797,7 @@ export default async function boda(ctx) {
       text: "La pareja la verá debajo de su mensaje, en su página de seguimiento.",
       body: html`<div class="field"><label for="rp">Respuesta</label><textarea id="rp" name="reply" rows="3">${r.reply || ""}</textarea></div>`,
     });
-    if (!data) return;
+    if (!data || !(await saveFirst())) return;
     try { await db.update("change_requests", { id: `eq.${r.id}` }, { reply: String(data.get("reply")).trim() || null }); boda(ctx); }
     catch (e) { fail(e); }
   }));
@@ -777,7 +829,7 @@ export default async function boda(ctx) {
   });
 
   // Guardar con Ctrl/Cmd + S
-  el.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); } });
+  el.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); } }, { signal });
 }
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o?.[k] !== undefined).map((k) => [k, o[k]]));

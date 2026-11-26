@@ -124,9 +124,29 @@ test("/api/pareja enlace: solo el equipo puede generar el enlace de una pareja",
   assert.equal((await asUser(await loginToken("lucia@example.com", "demo-pareja-1234"), body)).status, 403);
   const r = await asUser(await loginToken("ayudante@example.com", "demo-ayudante-1234"), body);
   assert.equal(r.status, 200);
-  assert.match((await r.json()).link, /\/pareja\/#acceso=[0-9a-f]{40,}/);
+  const [c] = await db.select("couple_users?email=eq.lucia@example.com&select=access_key");
+  assert.deepEqual(await r.json(), { ok: true, link: `${SITE}/pareja/#llave=${c.access_key}`, siempre: true });
   const nope = await asUser(await loginToken("luis@example.com", "demo-luis-1234"), { ...body, email: "desconocido@example.com" });
   assert.equal(nope.status, 404);
+});
+
+test("/api/pareja entrar: el enlace de siempre sirve todas las veces; una llave inventada, no", async () => {
+  const e = env();
+  const [c] = await db.select("couple_users?email=eq.lucia@example.com&select=access_key");
+  for (let i = 0; i < 2; i++) {
+    const r = await post("/api/pareja", { accion: "entrar", llave: c.access_key }, { "X-Forwarded-For": "198.51.100.210" });
+    assert.equal(r.status, 200);
+    const { acceso } = await r.json();
+    const v = await fetch(`${e.SUPABASE_URL}/auth/v1/verify`, {
+      method: "POST", headers: { apikey: e.SUPABASE_ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ type: "email", token_hash: acceso }),
+    });
+    assert.equal(v.status, 200, "la clave que da se canjea por una sesión");
+    assert.equal((await v.json()).user.email, "lucia@example.com");
+  }
+  for (const llave of ["x".repeat(32), "corta", ""]) {
+    const r = await post("/api/pareja", { accion: "entrar", llave }, { "X-Forwarded-For": "198.51.100.211" });
+    assert.equal(r.status, 404);
+  }
 });
 
 test("/api/pareja recordatorio: la pareja solo puede en su boda", async () => {

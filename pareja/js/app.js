@@ -30,19 +30,37 @@ async function start() {
   } catch (e) {
     return message("Aún no está todo listo", e.message);
   }
-  // Viene del enlace del email o de WhatsApp: /pareja/#acceso=<clave>
-  const acceso = new URLSearchParams(location.hash.replace(/^#/, "")).get("acceso");
-  if (acceso) {
+  // Viene de su enlace de siempre (/pareja/#llave=<clave>) o de uno de un solo uso (/pareja/#acceso=<clave>),
+  // por email o por WhatsApp.
+  const h = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const llave = h.get("llave");
+  const acceso = h.get("acceso");
+  if (llave || acceso) {
     history.replaceState(null, "", location.pathname + location.search + "#/");
-    try {
-      await supa.verifyLink(acceso);
-    } catch (e) {
-      return showLogin(supa.currentSession() ? "" : `${e.message} Escribe tu email y te mandamos otro.`);
-    }
+    return openLink(llave, acceso);
   }
+  return begin();
+}
+
+function begin() {
   supa.onAuthChange((s) => { if (!s) showLogin(); });
   if (!supa.currentSession()) return showLogin();
-  await enter();
+  return enter();
+}
+
+async function openLink(llave, acceso) {
+  try {
+    await (llave ? supa.enterWithKey(llave) : supa.verifyLink(acceso));
+  } catch (e) {
+    // Si ya estaba dentro en este móvil, entra igual: un enlace viejo o un corte de red no le hacen escribir nada.
+    if (!supa.currentSession()) {
+      if (!llave) return showLogin(`${e.message} Escribe tu email y te mandamos otro.`);
+      if (!(e.status >= 400 && e.status < 500)) return retry(() => openLink(llave, acceso));
+      return showLogin(e.status === 429 ? "Demasiados intentos. Esperad unos minutos y volved a abrir el enlace."
+        : "Este enlace ya no sirve. Escribid vuestro email y os mandamos el nuevo.");
+    }
+  }
+  return begin();
 }
 
 function message(title, text) {
@@ -51,6 +69,14 @@ function message(title, text) {
   render(app, html`<main class="login"><div class="login__card">
     <img class="login__mark" src="/studio/icono.svg" alt="">
     <h1>${title}</h1><p class="muted">${text}</p></div></main>`);
+}
+
+function retry(again = enter) {
+  message("Ahora mismo no podemos abrir vuestro panel", "Comprobad que tenéis internet y volved a intentarlo. No hace falta otro enlace.");
+  const btn = Object.assign(document.createElement("button"), { className: "btn btn--primary", type: "button", textContent: "Volver a intentarlo" });
+  btn.dataset.retry = "";
+  btn.addEventListener("click", () => { btn.disabled = true; again(); });
+  $(".login__card").append(btn);
 }
 
 function showLogin(error = "") {
@@ -100,6 +126,8 @@ async function enter() {
     await loadData();
   } catch (e) {
     if (e.status === 401) return showLogin();
+    // Sin conexión o con el servidor caído no se cierra la sesión: su enlace de acceso sirve una sola vez.
+    if (!(e.status >= 400 && e.status < 500 && e.status !== 429)) return retry();
     await supa.signOut().catch(() => {});
     return message("No encontramos vuestra boda", "Este email no tiene ninguna web de boda. Si creéis que es un error, escribid a WeddingWebs.");
   }
@@ -155,7 +183,10 @@ async function route() {
     if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
   document.title = `${match.title} · ${couple().join(" y ")}`;
-  const el = $("#view");
+  // Cada pantalla tiene su propia caja: si una termina de cargar o se actualiza cuando ya se ha
+  // cambiado a otra, no pinta encima (por ejemplo, encima de un formulario a medio rellenar).
+  const el = document.createElement("div");
+  $("#view").replaceChildren(el);
   render(el, html`<p class="muted">Cargando…</p>`);
   scrollTo(0, 0);
   try {

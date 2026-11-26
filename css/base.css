@@ -14,6 +14,7 @@ a { color: var(--accent); }
 
 /* Hero */
 .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+.hero--solo { grid-template-columns: 1fr; }
 .hero__photo { margin: 0; aspect-ratio: 4 / 5; max-width: 100%; border-radius: 999px 999px 4px 4px; overflow: hidden; background: var(--paper-2); }
 .hero__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .hero__text { display: grid; gap: 20px; }

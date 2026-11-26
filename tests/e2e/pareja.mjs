@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Fase 3 de punta a punta, en navegador: «una pareja de prueba puede invitar a 150 personas,
 // recibir respuestas y exportar la lista para el catering».
-//   1. Luis da acceso a la pareja y genera su enlace mágico desde el editor de la boda.
+//   1. Luis da acceso a la pareja y copia su enlace de siempre desde el editor de la boda.
 //   2. La pareja entra sin contraseña, importa un Excel de 150 invitados (52 grupos) y cambia datos.
 //   3. Los invitados abren su enlace personal y confirman (en el navegador y por la API).
 //   4. La pareja ve los totales, los pendientes, imprime los QR y descarga el Excel del catering.
@@ -57,9 +57,8 @@ try {
   await lp.locator("summary", { hasText: "Pareja y acceso" }).click();
   await lp.getByRole("button", { name: "Enlace de acceso" }).click();
   const link = await lp.locator("dialog[open] input[readonly]").inputValue();
-  if (!link.includes("/pareja/#acceso=")) throw new Error(`Enlace raro: ${link}`);
-  await luis.close();
-  ok("Luis da acceso a la pareja y genera su enlace para mandarlo por WhatsApp");
+  if (!link.includes("/pareja/#llave=")) throw new Error(`Enlace raro: ${link}`);
+  ok("Luis da acceso a la pareja y copia su enlace de siempre para mandarlo por WhatsApp");
 
   // ── 2. La pareja entra e importa 150 invitados ──
   const pareja = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: "es-ES", timezoneId: "Europe/Madrid", acceptDownloads: true });
@@ -69,13 +68,34 @@ try {
   await pp.goto(link);
   await pp.getByRole("heading", { name: /Olga & Teo/ }).waitFor();
   ok("La pareja entra sin contraseña con el enlace");
-  // Un enlace gastado no vale dos veces.
+  // Vuelve a pulsar el mismo enlace del WhatsApp (pestaña nueva) y desde otro móvil: entra las dos veces.
+  const again = await pareja.newPage();
+  await again.goto(link);
+  await again.getByRole("heading", { name: /Olga & Teo/ }).waitFor();
+  await again.close();
   const other = await browser.newContext();
   const op = await other.newPage();
   await op.goto(link);
-  await op.getByText("Este enlace ya se ha usado o ha caducado").waitFor();
+  await op.getByRole("heading", { name: /Olga & Teo/ }).waitFor();
   await other.close();
-  ok("El enlace solo sirve una vez");
+  ok("El enlace sirve todas las veces y desde otro móvil, sin escribir nada");
+  // Luis lo cambia: el viejo ya no deja entrar a nadie nuevo, pero quien ya estaba dentro sigue dentro.
+  await lp.getByRole("button", { name: "Cambiar enlace" }).click();
+  await lp.getByRole("button", { name: "Cambiar", exact: true }).click();
+  await lp.getByText("Enlace cambiado.").waitFor();
+  const fresh = await lp.locator("dialog[open] input[readonly]").inputValue();
+  if (fresh === link || !fresh.includes("/pareja/#llave=")) throw new Error(`No ha cambiado el enlace: ${fresh}`);
+  await luis.close();
+  const stranger = await browser.newContext();
+  const sp = await stranger.newPage();
+  await sp.goto(link);
+  await sp.getByText("Este enlace ya no sirve").waitFor();
+  await stranger.close();
+  const inside = await pareja.newPage();
+  await inside.goto(link);
+  await inside.getByRole("heading", { name: /Olga & Teo/ }).waitFor();
+  await inside.close();
+  ok("Al cambiar el enlace el viejo deja de servir; quien ya estaba dentro no tiene que escribir nada");
 
   await pp.goto(`${SITE}/pareja/#/invitados`);
   await pp.getByText("Dos formas de empezar").waitFor();

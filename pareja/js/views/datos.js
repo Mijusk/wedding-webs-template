@@ -87,10 +87,14 @@ export default async function datos(ctx) {
     else item[e.target.dataset.k] = e.target.value;
     touch();
   });
-  box.addEventListener("change", (e) => {
-    if (e.target.dataset.k !== "time") return;
-    const late = (t) => (t < "06:00" ? `3${t}` : t); // la fiesta de madrugada va al final
-    p.schedule.sort((a, b) => late(a.time).localeCompare(late(b.time)));
+  // Se ordena por hora al salir del horario, no mientras se teclea: repintar quita el foco a media hora.
+  const late = (t) => (t < "06:00" ? `3${t}` : t); // la fiesta de madrugada va al final
+  const sorted = () => [...p.schedule].sort((a, b) => late(a.time).localeCompare(late(b.time)));
+  box.addEventListener("focusout", (e) => {
+    if (box.contains(e.relatedTarget)) return;
+    const next = sorted();
+    if (next.every((s, i) => s === p.schedule[i])) return;
+    p.schedule = next;
     paint();
   });
   box.addEventListener("click", (e) => {
@@ -132,7 +136,7 @@ export default async function datos(ctx) {
     const iban = form.iban ? formatIban(form.iban.value) : null;
     if (iban && !isSampleIban(iban) && !ibanOk(iban)) { err.textContent = "El IBAN no es válido. Revisad los números."; return form.iban.focus(); }
     const patch = {
-      schedule: p.schedule.map((s) => ({ time: s.time, label: s.label.trim(), ...(s.place?.trim() ? { place: s.place.trim() } : {}), ...(s.tone ? { tone: s.tone } : {}) })),
+      schedule: sorted().map((s) => ({ time: s.time, label: s.label.trim(), ...(s.place?.trim() ? { place: s.place.trim() } : {}), ...(s.tone ? { tone: s.tone } : {}) })),
       venue: { address: form.address.value.trim(), ...(form.mapsUrl.value.trim() ? { mapsUrl: form.mapsUrl.value.trim() } : {}) },
       rsvp: { deadline: form.deadline.value || "", ...(ext ? { dietary: form.dietary.checked, bus: form.bus.checked } : {}) },
       sections: available.filter((s) => fixed(s) ? (p.sections || []).includes(s) : form.querySelector(`[name=section][value="${s}"]`)?.checked),

@@ -26,7 +26,7 @@
       "permanent": false
     },
     {
-      "source": "/(package\\.json|README\\.md|\\.env.*|\\.gitignore)",
+      "source": "/(package\\.json|README\\.md|MEJORAS\\.md|\\.env.*|\\.gitignore)",
       "destination": "/",
       "permanent": false
     }
@@ -60,6 +60,10 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
         }
       ]
     },
