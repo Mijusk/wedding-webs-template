@@ -131,3 +131,7 @@ body { font-size: 20px; line-height: 1.6; }
   .score { overflow: hidden; }
   .hero__photo { padding-inline: 0; min-height: 300px; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

@@ -290,3 +290,7 @@ dialog .rsvp-title { font-style: normal; font-size: clamp(40px, 6vw, 54px); }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   .reveal.is-pending, .reveal--photo.is-pending img { opacity: 1; transform: none; filter: none; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

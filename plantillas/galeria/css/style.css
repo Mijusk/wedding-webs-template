@@ -454,3 +454,7 @@ body .rsvp-dialog { border-radius: 2px; background: var(--paper); }
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   .work__shade { display: none !important; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

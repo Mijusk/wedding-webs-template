@@ -284,3 +284,7 @@ body .rsvp-dialog::backdrop { background: rgb(5 9 18 / .72); }
   .hero .sky__grid { opacity: .13 !important; }
   .hero .sky__star { opacity: var(--o, 1) !important; }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

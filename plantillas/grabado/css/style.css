@@ -113,3 +113,7 @@ body { font-size: 17px; line-height: 1.75; background: var(--grain), var(--paper
   .plate { width: min(300px, 80vw); justify-self: center; }
   .hero__names { font-size: min(60px, calc((100vw - 40px) / (var(--len) * .34))); }
 }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }

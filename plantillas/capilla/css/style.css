@@ -411,3 +411,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; }
 .panel__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 28px; }
 .panel > .link:last-child, .panel__links { margin-top: auto; padding-top: 22px; }
 .panel__links .link { margin-top: 0; }
+
+/* El atributo hidden tiene que ganar a los display de los componentes: si no, tras enviar
+   la confirmación seguía viéndose el formulario con «Enviando…» encima del «¡Gracias!». */
+[hidden] { display: none !important; }
