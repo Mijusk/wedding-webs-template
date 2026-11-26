@@ -110,6 +110,7 @@
           <span class="quick__amp" aria-hidden="true">&amp;</span>
           <input class="quick__name" id="q-b" name="b" type="text" placeholder="Martín" aria-label="El nombre de tu pareja" maxlength="24" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go">
           <button class="btn btn--magnetic quick__go" type="submit">Crear nuestra web <span aria-hidden="true">→</span></button>
+          <button class="quick__tap" id="quick-tap" type="button" tabindex="-1" aria-label="Escribir vuestros nombres"></button>
         </div>
         <p class="quick__alt">Sin registros ni pagos. <a href="#estilos">O mirad antes los estilos</a></p>
       </form>
@@ -125,7 +126,7 @@
       <figure class="phone hero__phone" aria-label="Web de ejemplo funcionando" style="--i:0;--depth:.35;--y:0px">
         <div class="hero__card-in">
           <div class="scaled" data-base-width="390" data-base-height="780">
-            <iframe id="intro-frame" title="Web de ejemplo: Lucía y Martín" tabindex="-1"></iframe>
+            <iframe id="intro-frame" title="Web de ejemplo: Lucía y Martín" tabindex="-1" data-still></iframe>
           </div>
         </div>
       </figure>
@@ -289,8 +290,8 @@
           <h2 class="wstep__title" id="builder-title">¿Cómo os llamáis?</h2>
           <p class="wstep__lead">Así saldrá en la portada de vuestra web.</p>
           <div class="field-row">
-            <div class="field"><label for="b-name-a">Nombre</label><input type="text" id="b-name-a" name="nameA" autocomplete="given-name" autocapitalize="words" maxlength="24" required></div>
-            <div class="field"><label for="b-name-b">y nombre</label><input type="text" id="b-name-b" name="nameB" autocapitalize="words" maxlength="24" required></div>
+            <div class="field"><label for="b-name-a">Nombre</label><input type="text" id="b-name-a" name="nameA" autocomplete="given-name" autocapitalize="words" maxlength="24" enterkeyhint="next" required></div>
+            <div class="field"><label for="b-name-b">y nombre</label><input type="text" id="b-name-b" name="nameB" autocomplete="off" autocapitalize="words" maxlength="24" enterkeyhint="next" required></div>
           </div>
           <button class="linkbtn" type="button" id="b-sample">o probad con una pareja de ejemplo</button>
         </section>
@@ -312,14 +313,14 @@
           <h2 class="wstep__title" id="w-t-lugar">¿Dónde lo celebráis?</h2>
           <p class="wstep__lead">Lo ponemos en la web con su mapa, para que nadie se pierda.</p>
           <div class="field-row">
-            <div class="field"><label for="b-venue">Lugar</label><input type="text" id="b-venue" name="venue" placeholder="Finca, iglesia, restaurante…" required></div>
-            <div class="field"><label for="b-city">Ciudad <span class="opt">opcional</span></label><input type="text" id="b-city" name="city"></div>
+            <div class="field"><label for="b-venue">Lugar</label><input type="text" id="b-venue" name="venue" placeholder="Finca, iglesia…" autocapitalize="words" enterkeyhint="next" required></div>
+            <div class="field"><label for="b-city">Ciudad <span class="opt">opcional</span></label><input type="text" id="b-city" name="city" autocapitalize="words" enterkeyhint="next"></div>
           </div>
         </section>
 
         <section class="wstep" data-step="estilo" aria-labelledby="w-t-estilo" hidden>
           <h2 class="wstep__title" id="w-t-estilo">¿Qué estilo os pega?</h2>
-          <p class="wstep__lead">Tocad uno y miradlo al lado. Luego podéis cambiarlo cuantas veces queráis.</p>
+          <p class="wstep__lead">Tocad uno y miradlo en vuestra web. Luego podéis cambiarlo cuantas veces queráis.</p>
           <fieldset class="field"><legend class="hp">Estilo</legend><div class="style-pick" id="b-styles"></div></fieldset>
         </section>
 
@@ -345,7 +346,7 @@
     <aside class="wizard__preview" aria-label="Vuestra web, en vivo">
       <figure class="phone wizard__phone">
         <div class="scaled" data-base-width="390" data-base-height="780">
-          <iframe id="w-frame" title="Vuestra web, en vivo" tabindex="-1" aria-hidden="true"></iframe>
+          <iframe id="w-frame" title="Vuestra web, en vivo" tabindex="-1" aria-hidden="true" data-still></iframe>
         </div>
       </figure>
       <p class="wizard__live"><span class="live-dot" aria-hidden="true"></span>En vivo</p>
@@ -447,8 +448,8 @@
         <button class="style-dock__arrow" type="button" id="dock-next" aria-label="Estilo siguiente">›</button>
       </div>
       <div class="stage__tools">
-        <button class="btn btn--small btn--ghost" type="button" id="stage-guest">Probadla como invitados</button>
-        <button class="btn btn--small btn--ghost" type="button" id="stage-share">Enseñádsela a vuestra pareja</button>
+        <button class="btn btn--small btn--ghost" type="button" id="stage-guest"><span class="when-wide">Probadla como invitados</span><span class="when-narrow">Probar como invitado</span></button>
+        <button class="btn btn--small btn--ghost" type="button" id="stage-share"><span class="when-wide">Enseñádsela a vuestra pareja</span><span class="when-narrow">Compartir</span></button>
         <button class="btn btn--small btn--ghost" type="button" id="stage-sections" aria-expanded="false" aria-controls="sections-panel">Secciones</button>
       </div>
     </div>

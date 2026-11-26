@@ -31,7 +31,7 @@ export function setupQuick({ style, url, withTheme, onStart }) {
     const need = phone.top + phone.height * 0.82 - innerHeight;
     if (need > 0) scrollBy({ top: Math.min(need, box.top - 90), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   };
-  const later = () => { reveal(); clearTimeout(timer); timer = setTimeout(() => paint().catch(() => {}), 1000); }; // cuando paran de escribir, no a cada letra
+  const later = () => { reveal(); clearTimeout(timer); timer = setTimeout(() => paint().catch(() => {}), 450); }; // en cuanto hacen una pausa, no a cada letra
   a.addEventListener("input", later);
   b.addEventListener("input", later);
   // Enter en el primer nombre pasa al segundo, no envía.
@@ -40,6 +40,14 @@ export function setupQuick({ style, url, withTheme, onStart }) {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     onStart(names());
+  });
+  // En el móvil el teclado taparía el móvil de la portada: tocar un nombre abre el paso a paso a
+  // pantalla completa, con la web en grande encima y el teclado ya en ese nombre. Va con un botón
+  // por encima de los campos (solo se ve en el móvil, ver .quick__tap): el foco que se da en su
+  // clic es el que deja al iPhone abrir el teclado en el paso a paso.
+  $("#quick-tap")?.addEventListener("click", (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    onStart(names(), e.clientX > r.left + r.width / 2 ? "b" : "a");
   });
   return { paint };
 }

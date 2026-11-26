@@ -214,6 +214,19 @@ El plan Hobby de Vercel solo permite una tarea programada al día. El aviso de c
 ### Sin funciones nuevas
 La baja y la web guardada van en `api/lead.js`, y el email «web publicada» en `api/pedido.js`. Siguen siendo 10 funciones de 12.
 
+## 2026-11-26 · Escaparate en el móvil: probarla con el teclado abierto
+
+En el iPhone el teclado tapaba la vista previa: en la portada el móvil de ejemplo quedaba debajo del formulario, y en el paso a paso la web se iba por arriba al enfocar un campo. Ahora:
+
+- **Tocar los nombres de la portada abre el paso a paso** a pantalla completa, con el teclado ya en ese nombre (`quick.js`, botón `#quick-tap` solo en móvil). Escribir en la portada sin ver nada no servía.
+- **Las capas miden lo que se ve de verdad** (`app/viewport.js`, con `visualViewport`): el paso a paso y «¿Os la guardamos?» ocupan justo el hueco encima del teclado y no hay nada que desplazar. Con el teclado abierto (`html.has-kb`) se queda la pregunta con «Siguiente» al lado y los campos.
+- **La vista previa del móvil es una ventana que se acerca a lo que rellenan** (`aimPreview` en `builder.js`): los nombres, la fecha, el lugar. Los busca por su texto, así vale para cualquier plantilla sin tocarlas. Si no caben (iPhone SE con teclado), la web se aleja lo justo.
+- **La vista previa cambia mientras escriben** (0,4 s de pausa en vez de 1 s) y sin repetir la entrada de la plantilla a cada letra: tras la primera vez, `preview.js` congela sus animaciones en los iframes con `data-still`.
+- **Los estilos de la portada, en una fila que se desliza** (8 en el móvil; todos en `plantillas.html`). Más no: cada uno es una web entera en un iframe y el iPhone se queda sin memoria.
+- **Sin el botón fijo de abajo en el móvil**: el de la cabecera ya está siempre a la vista.
+
+Probado con Playwright en tamaño iPhone 13 y SE, con el teclado simulado encogiendo la ventana. El teclado de verdad del iPhone solo se puede comprobar en el teléfono.
+
 ## Problemas encontrados que ya estaban en `main`
 
 - **La plantilla Clásica no se pinta** (estilos Olivar, Atardecer y Noche): `js/sections/hero.js` importa `longDate`, que no existe en `js/format.js`; además usa `t` sin definir y `js/main.js` no registra `story`, `gifts` ni `closing`. Parece un cambio a medias. No se ha tocado: hay que decidir cómo debía quedar. **Resuelto:** volvió a la versión que funcionaba y, desde el 25/11/2026, también admite el RSVP ampliado.

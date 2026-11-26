@@ -8,6 +8,7 @@ import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
+import { watchViewport } from "./viewport.js";
 import { captureAttribution } from "./attribution.js";
 import { setupConsent } from "./consent.js";
 import { initAnalytics, track } from "./analytics.js";
@@ -18,6 +19,7 @@ import { initAds, conversion } from "./ads.js";
 // página, sin esperar a nada. Aquí solo hace falta studio.json para el resto; los precios de la
 // base de datos y el config de cada plantilla llegan después, sin bloquear.
 startEntrance();
+watchViewport();
 
 async function start() {
   setupConsent();
@@ -102,7 +104,7 @@ async function start() {
   });
   const quick = setupQuick({
     style: available[0], url: urlOf(available[0]), withTheme,
-    onStart: (names) => { track("probar_abierto", { desde: "portada_nombres", nombres: names.every(Boolean) ? "si" : "no" }); openBuilder(available[0].id, { names }); },
+    onStart: (names, focus) => { track("probar_abierto", { desde: "portada_nombres", nombres: names.every(Boolean) ? "si" : "no" }); openBuilder(available[0].id, { names, focus }); },
   });
   document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder(); }));
 
@@ -261,7 +263,8 @@ function setupNudge() {
     const pastHero = $("#estilos").getBoundingClientRect().top < innerHeight * 0.6;
     const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.9;
     const busy = ["#builder", "#stage", "#loading", "#send"].some((id) => !$(id).hidden);
-    const show = pastHero && !atPricing && !busy && !document.querySelector(".cookies");
+    // En el móvil el botón de arriba ya está siempre a la vista: aquí sería repetirlo.
+    const show = pastHero && !atPricing && !busy && !document.querySelector(".cookies") && !matchMedia("(max-width: 760px)").matches;
     nudge.hidden = !show;
     document.body.classList.toggle("has-nudge", show);
   };

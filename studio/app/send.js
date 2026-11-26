@@ -57,8 +57,10 @@ export function openSend(from = "barra") {
   $("#send").hidden = false;
   syncScrollLock();
   const thanks = $("#send-thanks");
-  if (thanks.hidden) $("#b-phone").focus();
-  else thanks.querySelector("button")?.focus();
+  // En el móvil, sin abrir el teclado de golpe: primero que vean la hoja entera.
+  if (!thanks.hidden) thanks.querySelector("button")?.focus();
+  else if (matchMedia("(pointer: coarse)").matches) $("#send [data-close]").focus({ preventScroll: true });
+  else $("#b-phone").focus();
 }
 
 export function closeSend() {
