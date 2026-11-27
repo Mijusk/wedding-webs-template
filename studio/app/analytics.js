@@ -33,9 +33,15 @@ export function initAnalytics(studio) {
   load();
 }
 
+// Datos que van con todos los eventos de la visita, p. ej. el grupo de una prueba A/B
+// ({ grupo_movil: "tarjeta" }): en Umami se filtra cualquier evento por ese grupo.
+const extra = {};
+export const trackAlways = (data) => Object.assign(extra, data);
+
 // Evento del embudo, p. ej. track("prueba_generada", { estilo: "villa" }). Nunca datos personales.
 export function track(name, data) {
   if (!loaded || !allowed("analitica")) return;
+  data = { ...extra, ...data };
   try {
     if (window.umami) window.umami.track(name, data);
     else queue.push([name, data]);

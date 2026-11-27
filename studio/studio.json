@@ -801,6 +801,13 @@
   },
   "generator": {
     "firstRunMs": 3000,
+    "_quickNota": "La carga corta la primera vez que ven su web (nombres + estilo). {estilo} = el estilo elegido.",
+    "quickMs": 2200,
+    "quickMessages": [
+      "Poniendo vuestros nombres…",
+      "Aplicando el estilo {estilo}…",
+      "Preparando vuestra web…"
+    ],
     "switchMs": 700,
     "maxPhotos": 3,
     "messages": [
@@ -962,6 +969,11 @@
     "deliveryDays": 3,
     "onlineMonths": 12,
     "guestDataMonths": 6
+  },
+  "phoneGate": {
+    "_nota": "Tarjeta «¿Dónde os la mandamos?» que pide el móvil la primera vez que ven su web (app/gate.js). share = parte de las visitas a las que les sale (0.5 = la mitad, prueba A/B; 1 = a todas). enabled false = a nadie. En Umami, todos los eventos llevan grupo_movil (tarjeta o sin).",
+    "enabled": true,
+    "share": 0.5
   },
   "analytics": {
     "_nota": "Analítica anónima sin cookies (Umami). Pon aquí el id de la web en Umami para activarla; vacío = apagada. No se carga en localhost.",

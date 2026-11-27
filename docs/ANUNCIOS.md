@@ -106,7 +106,15 @@ tres toques: nombres → estilo → su web con datos de ejemplo):
    al bajar por la web y el panel para poner fecha, lugar y fotos encima de ella.
 6. `guardar_abierto` y `lead_prueba`.
 
-El salto más grande entre un paso y el siguiente es el que hay que mejorar. `ver_todas` cuenta
+El salto más grande entre un paso y el siguiente es el que hay que mejorar.
+
+**Prueba A/B de la tarjeta del móvil** (desde el 27/11/2026, `studio.json > phoneGate`): a la mitad
+de las visitas, la primera vez que ven su web les sale «¿Dónde os la mandamos?» pidiendo el móvil
+(se puede cerrar). Cada navegador se queda en su grupo y **todos** los eventos llevan
+`grupo_movil` (`tarjeta` o `sin`). En Umami, compara por `grupo_movil`: cuántos `lead_prueba` hay
+en cada grupo por cada `prueba_generada`, y cuántos llegan a `reserva_enviada`. La tarjeta manda además
+`tarjeta_movil` con `accion`: vista, dejado, cerrada. Tras ~2 semanas, si gana: `share: 1`; si
+pierde: `enabled: false`. Para verla a mano: `/studio/?ab=tarjeta` (o `?ab=sin`). `ver_todas` cuenta
 cuántos vuelven a la cuadrícula desde la vista previa.
 
 ## 5. Pie «Hecha con WeddingWebs» en las webs de boda
