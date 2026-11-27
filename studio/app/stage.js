@@ -42,7 +42,10 @@ export function setupStage(context) {
   $("#view-mobile").addEventListener("click", () => view(true));
   if (matchMedia("(max-width: 560px)").matches) view(true);
 
-  $("#stage-edit").addEventListener("click", () => { closeStage(); ctx.onEdit(state.style.id); });
+  // Editar datos: encima de la propia web, sin salir de aquí (edit.js).
+  $("#stage-edit").addEventListener("click", () => ctx.onEdit(state));
+  // Volver a la cuadrícula con todos los estilos (picker.js).
+  $("#stage-all").addEventListener("click", () => ctx.onAll(state));
   // Flechas del teclado: estilo anterior o siguiente (salvo escribiendo o con un panel abierto).
   document.addEventListener("keydown", (e) => {
     if ($("#stage").hidden || !["ArrowLeft", "ArrowRight"].includes(e.key) || e.altKey || e.metaKey || e.ctrlKey) return;
@@ -51,7 +54,7 @@ export function setupStage(context) {
     stepStyle(e.key === "ArrowRight" ? 1 : -1);
   });
   $("#stage-keep").addEventListener("click", () => { closeStage(); ctx.onKeep(state); });
-  $("#stage-try").addEventListener("click", () => { closeStage(); ctx.onEdit(state.style.id); });
+  $("#stage-try").addEventListener("click", () => { closeStage(); ctx.onTry(state.style.id); });
   $("#stage [data-close]").addEventListener("click", closeStage);
 
   $("#sections-note").textContent = studio.sections?.note || "";
@@ -108,6 +111,7 @@ export async function prepareStage(wedding, style) {
   const [a, b] = state.config.event.couple;
   $("#stage-kind").textContent = demo ? "Web de ejemplo" : "Vuestra web";
   $("#stage-title").textContent = `${a} & ${b}`;
+  $("#stage-edit").textContent = wedding?.partial ? "Poner datos" : "Editar datos";
   $("#stage-edit").hidden = demo;
   $("#stage-keep").hidden = demo;
   $("#stage-try").hidden = !demo;
@@ -117,6 +121,20 @@ export async function prepareStage(wedding, style) {
   markStyle();
   return ready;
 }
+
+// Con los datos nuevos que van poniendo encima de la web (edit.js): misma plantilla, mismo
+// estilo, solo se le manda el config nuevo (sin recargar ni repetir la entrada).
+export async function updateWedding(wedding) {
+  if (!state) return;
+  state = { ...state, wedding, config: withSections(await ctx.configFor(state.style, wedding)) };
+  const [a, b] = state.config.event.couple;
+  $("#stage-title").textContent = `${a} & ${b}`;
+  $("#stage-edit").textContent = wedding.partial ? "Poner datos" : "Editar datos";
+  return showInFrame($("#stage-frame"), ctx.studio.templates[state.style.template].url, state.config);
+}
+
+// Cambiar a otro estilo desde fuera (la cuadrícula de «Ver todas»).
+export const showStyle = (id) => switchStyle(id);
 
 export function openStage() {
   $("#stage").hidden = false;
@@ -288,7 +306,9 @@ function closeShare() { $("#share-pop").hidden = true; }
 
 function shareUrl() {
   const w = state.wedding;
-  const data = { c: w.couple, d: w.date, t: w.time, v: w.venue, ci: w.city, s: state.style.id };
+  const data = w.partial
+    ? { c: w.couple, d: w.date || undefined, t: w.time || undefined, v: w.venue || undefined, ci: w.city || undefined, s: state.style.id, p: 1 }
+    : { c: w.couple, d: w.date, t: w.time, v: w.venue, ci: w.city, s: state.style.id };
   const bytes = new TextEncoder().encode(JSON.stringify(data));
   const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   return `${location.origin}${location.pathname}#boda=${b64}`;
@@ -303,7 +323,11 @@ export function weddingFromHash(hash = location.hash) {
     const d = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
     const str = (v, n = 80) => String(v ?? "").trim().slice(0, n);
     const couple = Array.isArray(d.c) ? d.c.slice(0, 2).map((x) => str(x, 24)) : [];
-    if (couple.length !== 2 || !couple[0] || !couple[1] || !/^\d{4}-\d{2}-\d{2}$/.test(d.d) || !/^\d{2}:\d{2}$/.test(d.t) || !str(d.v)) return null;
-    return { wedding: { couple, date: d.d, time: d.t, venue: str(d.v), city: str(d.ci), photos: [], shared: true }, style: str(d.s, 40) };
+    if (couple.length !== 2 || !couple[0] || !couple[1]) return null;
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(d.d) ? d.d : "", time = /^\d{2}:\d{2}$/.test(d.t) ? d.t : "";
+    const wedding = { couple, date, time, venue: str(d.v), city: str(d.ci), photos: [], shared: true };
+    // Sin fecha, hora o lugar: con los del ejemplo (lo que hoy se puede probar solo con los nombres).
+    if (!date || !time || !wedding.venue) { if (!d.p) return null; wedding.partial = true; }
+    return { wedding, style: str(d.s, 40) };
   } catch { return null; }
 }

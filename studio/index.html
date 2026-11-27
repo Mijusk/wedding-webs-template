@@ -275,71 +275,30 @@
 <!-- Botón fijo abajo mientras se ven los estilos (app/main.js > setupNudge) -->
 <button class="btn btn--small nudge" id="nudge" type="button" hidden>Probar con vuestra boda</button>
 
-<!-- Generador paso a paso (studio/app/builder.js): una pregunta por pantalla y la web cambiando al
-     lado en cada paso. Sin email: se pide al final, si quieren guardarla (ver #send). -->
+<!-- «Probar», paso 1 (studio/app/builder.js): solo los nombres, con la web cambiando al lado.
+     Paso 2: elegir estilo en la cuadrícula (#picker). Fecha, lugar y fotos, luego, encima de la web. -->
 <div class="overlay overlay--wizard" id="builder" role="dialog" aria-modal="true" aria-labelledby="builder-title" hidden>
   <div class="wizard">
     <button class="close" type="button" data-close aria-label="Cerrar">×</button>
     <div class="wizard__main">
-      <div class="wizard__progress" aria-hidden="true"><span id="w-bar"></span></div>
-      <p class="eyebrow" id="w-count">Paso 1 de 5</p>
+      <div class="wizard__progress" aria-hidden="true"><span id="w-bar" style="width:50%"></span></div>
+      <p class="eyebrow" id="w-count">Paso 1 de 2</p>
       <form id="builder-form" novalidate>
         <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
         <section class="wstep" data-step="nombres" aria-labelledby="builder-title">
           <h2 class="wstep__title" id="builder-title">¿Cómo os llamáis?</h2>
-          <p class="wstep__lead">Así saldrá en la portada de vuestra web.</p>
+          <p class="wstep__lead">Solo eso. Después elegís estilo y la veis entera, con vuestros nombres.</p>
           <div class="field-row">
             <div class="field"><label for="b-name-a">Nombre</label><input type="text" id="b-name-a" name="nameA" autocomplete="given-name" autocapitalize="words" maxlength="24" enterkeyhint="next" required></div>
-            <div class="field"><label for="b-name-b">y nombre</label><input type="text" id="b-name-b" name="nameB" autocomplete="off" autocapitalize="words" maxlength="24" enterkeyhint="next" required></div>
+            <div class="field"><label for="b-name-b">y nombre</label><input type="text" id="b-name-b" name="nameB" autocomplete="off" autocapitalize="words" maxlength="24" enterkeyhint="go" required></div>
           </div>
           <button class="linkbtn" type="button" id="b-sample">o probad con una pareja de ejemplo</button>
         </section>
 
-        <section class="wstep" data-step="fecha" aria-labelledby="w-t-fecha" hidden>
-          <h2 class="wstep__title" id="w-t-fecha">¿Cuándo es el gran día?</h2>
-          <p class="wstep__lead">Con la fecha preparamos la cuenta atrás y el plazo para confirmar.</p>
-          <div class="field-row">
-            <div class="field"><label for="b-date">Fecha de la boda</label><input type="date" id="b-date" name="date" required></div>
-            <div class="field"><label for="b-time">Hora de la ceremonia</label><input type="time" id="b-time" name="time" value="18:00" required></div>
-          </div>
-          <div class="countdown" id="w-countdown" aria-live="polite" hidden>
-            <span class="countdown__num" id="w-days">0</span>
-            <span class="countdown__label" id="w-days-label">días para vuestro «sí, quiero»</span>
-          </div>
-        </section>
-
-        <section class="wstep" data-step="lugar" aria-labelledby="w-t-lugar" hidden>
-          <h2 class="wstep__title" id="w-t-lugar">¿Dónde lo celebráis?</h2>
-          <p class="wstep__lead">Lo ponemos en la web con su mapa, para que nadie se pierda.</p>
-          <div class="field-row">
-            <div class="field"><label for="b-venue">Lugar</label><input type="text" id="b-venue" name="venue" placeholder="Finca, iglesia…" autocapitalize="words" enterkeyhint="next" required></div>
-            <div class="field"><label for="b-city">Ciudad <span class="opt">opcional</span></label><input type="text" id="b-city" name="city" autocapitalize="words" enterkeyhint="next"></div>
-          </div>
-        </section>
-
-        <section class="wstep" data-step="estilo" aria-labelledby="w-t-estilo" hidden>
-          <h2 class="wstep__title" id="w-t-estilo">¿Qué estilo os pega?</h2>
-          <p class="wstep__lead">Tocad uno y miradlo en vuestra web. Luego podéis cambiarlo cuantas veces queráis.</p>
-          <fieldset class="field"><legend class="hp">Estilo</legend><div class="style-pick" id="b-styles"></div></fieldset>
-        </section>
-
-        <section class="wstep" data-step="fotos" aria-labelledby="w-t-fotos" hidden>
-          <h2 class="wstep__title" id="w-t-fotos">¿Ponemos vuestras fotos?</h2>
-          <p class="wstep__lead">Hasta tres; la primera será la portada. Si no, usamos fotos de ejemplo.</p>
-          <div class="photos" id="b-photos" aria-label="Fotos">
-            <label class="photos__add" for="b-photo-input" id="b-photo-add">
-              <span aria-hidden="true">+</span> Añadir fotos
-              <input type="file" id="b-photo-input" accept="image/*" multiple>
-            </label>
-          </div>
-          <p class="hint">Las fotos no salen de vuestro navegador.</p>
-        </section>
-
         <p class="error" id="b-error" role="alert"></p>
         <div class="wizard__nav">
-          <button class="btn btn--ghost" type="button" id="w-back">Atrás</button>
-          <button class="btn" type="submit" id="w-next">Siguiente</button>
+          <button class="btn" type="submit" id="w-next">Elegir estilo <span aria-hidden="true">→</span></button>
         </div>
       </form>
     </div>
@@ -352,6 +311,21 @@
       <p class="wizard__live"><span class="live-dot" aria-hidden="true"></span>En vivo</p>
     </aside>
   </div>
+</div>
+
+<!-- «Probar», paso 2 (studio/app/picker.js): todos los estilos en tarjetas, con sus nombres.
+     También se abre desde la vista previa con «Ver todas». -->
+<div class="picker" id="picker" role="dialog" aria-modal="true" aria-labelledby="picker-title" hidden>
+  <div class="picker__head">
+    <div class="picker__text">
+      <p class="eyebrow" id="picker-step">Paso 2 de 2</p>
+      <h2 class="picker__title" id="picker-title">¿Qué estilo os pega?</h2>
+      <p class="picker__lead" id="picker-lead"></p>
+      <button class="linkbtn" type="button" id="picker-names">Cambiar los nombres</button>
+    </div>
+    <button class="close" type="button" data-close aria-label="Cerrar">×</button>
+  </div>
+  <ul class="picker__grid" id="picker-grid" aria-label="Estilos"></ul>
 </div>
 
 <!-- Guardar la web: el email se pide aquí, cuando ya la han visto (studio/app/send.js). -->
@@ -438,14 +412,58 @@
     <div class="stage__frame" id="stage-frame-wrap">
       <iframe id="stage-frame" title="Vista previa de la web"></iframe>
       <div class="switching" id="switching" hidden><p id="switching-msg"></p></div>
+      <!-- Aviso que no bloquea (como el de las cookies) mientras solo han puesto los nombres (app/edit.js) -->
+      <div class="data-prompt" id="data-prompt" role="status" hidden>
+        <p class="data-prompt__title">¿Queréis probarla con vuestros datos?</p>
+        <p class="data-prompt__text">Ahora salen una fecha y un lugar de ejemplo. Poned los vuestros aquí mismo y la web cambia al momento.</p>
+        <div class="data-prompt__actions">
+          <button class="btn btn--small" type="button" id="data-prompt-yes">Poner nuestros datos</button>
+          <button class="btn btn--small btn--ghost" type="button" id="data-prompt-no">Ahora no</button>
+        </div>
+      </div>
     </div>
+    <!-- Sus datos, encima de la web: cambian según escriben (app/edit.js) -->
+    <aside class="edit-panel" id="edit-panel" aria-labelledby="edit-title" hidden>
+      <div class="sections-panel__head">
+        <p class="edit-panel__title" id="edit-title">Vuestros datos</p>
+        <button class="close" type="button" id="edit-close" aria-label="Cerrar">×</button>
+      </div>
+      <form id="edit-form" novalidate autocomplete="off">
+        <div class="edit-panel__row">
+          <div class="field"><label for="e-name-a">Nombre</label><input type="text" id="e-name-a" name="nameA" data-aim="top" autocapitalize="words" maxlength="24" enterkeyhint="next"></div>
+          <div class="field"><label for="e-name-b">y nombre</label><input type="text" id="e-name-b" name="nameB" data-aim="top" autocapitalize="words" maxlength="24" enterkeyhint="next"></div>
+        </div>
+        <div class="edit-panel__row">
+          <div class="field"><label for="e-date">Fecha</label><input type="date" id="e-date" name="date" data-aim="details"></div>
+          <div class="field"><label for="e-time">Hora</label><input type="time" id="e-time" name="time" value="18:00" data-aim="details"></div>
+        </div>
+        <div class="edit-panel__row">
+          <div class="field"><label for="e-venue">Lugar</label><input type="text" id="e-venue" name="venue" data-aim="details" placeholder="Finca, iglesia…" autocapitalize="words" enterkeyhint="next"></div>
+          <div class="field"><label for="e-city">Ciudad <span class="opt">opcional</span></label><input type="text" id="e-city" name="city" data-aim="details" autocapitalize="words" enterkeyhint="done"></div>
+        </div>
+        <p class="error" id="edit-error" role="alert"></p>
+        <div class="edit-panel__foot">
+          <div class="photos photos--small" id="edit-photos" aria-label="Fotos">
+            <label class="photos__add" for="e-photo-input" id="e-photo-add">
+              <span aria-hidden="true">+</span> Fotos
+              <input type="file" id="e-photo-input" accept="image/*" multiple>
+            </label>
+          </div>
+          <button class="btn" type="submit" id="edit-done">Listo</button>
+        </div>
+        <p class="hint edit-panel__hint">Lo que dejéis en blanco sale del ejemplo. Las fotos no salen de vuestro navegador.</p>
+      </form>
+    </aside>
     <div class="stage__dock">
+      <div class="dock-row">
       <div class="style-dock" id="style-dock" role="group" aria-label="Cambiar de estilo">
         <button class="style-dock__arrow" type="button" id="dock-prev" aria-label="Estilo anterior">‹</button>
         <div class="style-dock__name" id="dock-swipe">
           <small id="dock-count">Estilo</small><strong id="dock-name"></strong><span class="style-dock__hint" id="dock-hint">Deslizad para ver otro</span>
         </div>
         <button class="style-dock__arrow" type="button" id="dock-next" aria-label="Estilo siguiente">›</button>
+      </div>
+      <button class="btn btn--small btn--ghost dock-all" type="button" id="stage-all"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></svg>Ver todas</button>
       </div>
       <div class="stage__tools">
         <button class="btn btn--small btn--ghost" type="button" id="stage-guest"><span class="when-wide">Probadla como invitados</span><span class="when-narrow">Probar como invitado</span></button>

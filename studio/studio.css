@@ -670,3 +670,104 @@ body.has-nudge { padding-bottom: 64px; }
   .share-pop { position: fixed; left: 0; right: 0; bottom: 0; width: auto; border-radius: 20px 20px 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); animation-name: sheet-up; }
   .save-nudge { top: 10px; font-size: 14px; gap: 8px; padding-left: 16px; }
 }
+
+/* «Probar», paso 2: todos los estilos en tarjetas con sus nombres (app/picker.js) */
+.picker { position: fixed; inset: 0; z-index: 54; overflow-y: auto; overscroll-behavior: contain; background: var(--bg);
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  animation: wizard-in .45s cubic-bezier(.16, 1, .3, 1); }
+@keyframes wizard-in { from { opacity: 0; transform: translateY(18px); } }
+.picker__head { max-width: 1160px; margin: 0 auto 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.picker__text { padding-right: 52px; display: grid; gap: 8px; justify-items: start; }
+.picker__title { font-size: clamp(30px, 4.4vw, 46px); }
+.picker__lead { color: var(--muted); max-width: 52ch; }
+.picker__head > .close { flex: none; position: fixed; z-index: 2; top: calc(14px + env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px));
+  box-shadow: 0 6px 18px -8px var(--shadow); width: 42px; height: 42px; display: grid; place-items: center; padding: 0 0 3px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+.picker__grid { list-style: none; margin: 0 auto; padding: 0; max-width: 1160px; display: grid; gap: 22px 18px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.pick-card { width: 100%; display: grid; gap: 9px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+  animation: card-in .6s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes card-in { from { opacity: 0; transform: translateY(14px); } }
+.pick-card__shot { display: block; aspect-ratio: 390 / 560; border-radius: 14px; border: 1px solid var(--line);
+  box-shadow: 0 18px 36px -24px var(--shadow); transition: transform .35s cubic-bezier(.16, 1, .3, 1), box-shadow .35s; }
+/* Mientras carga, un brillo suave en lugar del blanco */
+.pick-card__shot:not([data-state="ready"])::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .7) 50%, transparent 70%) var(--accent-soft);
+  background-size: 220% 100%; animation: shimmer 1.4s linear infinite; }
+@keyframes shimmer { to { background-position: -120% 0; } }
+.pick-card:hover .pick-card__shot { transform: translateY(-3px); box-shadow: 0 26px 44px -24px var(--shadow); }
+.pick-card:focus-visible { outline: none; }
+.pick-card:focus-visible .pick-card__shot { outline: 2px solid var(--accent); outline-offset: 3px; }
+.pick-card__label { display: flex; align-items: center; gap: 8px; min-width: 0; padding-inline: 2px; }
+.pick-card__name { font: 400 20px/1.15 var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-card__now { position: absolute; z-index: 1; left: 8px; top: 8px; display: none; padding: 4px 9px; border-radius: 999px;
+  background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+.pick-card.is-current .pick-card__now { display: block; }
+.pick-card.is-current .pick-card__shot { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), 0 18px 36px -24px var(--shadow); }
+.pick-card.is-opening .pick-card__shot { transform: scale(.97); opacity: .7; }
+@media (max-width: 600px) {
+  .picker__head { margin-bottom: 16px; }
+  .picker__title { font-size: 28px; }
+  .picker__lead { font-size: 15px; line-height: 1.45; }
+  .picker__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; }
+  .pick-card { gap: 7px; }
+  .pick-card__shot { border-radius: 12px; }
+  .pick-card__name { font-size: 18px; }
+}
+@media (max-width: 760px) { .picker { bottom: var(--cookies-h, 0px); } }
+
+/* Vista previa: «Ver todas», junto a la barra de estilos */
+.dock-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.dock-all { gap: 7px; white-space: nowrap; background: var(--surface); }
+@media (max-width: 560px) {
+  .dock-row .style-dock { flex: 1; min-width: 0; }
+  .dock-row .style-dock__hint { display: none; }
+  .dock-row .style-dock__name small { grid-area: 2 / 1 / 3 / 3; }
+  .dock-all { flex: none; flex-direction: column; gap: 3px; min-height: 54px; padding: 6px 12px; border-radius: 16px; font-size: 12px; }
+}
+
+/* Aviso «¿Queréis probarla con vuestros datos?»: abajo, sobre la web, sin bloquear nada */
+.data-prompt { position: absolute; z-index: 3; left: 12px; right: 12px; bottom: 12px; margin-inline: auto; width: auto; max-width: 440px;
+  display: grid; gap: 8px; padding: 16px 18px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 18px 50px var(--shadow); font-size: 14px; color: var(--muted); animation: rise .45s cubic-bezier(.16, 1, .3, 1); }
+.data-prompt__title { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.data-prompt__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.data-prompt__actions .btn { flex: 1 1 auto; }
+
+/* Sus datos, encima de la web (app/edit.js) */
+.edit-panel { position: absolute; z-index: 4; top: 12px; left: max(16px, env(safe-area-inset-left, 0px)); width: min(360px, calc(100% - 32px));
+  max-height: calc(100% - 24px); overflow-y: auto; display: grid; gap: 12px; padding: 18px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: 0 24px 60px var(--shadow); animation: panel-in .35s cubic-bezier(.16, 1, .3, 1); }
+.edit-panel__title { font-family: var(--font-display); font-size: 22px; line-height: 1.1; }
+#edit-form { display: grid; gap: 12px; }
+.edit-panel__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.edit-panel .field { gap: 4px; }
+.edit-panel .field label { font-size: 12px; }
+.edit-panel .error:empty { display: none; }
+.edit-panel__foot { display: flex; align-items: flex-end; gap: 10px; }
+.edit-panel__foot .photos { flex: 1; gap: 6px; }
+.edit-panel__foot #edit-done { flex: none; min-width: 110px; min-height: 48px; }
+.photos--small .photos__item, .photos--small .photos__add { width: 52px; height: 52px; font-size: 11px; }
+.photos--small .photos__item button { width: 20px; height: 20px; font-size: 13px; top: 2px; right: 2px; }
+.photos--small .photos__item .first { display: none; }
+.photos--small .photos__add span { font-size: 18px; }
+.edit-panel__hint { font-size: 12px; }
+@media (max-width: 560px) {
+  /* En el móvil, una hoja abajo que se queda siempre encima del teclado (--vv-h, de viewport.js);
+     la web, en lo que queda arriba, va a la parte que están cambiando. */
+  .edit-panel { position: fixed; z-index: 52; left: 0; right: 0; width: auto; top: auto; bottom: auto;
+    top: calc(var(--vv-top, 0px) + var(--vv-h, 100dvh) - var(--cookies-h, 0px)); transform: translateY(-100%);
+    max-height: min(70dvh, calc(var(--vv-h, 100dvh) - 120px)); gap: 10px; border-radius: 20px 20px 0 0;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); animation: edit-up .4s cubic-bezier(.16, 1, .3, 1); }
+  @keyframes edit-up { from { transform: translateY(0); } }
+  #edit-form { gap: 8px; }
+  .edit-panel .field input[type] { padding: 8px 10px; min-height: 44px; font-size: 16px; }
+  .edit-panel__title { font-size: 20px; }
+  .edit-panel__hint { display: none; }
+  .has-kb .edit-panel { padding-bottom: 10px; }
+  .has-kb .edit-panel :is(.edit-panel__hint, #edit-photos) { display: none; }
+  .has-kb .edit-panel__foot #edit-done { flex: 1; min-height: 42px; }
+}
+/* Con el aviso de cookies sin contestar, la vista previa del móvil es más baja: la web encoge y
+   la barra de estilos sigue a la vista (antes la web se le ponía encima). */
+@media (max-width: 560px) { .stage__frame { min-height: 0; } }

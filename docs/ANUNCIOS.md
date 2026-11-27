@@ -95,11 +95,19 @@ marcado como «Desduplicado».
 
 ## 4. Dónde abandona la gente (embudo del generador)
 
-Con la analítica aceptada, cada paso del generador manda a Umami el evento `paso_generador` con
-`paso` (nombres, fecha, lugar, estilo, fotos) y `numero` (1 a 5), una vez por paso cada vez que
-se abre. En Umami › Eventos › `paso_generador`, filtra por `numero`: el salto más grande entre un
-número y el siguiente es el paso que hay que mejorar. Después vienen `prueba_generada`,
-`guardar_abierto` y `lead_prueba`.
+Con la analítica aceptada, el «Probar» manda a Umami un evento por paso (desde el 27/11/2026 son
+tres toques: nombres → estilo → su web con datos de ejemplo):
+
+1. `probar_abierto` (con `desde`: portada_nombres, boton, boton_fijo, estilos).
+2. `paso_generador` con `paso: nombres`: han escrito los dos nombres.
+3. `estilos_abiertos` y `estilo_elegido` (con `estilo` y `posicion` en la cuadrícula).
+4. `prueba_generada`: ya ven su web.
+5. `aviso_datos` (`accion`: visto, si, no) y `datos_puestos` (`completos`: si/no): el aviso que sale
+   al bajar por la web y el panel para poner fecha, lugar y fotos encima de ella.
+6. `guardar_abierto` y `lead_prueba`.
+
+El salto más grande entre un paso y el siguiente es el que hay que mejorar. `ver_todas` cuenta
+cuántos vuelven a la cuadrícula desde la vista previa.
 
 ## 5. Pie «Hecha con WeddingWebs» en las webs de boda
 
