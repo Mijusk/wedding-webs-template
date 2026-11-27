@@ -62,7 +62,7 @@ export const priceLabel = ([min, max], currency) =>
 // Mientras haya una capa abierta: sin scroll detrás, y la página de fondo inerte para que
 // el teclado y los lectores de pantalla se queden dentro de la capa.
 export function syncScrollLock() {
-  const open = ["#builder", "#loading", "#stage", "#send"].some((id) => !$(id).hidden);
+  const open = ["#builder", "#picker", "#loading", "#stage", "#send"].some((id) => !$(id).hidden);
   document.body.classList.toggle("locked", open);
   document.querySelectorAll("body > header, body > main, body > footer, #nudge").forEach((el) => { el.inert = open; });
 }

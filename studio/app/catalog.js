@@ -53,7 +53,12 @@ export function makeCatalog(studio) {
     }
     return bases.get(id);
   };
-  const configFor = async (style, wedding) => toConfig(await baseFor(style.template), wedding, style);
+  // wedding.partial: solo algunos datos suyos (de primeras, los nombres); el resto, del ejemplo
+  // de cada plantilla, así cada estilo se ve entero con su propia fecha y lugar de ejemplo.
+  const configFor = async (style, wedding) => {
+    const base = await baseFor(style.template);
+    return toConfig(base, wedding?.partial ? withDefaults(base, wedding) : wedding, style);
+  };
   // Vista previa en vivo con lo que lleven escrito: lo que falta sale del ejemplo de la plantilla.
   const previewFor = async (style, partial) => {
     const base = await baseFor(style.template);

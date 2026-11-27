@@ -1,8 +1,10 @@
 import { $, esc, session, friendlyError, faqItems } from "./util.js";
 import { fitScaled } from "./preview.js";
 import { loadStudio, makeCatalog, applyLivePrices, renderStyleCards, limitToTwoRows } from "./catalog.js";
-import { setupBuilder, openBuilder, closeBuilder, playLoading } from "./builder.js";
-import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, stageState, weddingFromHash } from "./stage.js";
+import { setupBuilder, openBuilder, closeBuilder } from "./builder.js";
+import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, stageState, weddingFromHash, updateWedding, showStyle } from "./stage.js";
+import { setupPicker, openPicker, closePicker, pickerOpen } from "./picker.js";
+import { setupEdit, openEdit, closeEdit, editOpen, armPrompt, hidePrompt } from "./edit.js";
 import { setupQuick } from "./quick.js";
 import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./send.js";
 import { setupPricing } from "./pricing.js";
@@ -49,7 +51,7 @@ async function start() {
   $("#styles-grid").addEventListener("click", async (e) => {
     const t = e.target.closest("[data-try], [data-demo]");
     if (!t) return;
-    if (t.dataset.try) { track("probar_abierto", { estilo: t.dataset.try, desde: "estilos" }); return openBuilder(t.dataset.try); }
+    if (t.dataset.try) { track("probar_abierto", { estilo: t.dataset.try, desde: "estilos" }); return openBuilder(t.dataset.try, { names: lastNames }); }
     track("ejemplo_visto", { estilo: t.dataset.demo });
     await showExample(styles.find((s) => s.id === t.dataset.demo));
   });
@@ -60,9 +62,11 @@ async function start() {
   setupPricing({ studio, templateUrl: (style) => new URL(urlOf(style), location.href) });
   setupStage({
     studio, configFor,
-    onEdit: (styleId) => openBuilder(styleId),
+    onEdit: () => { track("datos_abiertos", { desde: "barra" }); openEdit(); },
+    onAll: (state) => { track("ver_todas", { estilo: state.style.id }); pickWedding = state.wedding; openPicker(state.wedding, { now: state.style.id }); },
+    onTry: (styleId) => openBuilder(styleId, { names: lastNames }),
     onKeep: (state) => setupPricing.choose(state),
-    onClose: () => hideNudge(),
+    onClose: () => { hideNudge(); hidePrompt(); closeEdit(); },
     onGuest: () => track("probar_como_invitado", { estilo: stageState()?.style.id }),
     onShare: () => track("prueba_compartida", { estilo: stageState()?.style.id }),
   });
@@ -83,35 +87,80 @@ async function start() {
     onSave: saveTrial,
   });
 
+  // «Probar» en tres toques: los nombres (builder.js) -> el estilo (picker.js) -> su web, con
+  // datos de ejemplo. Fecha, lugar y fotos, si quieren, encima de la propia web (edit.js).
+  let lastNames = null;   // los últimos nombres que han puesto (para no volver a pedirlos)
+  let pickWedding = null; // la boda con la que se pintan las tarjetas
+  const withNames = (names) => ({ couple: names, date: "", time: "", venue: "", city: "", photos: [], partial: true });
+  const showTrial = async (wedding, style) => {
+    setupPricing.prefill(saved ? { ...wedding, ...saved } : wedding);
+    await prepareStage(wedding, style);
+    openStage();
+    if (saved) saveTrial(saved, { wedding, style }).catch(() => {});
+    else if (wedding.partial) armPrompt();
+    else scheduleSaveNudge();
+  };
+  const choose = (names, from) => {
+    lastNames = names;
+    pickWedding = withNames(names);
+    track("estilos_abiertos", { desde: from });
+    openPicker(pickWedding);
+  };
+
   setupBuilder({
-    studio, demoPhotos, previewFor,
-    onGenerate: async (wedding, style) => {
-      track("prueba_generada", { estilo: style.id, fotos: wedding.photos.length, ejemplo: wedding.sample ? "si" : "no" });
-      setupPricing.prefill(saved ? { ...wedding, ...saved } : wedding);
-      const loading = playLoading(wedding, studio.generator);
+    studio, previewFor,
+    onNames: async (names, styleId, { sample }) => {
+      if (!styleId) return choose(names, sample ? "pareja_ejemplo" : "nombres");
+      // Venían de la tarjeta de un estilo: directos a su web.
+      lastNames = names;
+      track("prueba_generada", { estilo: styleId, desde: "tarjeta" });
+      try { await showTrial(withNames(names), available.find((s) => s.id === styleId) || available[0]); }
+      catch (e) { console.error("[WeddingWebs] vista previa:", e); openBuilder(styleId, { names }); $("#b-error").textContent = "No hemos podido preparar la vista previa. Revisad la conexión y volved a intentarlo."; }
+    },
+  });
+  setupPicker({
+    studio, configFor,
+    onPick: async (style, { position }) => {
+      track("estilo_elegido", { estilo: style.id, posicion: position, desde: $("#stage").hidden ? "nombres" : "vista_previa" });
       try {
-        await Promise.all([prepareStage(wedding, style), loading]);
-        openStage();
-        if (saved) saveTrial(saved, { wedding, style }).catch(() => {});
-        else scheduleSaveNudge();
-      } catch (e) {
-        console.error("[WeddingWebs] vista previa:", e);
-        await loading;
-        openBuilder(style.id);
-        $("#b-error").textContent = "No hemos podido preparar la vista previa. Revisad la conexión y volved a intentarlo.";
-      }
+        if (!$("#stage").hidden) { closePicker({ restoreFocus: false }); await showStyle(style.id); return; }
+        track("prueba_generada", { estilo: style.id, desde: "cuadricula" });
+        await showTrial(pickWedding, style);
+        closePicker({ restoreFocus: false });
+      } catch (e) { console.error("[WeddingWebs] vista previa:", e); }
+    },
+    onNames: () => openBuilder("", { names: lastNames }),
+  });
+  setupEdit({
+    getState: () => stageState(),
+    update: (wedding) => updateWedding(wedding),
+    maxPhotos: studio.generator.maxPhotos,
+    onPrompt: (accion) => track("aviso_datos", { accion }),
+    onDone: (wedding) => {
+      lastNames = wedding.couple;
+      track("datos_puestos", { estilo: stageState()?.style.id, completos: wedding.partial ? "no" : "si", fotos: wedding.photos.length });
+      setupPricing.prefill(saved ? { ...wedding, ...saved } : wedding);
+      if (saved) saveTrial(saved, stageState()).catch(() => {});
+      else if (!wedding.partial) scheduleSaveNudge(8000);
     },
   });
   const quick = setupQuick({
     style: available[0], url: urlOf(available[0]), withTheme,
-    onStart: (names, focus) => { track("probar_abierto", { desde: "portada_nombres", nombres: names.every(Boolean) ? "si" : "no" }); openBuilder(available[0].id, { names, focus }); },
+    onStart: (names, focus) => {
+      track("probar_abierto", { desde: "portada_nombres", nombres: names.every(Boolean) ? "si" : "no" });
+      // Con los dos nombres ya puestos (y sin haber tocado un campo en el móvil), a elegir estilo.
+      if (!focus && names.every(Boolean)) return choose(names, "portada");
+      openBuilder("", { names, focus });
+    },
   });
-  document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder(); }));
+  document.querySelectorAll("[data-open-builder]").forEach((b) => b.addEventListener("click", () => { track("probar_abierto", { desde: "boton" }); openBuilder("", { names: lastNames }); }));
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (sendOpen()) closeSend();
+    else if (pickerOpen()) closePicker();
     else if (!$("#builder").hidden) closeBuilder();
+    else if (editOpen()) closeEdit();
     else if (!$("#share-pop").hidden) $("#share-pop").hidden = true;
     else if (!$("#sections-panel").hidden) toggleSectionsPanel(false);
     else if (!$("#stage").hidden) closeStage();
@@ -142,9 +191,10 @@ async function start() {
     history.replaceState(null, "", location.pathname + location.search);
     track("prueba_abierta_compartida", { estilo: shared.style });
     setupPricing.prefill(shared.wedding);
-    try { await prepareStage(shared.wedding, pick(shared.style) || available[0]); openStage(); scheduleSaveNudge(30000); }
+    lastNames = shared.wedding.couple;
+    try { await prepareStage(shared.wedding, pick(shared.style) || available[0]); openStage(); shared.wedding.partial ? armPrompt(15000) : scheduleSaveNudge(30000); }
     catch (e) { console.error("[WeddingWebs] enlace compartido:", e); }
-  } else if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id);
+  } else if (params.has("probar")) openBuilder(pick(params.get("probar"))?.id || "");
   else if (pick(params.get("ver"))) await showExample(pick(params.get("ver")));
   else if (params.has("prueba")) await openSavedTrial(params.get("prueba"), (id) => pick(id) || available[0]);
   if (params.has("probar") || params.has("ver") || params.has("prueba")) history.replaceState(null, "", location.pathname + location.hash);
@@ -207,7 +257,8 @@ async function openSavedTrial(token, styleFor) {
     const res = await fetch(`/api/lead?prueba=${encodeURIComponent(token)}`);
     if (!res.ok) return;
     const { prueba: p } = await res.json();
-    const wedding = { couple: p.couple, date: p.date, time: p.time, venue: p.venue, city: p.city, photos: [] };
+    const wedding = { couple: p.couple, date: p.date || "", time: p.time || "", venue: p.venue || "", city: p.city || "", photos: [] };
+    wedding.partial = !(wedding.date && wedding.time && wedding.venue);
     setupPricing.prefill({ ...wedding, email: p.email });
     await prepareStage(wedding, styleFor(p.style));
     openStage();
@@ -222,9 +273,10 @@ function leadFromTrial(w, style) {
     name: w.couple.join(" y "),
     nameA: w.couple[0],
     nameB: w.couple[1],
-    weddingDate: `${w.date} ${w.time}`,
-    venue: [w.venue, w.city].filter(Boolean).join(", "),
-    city: w.city,
+    // Solo con los nombres puestos, sin fecha ni lugar: los de ejemplo no se guardan.
+    weddingDate: w.date ? `${w.date} ${w.time}` : undefined,
+    venue: [w.venue, w.city].filter(Boolean).join(", ") || undefined,
+    city: w.city || undefined,
     style: style.id,
     photos: w.photos.length,
     // El texto exacto que aceptaron (prueba del consentimiento, RGPD).
@@ -262,7 +314,7 @@ function setupNudge() {
   const update = () => {
     const pastHero = $("#estilos").getBoundingClientRect().top < innerHeight * 0.6;
     const atPricing = $("#tarifas").getBoundingClientRect().top < innerHeight * 0.9;
-    const busy = ["#builder", "#stage", "#loading", "#send"].some((id) => !$(id).hidden);
+    const busy = ["#builder", "#picker", "#stage", "#loading", "#send"].some((id) => !$(id).hidden);
     // En el móvil el botón de arriba ya está siempre a la vista: aquí sería repetirlo.
     const show = pastHero && !atPricing && !busy && !document.querySelector(".cookies") && !matchMedia("(max-width: 760px)").matches;
     nudge.hidden = !show;
@@ -272,7 +324,7 @@ function setupNudge() {
   addEventListener("resize", update);
   // El aviso de cookies entra y sale del <body>; las capas cambian su atributo hidden.
   new MutationObserver(update).observe(document.body, { childList: true });
-  ["#builder", "#stage", "#loading"].forEach((id) => new MutationObserver(update).observe($(id), { attributes: true, attributeFilter: ["hidden"] }));
+  ["#builder", "#picker", "#stage", "#loading"].forEach((id) => new MutationObserver(update).observe($(id), { attributes: true, attributeFilter: ["hidden"] }));
   nudge.addEventListener("click", () => { track("probar_abierto", { desde: "boton_fijo" }); openBuilder(); });
   update();
 }
