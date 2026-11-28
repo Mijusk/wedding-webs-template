@@ -136,7 +136,7 @@
     </div>
 
     <div class="wrap hero__foot">
-      <p class="lead">Elegid un estilo, poned vuestros nombres, la fecha y tres fotos, y vedla funcionando al momento. Los invitados confirman desde la web y vosotros veis las respuestas al momento en vuestro panel.</p>
+      <p class="lead">Con vuestros nombres elegís estilo y la veis entera al momento; la fecha, el lugar y las fotos, cuando queráis. Los invitados confirman desde la web y vosotros veis las respuestas en vuestro panel.</p>
     </div>
   </section>
 
@@ -156,7 +156,7 @@
       <h2 id="steps-title">De la idea al enlace en tres pasos</h2>
     </div>
     <ol class="steps__list">
-      <li><strong>Probad un estilo</strong><span>Con vuestros datos y fotos, antes de pagar nada.</span></li>
+      <li><strong>Probad un estilo</strong><span>Con vuestros nombres y, si queréis, vuestra fecha y fotos. Gratis y sin registros.</span></li>
       <li><strong>Elegid una tarifa</strong><span>Esencial, Completa o Atelier, con un diseño hecho para vosotros.</span></li>
       <li><strong>Compartid el enlace</strong><span>Por WhatsApp o en la invitación. Las confirmaciones aparecen solas en vuestro panel, listas para descargar en Excel.</span></li>
     </ol>
@@ -419,6 +419,40 @@
           <button class="btn btn--small" type="button" id="data-prompt-yes">Poner nuestros datos</button>
           <button class="btn btn--small btn--ghost" type="button" id="data-prompt-no">Ahora no</button>
         </div>
+      </div>
+    </div>
+    <!-- «¿Dónde os la mandamos?»: el móvil, la primera vez que ven su web (app/gate.js, prueba A/B) -->
+    <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" hidden>
+      <div class="gate__card" id="gate-card">
+        <button class="gate__close" type="button" id="gate-close" aria-label="Cerrar y verla">×</button>
+        <svg class="gate__art" viewBox="0 0 160 120" aria-hidden="true">
+          <g class="gate__float">
+            <rect x="26" y="34" width="108" height="72" rx="10" fill="#fff" stroke="#1f1a24" stroke-width="3"/>
+            <path d="M28 40 L80 78 L132 40" fill="none" stroke="#1f1a24" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M28 102 L66 70 M132 102 L94 70" fill="none" stroke="#1f1a24" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="80" cy="78" r="15" fill="#7d2a4b"/>
+            <path d="M80 86 C74 81 71 78 71 74.5 C71 71.5 73.5 70 75.8 70 C77.6 70 79 71 80 72.6 C81 71 82.4 70 84.2 70 C86.5 70 89 71.5 89 74.5 C89 78 86 81 80 86 Z" fill="#fff"/>
+            <ellipse cx="62" cy="56" rx="3" ry="2" fill="#f1b5c6" opacity=".9"/>
+            <ellipse cx="98" cy="56" rx="3" ry="2" fill="#f1b5c6" opacity=".9"/>
+          </g>
+          <path class="gate__heart gate__heart--a" d="M140 26 c-3-2.6-5-4.2-5-6.2 0-1.6 1.3-2.6 2.6-2.6 1 0 1.8.6 2.4 1.5.6-.9 1.4-1.5 2.4-1.5 1.3 0 2.6 1 2.6 2.6 0 2-2 3.6-5 6.2z" fill="#7d2a4b"/>
+          <path class="gate__heart gate__heart--b" d="M20 30 c-2.4-2-4-3.3-4-4.9 0-1.3 1-2.1 2.1-2.1.8 0 1.4.5 1.9 1.2.5-.7 1.1-1.2 1.9-1.2 1.1 0 2.1.8 2.1 2.1 0 1.6-1.6 2.9-4 4.9z" fill="#e7a0b6"/>
+          <path class="gate__spark" d="M118 14 l2 5 5 2 -5 2 -2 5 -2-5 -5-2 5-2z" fill="#d9b25c"/>
+        </svg>
+        <p class="gate__title" id="gate-title">¡Ya está lista!</p>
+        <p class="gate__lead">¿Dónde os la mandamos? Os llega por WhatsApp y, si queréis, os ayudamos a elegir.</p>
+        <form id="gate-form" novalidate>
+          <div class="hp" aria-hidden="true"><label>No rellenar <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <input class="gate__phone" type="tel" id="g-phone" name="phone" aria-label="Vuestro móvil" autocomplete="tel" inputmode="tel" placeholder="Vuestro móvil" enterkeyhint="send">
+          <label class="consent gate__consent" for="g-consent">
+            <input type="checkbox" id="g-consent" name="consent" value="si">
+            <span>Acepto que me escribáis por WhatsApp sobre mi web. Solo para eso, y podéis pedirnos que borremos mi número cuando queráis (<a href="legal.html#privacidad" target="_blank">privacidad</a>).</span>
+          </label>
+          <p class="error" id="gate-error" role="alert"></p>
+          <button class="btn btn--wide" type="submit" id="gate-submit">Verla y recibirla por WhatsApp</button>
+        </form>
+        <p class="gate__trust">Solo os escribimos sobre vuestra web. Nada de spam.</p>
+        <div class="gate__done" id="gate-done" role="status" hidden><span aria-hidden="true">✓</span>¡Hecho! Ahí os llega. Ahora, a verla.</div>
       </div>
     </div>
     <!-- Sus datos, encima de la web: cambian según escriben (app/edit.js) -->

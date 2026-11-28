@@ -15,9 +15,8 @@ export function setupSend(context) {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(form));
     const phone = String(d.phone || "").trim(), email = String(d.email || "").trim();
-    const digits = phone.replace(/\D/g, "");
-    if (!phone) { err.textContent = "Dejadnos vuestro móvil: os mandamos ahí el enlace de vuestra web."; return $("#b-phone").focus(); }
-    if (digits.length < 9 || digits.length > 15 || /[^\d\s+().-]/.test(phone)) { err.textContent = "Revisad el móvil: parece que le falta o le sobra algún número."; return $("#b-phone").focus(); }
+    const bad = phoneError(phone);
+    if (bad) { err.textContent = bad; return $("#b-phone").focus(); }
     if (email && !/^\S+@\S+\.\S+$/.test(email)) { err.textContent = "Revisad el email, o dejadlo en blanco."; return $("#b-email").focus(); }
     if (!d.consent) { err.textContent = "Marcad la casilla para que podamos escribiros."; return $("#b-consent").focus(); }
     if (d.website) return closeSend(); // campo trampa: un bot
@@ -33,9 +32,7 @@ export function setupSend(context) {
       thanks.hidden = false;
       thanks.querySelector("[data-close-send]").addEventListener("click", closeSend);
       thanks.querySelector("[data-close-send]").focus();
-      $("#stage-save").textContent = "Guardada ✓";
-      $("#stage-save").disabled = true;
-      hideNudge(true);
+      markSaved();
     } catch {
       err.textContent = "No hemos podido guardarla. Revisad la conexión y volved a intentarlo.";
     } finally {
@@ -48,6 +45,27 @@ export function setupSend(context) {
   $("#stage-save").addEventListener("click", () => openSend("barra"));
   $("#save-nudge-yes").addEventListener("click", () => { hideNudge(true); openSend("aviso"); });
   $("#save-nudge-no").addEventListener("click", () => hideNudge(true));
+  // Con otro panel abierto (compartir, secciones, modo invitado) el aviso estorbaba encima.
+  ["#stage-share", "#stage-sections", "#stage-guest", "#stage-edit"].forEach((id) =>
+    $(id).addEventListener("click", () => { if (!$("#save-nudge").hidden) hideNudge(true); }));
+}
+
+// Algo encima de la web en este momento: el aviso espera a que lo cierren.
+const busy = () => ["#share-pop", "#sections-panel", "#guest-panel", "#edit-panel", "#data-prompt", "#gate"].some((id) => !$(id).hidden);
+
+// El móvil, como lo escriben: "" si vale, o el aviso para la pareja.
+export function phoneError(phone) {
+  const digits = phone.replace(/\D/g, "");
+  if (!phone) return "Dejadnos vuestro móvil: os mandamos ahí el enlace de vuestra web.";
+  if (digits.length < 9 || digits.length > 15 || /[^\d\s+().-]/.test(phone)) return "Revisad el móvil: parece que le falta o le sobra algún número.";
+  return "";
+}
+
+// Ya nos han dejado el móvil (aquí o en la tarjeta de antes de verla, gate.js).
+export function markSaved() {
+  $("#stage-save").textContent = "Guardada ✓";
+  $("#stage-save").disabled = true;
+  hideNudge(true);
 }
 
 export function openSend(from = "barra") {
@@ -76,8 +94,9 @@ export const sendOpen = () => !$("#send").hidden;
 export function scheduleSaveNudge(ms = 20000) {
   clearTimeout(nudgeTimer);
   if (nudged || $("#stage-save").disabled) return;
-  nudgeTimer = setTimeout(() => {
+  nudgeTimer = setTimeout(function show() {
     if ($("#stage").hidden || $("#stage-save").hidden || sendOpen()) return;
+    if (busy()) { nudgeTimer = setTimeout(show, 8000); return; }
     $("#save-nudge").hidden = false;
     nudged = true;
   }, ms);

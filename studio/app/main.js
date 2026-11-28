@@ -6,14 +6,16 @@ import { setupStage, prepareStage, openStage, closeStage, toggleSectionsPanel, s
 import { setupPicker, openPicker, closePicker, pickerOpen } from "./picker.js";
 import { setupEdit, openEdit, closeEdit, editOpen, armPrompt, hidePrompt } from "./edit.js";
 import { setupQuick } from "./quick.js";
-import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge } from "./send.js";
+import { setupSend, closeSend, sendOpen, scheduleSaveNudge, hideNudge, markSaved } from "./send.js";
 import { setupPricing } from "./pricing.js";
 import { saveLead } from "./leads.js";
 import { startEntrance, revealOnScroll, scrollToHash } from "./entrance.js";
 import { watchViewport } from "./viewport.js";
 import { captureAttribution } from "./attribution.js";
 import { setupConsent } from "./consent.js";
-import { initAnalytics, track } from "./analytics.js";
+import { initAnalytics, track, trackAlways } from "./analytics.js";
+import { setupGate, gateDue, openGate, gateGroup, gateOpen, close as closeGate } from "./gate.js";
+import { playLoading } from "./loading.js";
 import { addStructuredData } from "./seo.js";
 import { initAds, conversion } from "./ads.js";
 
@@ -30,7 +32,7 @@ async function start() {
   const catalog = makeCatalog(studio);
   initAnalytics(studio);
   initAds(studio);
-  const { styles, available, templateIds, demoPhotos, urlOf, configFor, previewFor, withTheme } = catalog;
+  const { styles, available, demoPhotos, urlOf, configFor, previewFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
   const faq = faqItems(studio);
@@ -41,10 +43,9 @@ async function start() {
   if ($("#brand-tagline").getAttribute("aria-label") !== studio.brand.tagline) $("#brand-tagline").textContent = studio.brand.tagline;
 
   // Estilos
-  const templates = new Set(templateIds);
   const soon = styles.filter((s) => s.status !== "available").map((s) => s.name);
   $("#styles-note").textContent =
-    `Ahora mismo hay ${templates.size === 1 ? "una plantilla" : `${templates.size} plantillas`} en ${available.length} estilos.`
+    `${available.length} estilos, y todos se pueden probar gratis con vuestros nombres.`
     + (soon.length ? ` ${soon.join(", ")} está en camino.` : "");
   renderStyleCards($("#styles-grid"), catalog);
   limitToTwoRows($("#styles-grid"), $("#styles-more"));
@@ -56,7 +57,7 @@ async function start() {
     await showExample(styles.find((s) => s.id === t.dataset.demo));
   });
 
-  revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact, .foot");
+  revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact");
 
   // Generador
   setupPricing({ studio, templateUrl: (style) => new URL(urlOf(style), location.href) });
@@ -66,7 +67,7 @@ async function start() {
     onAll: (state) => { track("ver_todas", { estilo: state.style.id }); pickWedding = state.wedding; openPicker(state.wedding, { now: state.style.id }); },
     onTry: (styleId) => openBuilder(styleId, { names: lastNames }),
     onKeep: (state) => setupPricing.choose(state),
-    onClose: () => { hideNudge(); hidePrompt(); closeEdit(); },
+    onClose: () => { hideNudge(); hidePrompt(); closeEdit(); closeGate("vista_cerrada"); },
     onGuest: () => track("probar_como_invitado", { estilo: stageState()?.style.id }),
     onShare: () => track("prueba_compartida", { estilo: stageState()?.style.id }),
   });
@@ -91,18 +92,30 @@ async function start() {
   // datos de ejemplo. Fecha, lugar y fotos, si quieren, encima de la propia web (edit.js).
   let lastNames = null;   // los últimos nombres que han puesto (para no volver a pedirlos)
   let pickWedding = null; // la boda con la que se pintan las tarjetas
-  const withNames = (names) => ({ couple: names, date: "", time: "", venue: "", city: "", photos: [], partial: true });
+  const withNames = (names, sample = false) => ({ couple: names, date: "", time: "", venue: "", city: "", photos: [], partial: true, ...(sample && { sample }) });
+  // La tarjeta del móvil (gate.js): a una parte de las visitas, la primera vez que ven su web.
+  setupGate({
+    config: studio.phoneGate,
+    onEvent: (name, data) => track(name, { ...data, estilo: stageState()?.style.id }),
+    onSave: async (contact) => { await saveTrial(contact, stageState()); markSaved(); },
+  });
+  trackAlways({ grupo_movil: gateGroup() });
+  let warmed = false; // la carga corta, solo la primera vez que ven su web
   const showTrial = async (wedding, style) => {
     setupPricing.prefill(saved ? { ...wedding, ...saved } : wedding);
-    await prepareStage(wedding, style);
+    const loading = warmed ? null : playLoading(wedding, { ms: studio.generator.quickMs || 2000, messages: studio.generator.quickMessages || studio.generator.messages, vars: { estilo: style.name } });
+    try { await Promise.all([prepareStage(wedding, style), loading]); }
+    catch (e) { await loading; throw e; }
+    warmed = true;
     openStage();
-    if (saved) saveTrial(saved, { wedding, style }).catch(() => {});
-    else if (wedding.partial) armPrompt();
-    else scheduleSaveNudge();
+    if (saved) { saveTrial(saved, { wedding, style }).catch(() => {}); return; }
+    const after = () => (wedding.partial ? armPrompt() : scheduleSaveNudge());
+    if (gateDue(wedding)) openGate(wedding).then(() => { if (!saved) after(); });
+    else after();
   };
   const choose = (names, from) => {
     lastNames = names;
-    pickWedding = withNames(names);
+    pickWedding = withNames(names, from === "pareja_ejemplo");
     track("estilos_abiertos", { desde: from });
     openPicker(pickWedding);
   };
@@ -157,7 +170,8 @@ async function start() {
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (sendOpen()) closeSend();
+    if (gateOpen()) closeGate("escape");
+    else if (sendOpen()) closeSend();
     else if (pickerOpen()) closePicker();
     else if (!$("#builder").hidden) closeBuilder();
     else if (editOpen()) closeEdit();
@@ -281,7 +295,7 @@ function leadFromTrial(w, style) {
     photos: w.photos.length,
     // El texto exacto que aceptaron (prueba del consentimiento, RGPD).
     consent: true,
-    consentText: document.querySelector("label[for=b-consent] span")?.textContent.replace(/\s+/g, " ").trim(),
+    consentText: w.consentText || document.querySelector("label[for=b-consent] span")?.textContent.replace(/\s+/g, " ").trim(),
   };
 }
 

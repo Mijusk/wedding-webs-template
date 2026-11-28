@@ -26,7 +26,7 @@ export function setupPricing({ studio, templateUrl }) {
     </article>`;
   }).join("");
   const g = studio.guarantee;
-  if (g?.enabled && g.title) $("#tiers").insertAdjacentHTML("afterend", `<p class="tiers__guarantee">${esc(g.title)}. <a href="legal.html#garantia">Condiciones de la garantía</a></p>`);
+  if (g?.enabled && g.title) $("#tiers").insertAdjacentHTML("afterend", `<p class="tiers__guarantee"><span>${esc(g.title)}. <a href="legal.html#garantia">Condiciones de la garantía</a></span></p>`);
   if (studio.pricing.note) $("#tiers").insertAdjacentHTML("afterend", `<p class="fineprint tiers__note">${esc(fill(studio.pricing.note, studio.legal))}</p>`);
 
   const tierSel = $("#c-tier"), styleSel = $("#c-style");
