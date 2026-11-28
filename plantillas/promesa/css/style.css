@@ -69,7 +69,7 @@ html:not(.is-still) .slot--lens img { visibility: hidden; }
 }
 .hero__name { display: block; opacity: var(--nf, 1); }
 .ch { display: inline-block; }
-.slot--hero { display: block; width: auto; height: clamp(150px, 31svh, 330px); aspect-ratio: 7 / 10; margin: 0; }
+.slot--hero { display: block; width: auto; height: clamp(90px, 31svh, 330px); aspect-ratio: 7 / 10; margin: 0; }
 .hero__date { font: 500 11.5px/1.7 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
 .hero__place { white-space: nowrap; }
 .hero__hint { display: grid; justify-items: center; gap: 8px; margin-top: 3svh; font: italic 400 17px/1.2 var(--font-body); color: var(--accent); }
@@ -81,7 +81,7 @@ html:not(.is-still) .slot--lens img { visibility: hidden; }
   text-wrap: balance; text-shadow: 0 2px 30px rgb(0 0 0 / .25); opacity: var(--show, 0);
 }
 @media (max-width: 560px) { .hero__dot { display: none; } .hero__place { display: block; } }
-@media (min-width: 880px) and (min-aspect-ratio: 5/4) {
+@media (min-aspect-ratio: 1/1) {
   .hero__names { flex-direction: row; align-items: center; gap: .2em; font-size: min(calc((100vw - 2 * var(--gutter)) / (var(--sum) * .5 + 1.5)), 17svh, 176px); }
   .slot--hero { height: 1.55em; }
 }
@@ -130,12 +130,12 @@ html:not(.is-still) [data-rise]:not(.head):not(.swatches):not(.is-up) { opacity:
 .chapters { display: block; max-width: none; gap: 0; }
 .chapter { display: block; text-align: left; }
 .chapter.has-photo { height: calc(100vh + 125svh); }
-.chapter__body { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; gap: 26px; max-width: var(--col); margin: 0 auto; padding: 0 var(--gutter); opacity: var(--bf, 1); }
+.chapter__body { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; gap: min(26px, 3svh); max-width: var(--col); margin: 0 auto; padding: 0 var(--gutter); opacity: var(--bf, 1); }
 .chapter__meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 11.5px/1.5 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--accent); }
 .chapter__num { color: var(--muted); letter-spacing: .18em; }
-.chapter__text { font: 400 clamp(34px, 9.2vw, 70px)/1.13 var(--font-display); letter-spacing: -.012em; color: var(--ink); max-width: 16em; text-wrap: pretty; }
-.chapter.is-long .chapter__text { font-size: clamp(28px, 7.4vw, 56px); }
-.chapter.is-longer .chapter__text { font-size: clamp(23px, 6vw, 46px); }
+.chapter__text { font: 400 clamp(18px, min(9.2vw, 6.6svh), 70px)/1.13 var(--font-display); letter-spacing: -.012em; color: var(--ink); max-width: 16em; text-wrap: pretty; }
+.chapter.is-long .chapter__text { font-size: clamp(16px, min(7.4vw, 5.4svh), 56px); }
+.chapter.is-longer .chapter__text { font-size: clamp(15px, min(6vw, 4.4svh), 46px); }
 .chapter__caption {
   position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: max(84px, 12svh);
   font: italic 400 clamp(32px, 8vw, 68px)/1.05 var(--font-display); color: var(--photo-ink); text-shadow: 0 2px 30px rgb(0 0 0 / .25);
@@ -190,9 +190,9 @@ html:not(.is-still) .swatches:not(.is-up) .swatch__name, html:not(.is-still) .sw
 .closing { margin-top: var(--space); padding: 0; height: calc(100vh + 110svh); }
 .closing__body { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; justify-items: center; gap: 0; padding: max(28px, 5svh) var(--gutter); overflow: visible; text-align: center; }
 .closing__eyebrow { margin-bottom: 14px; }
-.closing__title { font-size: clamp(48px, 13vw, 120px); line-height: .98; letter-spacing: -.02em; max-width: 9em; color: var(--photo-ink); text-wrap: balance; }
-.slot--closing { display: block; width: auto; height: clamp(130px, 26svh, 300px); aspect-ratio: 7 / 10; margin: 4svh 0; }
-.closing__end { display: grid; justify-items: center; gap: 22px; opacity: var(--end, 0); transform: translateY(calc((1 - var(--end, 0)) * 22px)); }
+.closing__title { font-size: clamp(30px, min(13vw, 12svh), 120px); line-height: .98; letter-spacing: -.02em; max-width: 9em; color: var(--photo-ink); text-wrap: balance; }
+.slot--closing { display: block; width: auto; height: clamp(70px, 26svh, 300px); aspect-ratio: 7 / 10; margin: 4svh 0; }
+.closing__end { display: grid; justify-items: center; gap: min(22px, 3svh); opacity: var(--end, 0); transform: translateY(calc((1 - var(--end, 0)) * 22px)); }
 .closing__text { max-width: 26em; color: var(--muted); }
 .closing__action { margin: 0; }
 .closing__end { visibility: hidden; }
