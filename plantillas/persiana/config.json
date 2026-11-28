@@ -1,0 +1,190 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Lucía",
+      "Martín"
+    ],
+    "date": "2027-06-12T18:00:00+02:00",
+    "end": "2027-06-13T03:00:00+02:00",
+    "tagline": "Una tarde de junio, con las ventanas abiertas",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Lucía y Martín abrazados entre olivos"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Granada, 2017",
+        "text": "Coincidimos en el mismo patio a la hora de la siesta. Ninguno de los dos se movió de la sombra hasta que anocheció.",
+        "photo": "assets/foto-1.jpg",
+        "photoAlt": "Lucía y Martín sentados en un muro encalado"
+      },
+      {
+        "meta": "Cadaqués, 2025",
+        "text": "Una cena con velas frente al mar. Martín se pasó la tarde tocándose el bolsillo de la chaqueta.",
+        "photo": "assets/foto-2.jpg",
+        "photoAlt": "Lucía y Martín brindando en una cena junto al mar"
+      },
+      {
+        "meta": "Aranjuez, 2027",
+        "text": "Ahora abrimos las ventanas de par en par para celebrarlo contigo.",
+        "photo": "assets/foto-3.jpg",
+        "photoAlt": "Las manos de Lucía y Martín, con el anillo"
+      }
+    ]
+  },
+  "venue": {
+    "name": "Finca El Olivar",
+    "address": "Camino de los Almendros, 14 · Aranjuez, Madrid",
+    "city": "Aranjuez",
+    "mapsUrl": "https://maps.google.com/?q=Aranjuez",
+    "lat": 40.0331,
+    "lon": -3.6028
+  },
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "Bajo los olivos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "En el patio, a la sombra de la parra"
+    },
+    {
+      "time": "21:30",
+      "label": "Cena",
+      "place": "Cuando baje el sol"
+    },
+    {
+      "time": "23:30",
+      "label": "Fiesta",
+      "place": "Con las ventanas abiertas"
+    }
+  ],
+  "gifts": {
+    "holder": "Lucía Ortega y Martín Sanz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-05-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "hint": "Desliza y entra el sol"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "title": "Cuándo y dónde",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Ver en el mapa"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "Cómo empezó todo"
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "Siguiendo al sol",
+      "text": "Horarios orientativos."
+    },
+    "dresscode": {
+      "eyebrow": "Vestimenta",
+      "title": "Qué ponerse",
+      "text": "De verano y sin prisa: lino, algodón y colores de tarde. La ceremonia es sobre hierba, mejor sin tacón fino.",
+      "paletteLabel": "Colores de la tarde",
+      "palette": [
+        {
+          "name": "Lino",
+          "color": "#d9cab0"
+        },
+        {
+          "name": "Oliva",
+          "color": "#8b8f60"
+        },
+        {
+          "name": "Terracota",
+          "color": "#bf6a48"
+        },
+        {
+          "name": "Cielo",
+          "color": "#a8bfcc"
+        }
+      ]
+    },
+    "gallery": {
+      "eyebrow": "Algunos momentos",
+      "title": "A la luz de la tarde"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es el regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "text": "Te agradeceremos que nos lo confirmes antes del {deadline}.",
+      "after": "Gracias por venir. Todavía nos dura la luz de aquella tarde.",
+      "today": "Hoy es el día. Nos vemos allí."
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "dresscode",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-4.jpg",
+    "assets/foto-5.jpg",
+    "assets/foto-6.jpg",
+    "assets/foto-7.jpg",
+    "assets/foto-8.jpg"
+  ]
+}

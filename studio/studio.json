@@ -12,6 +12,26 @@
       "name": "Editorial",
       "url": "../plantillas/editorial/"
     },
+    "infinito": {
+      "name": "Infinito",
+      "url": "../plantillas/infinito/"
+    },
+    "hilo": {
+      "name": "Hilo rojo",
+      "url": "../plantillas/hilo/"
+    },
+    "persiana": {
+      "name": "Persiana",
+      "url": "../plantillas/persiana/"
+    },
+    "floracion": {
+      "name": "Floración",
+      "url": "../plantillas/floracion/"
+    },
+    "promesa": {
+      "name": "Promesa",
+      "url": "../plantillas/promesa/"
+    },
     "minimal": {
       "name": "Minimal",
       "url": "../plantillas/minimal/"
@@ -197,6 +217,66 @@
       ],
       "description": "Foto a pantalla completa, vuestra historia en capítulos y una página que pasa de la tarde a la noche al bajar.",
       "theme": "editorial"
+    },
+    {
+      "id": "infinito",
+      "name": "Infinito",
+      "template": "infinito",
+      "theme": "infinito",
+      "status": "available",
+      "swatch": [
+        "#15120f",
+        "#d9c39d"
+      ],
+      "description": "Cada parte de vuestra web vive dentro de una foto: al bajar, la cámara entra por un arco y aparece la siguiente. La última ventana enseña otra vez la portada. Cine elegante en tinta y champán."
+    },
+    {
+      "id": "hilo",
+      "name": "Hilo rojo",
+      "template": "hilo",
+      "theme": "hilo",
+      "status": "available",
+      "swatch": [
+        "#f6f0e6",
+        "#a8222d"
+      ],
+      "description": "Un hilo rojo se va cosiendo por la web mientras bajáis: une vuestros nombres, sujeta las fotos como una guirnalda y acaba en un lazo en «Confirmar asistencia»."
+    },
+    {
+      "id": "persiana",
+      "name": "Persiana",
+      "template": "persiana",
+      "theme": "persiana",
+      "status": "available",
+      "swatch": [
+        "#ede3d3",
+        "#b9844c"
+      ],
+      "description": "Una ventana en una pared encalada con su persiana de madera: las lamas se abren al entrar, la luz de la tarde cae en franjas por la pared y, al bajar, la persiana sube y aparece vuestra foto. Calma mediterránea."
+    },
+    {
+      "id": "floracion",
+      "name": "Floración",
+      "template": "floracion",
+      "theme": "floracion",
+      "status": "available",
+      "swatch": [
+        "#f8f0ea",
+        "#a3465d"
+      ],
+      "description": "Una flor que se abre pétalo a pétalo mientras bajáis, y pétalos que se sueltan y acompañan la lectura. Romántica y delicada."
+    },
+    {
+      "id": "promesa",
+      "name": "Promesa",
+      "template": "promesa",
+      "theme": "promesa",
+      "status": "available",
+      "swatch": [
+        "#1a1318",
+        "#e3b3a6"
+      ],
+      "description": "Tipografía en movimiento sobre ciruela: las frases se encienden según se leen y las fotos, en óvalos entre las palabras como camafeos, crecen hasta llenar la pantalla. Editorial y moderna."
     },
     {
       "id": "minimal",
@@ -749,6 +829,125 @@
         "#d1b06a"
       ],
       "description": "Azul noche con detalles dorados. Para bodas de tarde que acaban de madrugada."
+    }
+  ],
+  "_categoriesNota": "Tipos de estilo para filtrar: los botones encima de las tarjetas en la portada, en «Todas las plantillas» y en «Probar» (app/filters.js). Un estilo puede estar en varios; el orden de las tarjetas es el de styles. Los ids que aún no existen se ignoran (jornada y mesa son «Del día a la noche» y «La mesa», que llegan en otro PR). Un estilo que no está en ninguno solo sale en «Todos».",
+  "categories": [
+    {
+      "id": "movimiento",
+      "name": "Con movimiento",
+      "styles": [
+        "jornada",
+        "mesa",
+        "infinito",
+        "hilo",
+        "persiana",
+        "floracion",
+        "promesa",
+        "editorial",
+        "cumbre"
+      ]
+    },
+    {
+      "id": "elegantes",
+      "name": "Elegantes",
+      "styles": [
+        "villa",
+        "etiqueta",
+        "lacre",
+        "monograma",
+        "toile",
+        "palacio",
+        "capilla",
+        "regencia",
+        "encaje",
+        "chocolate",
+        "caligrafia",
+        "seda",
+        "feston",
+        "perla",
+        "marmol",
+        "terciopelo",
+        "grabado"
+      ]
+    },
+    {
+      "id": "florales",
+      "name": "Florales",
+      "styles": [
+        "floracion",
+        "acuarela",
+        "toile",
+        "jardin",
+        "botanica",
+        "bordado",
+        "laca"
+      ]
+    },
+    {
+      "id": "minimalistas",
+      "name": "Minimalistas",
+      "styles": [
+        "editorial",
+        "minimal",
+        "postal",
+        "negro",
+        "lino",
+        "vegetal",
+        "kintsugi",
+        "seda",
+        "perla"
+      ]
+    },
+    {
+      "id": "mediterraneos",
+      "name": "Mediterráneos",
+      "styles": [
+        "persiana",
+        "villa",
+        "azulejo",
+        "costa",
+        "vendimia",
+        "riviera",
+        "olivar",
+        "atardecer"
+      ]
+    },
+    {
+      "id": "noche",
+      "name": "De noche",
+      "styles": [
+        "infinito",
+        "promesa",
+        "etiqueta",
+        "negro",
+        "palacio",
+        "estrellas",
+        "chocolate",
+        "terciopelo",
+        "noche"
+      ]
+    },
+    {
+      "id": "originales",
+      "name": "Originales",
+      "styles": [
+        "hilo",
+        "mesa",
+        "verbena",
+        "carrete",
+        "carta",
+        "estrellas",
+        "galeria",
+        "ciudades",
+        "vendimia",
+        "cartografia",
+        "cuento",
+        "partitura",
+        "cumbre",
+        "origami",
+        "laca"
+      ]
     }
   ],
   "sections": {

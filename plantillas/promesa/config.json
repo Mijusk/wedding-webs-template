@@ -1,0 +1,192 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Elena",
+      "Pablo"
+    ],
+    "date": "2027-09-18T18:30:00+02:00",
+    "end": "2027-09-19T03:30:00+02:00",
+    "tagline": "Hay promesas que solo se hacen una vez. Queremos que estés delante.",
+    "photo": "assets/portada.jpg",
+    "photoFocus": "50% 30%",
+    "photoAlt": "Elena y Pablo abrazados entre olivos al atardecer"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Verano de 2018",
+        "text": "Nos conocimos en una boda en Cádiz. Ella no sabía bailar sevillanas y él tampoco, así que fingimos los dos hasta el amanecer.",
+        "photo": "assets/foto-1.jpg",
+        "photoAlt": "Elena y Pablo paseando de la mano por la orilla al atardecer"
+      },
+      {
+        "meta": "Mayo de 2025",
+        "text": "Una cena frente al mar, una pregunta que llevaba meses ensayada y un sí antes de que terminara la frase.",
+        "photo": "assets/foto-2.jpg",
+        "photoAlt": "Elena y Pablo brindando en una cena junto al mar"
+      },
+      {
+        "meta": "Septiembre de 2027",
+        "text": "Ahora queremos prometérnoslo delante de las personas que más queremos. Y tú eres una de ellas.",
+        "photo": "assets/foto-3.jpg",
+        "photoAlt": "Las manos de Elena y Pablo, con el anillo"
+      }
+    ]
+  },
+  "venue": {
+    "name": "Hacienda Los Aromos",
+    "address": "Carretera de Brenes, km 4 · Carmona, Sevilla",
+    "city": "Carmona",
+    "mapsUrl": "https://maps.google.com/?q=Carmona,Sevilla",
+    "lat": 37.4712,
+    "lon": -5.6461
+  },
+  "schedule": [
+    {
+      "time": "18:30",
+      "label": "Ceremonia",
+      "place": "En el patio de los naranjos"
+    },
+    {
+      "time": "20:00",
+      "label": "Cóctel",
+      "place": "Junto a la alberca"
+    },
+    {
+      "time": "22:00",
+      "label": "Cena",
+      "place": "Bajo los olivos"
+    },
+    {
+      "time": "00:30",
+      "label": "Fiesta",
+      "place": "Hasta que salga el sol"
+    }
+  ],
+  "gifts": {
+    "holder": "Elena Rivas y Pablo Herrera",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-08-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "hint": "Desliza"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "title": "Cuándo y dónde",
+      "lead": "El {date} a las {time}, en {venue}, nos diremos que sí {photo} para siempre. Y queremos que estés.",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Ver en el mapa"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "Cómo llegamos hasta aquí"
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "Hora a hora",
+      "text": "Horarios orientativos."
+    },
+    "dresscode": {
+      "eyebrow": "Vestimenta",
+      "title": "Qué ponerse",
+      "text": "Elegante de verano. La noche refresca entre los olivos: trae algo para los hombros.",
+      "paletteLabel": "Si te apetece, nuestros colores",
+      "palette": [
+        {
+          "name": "Rosa empolvado",
+          "color": "#e3b3a6"
+        },
+        {
+          "name": "Ciruela",
+          "color": "#6b3a52"
+        },
+        {
+          "name": "Oliva",
+          "color": "#8c8a5e"
+        },
+        {
+          "name": "Arena",
+          "color": "#d9c4a5"
+        }
+      ]
+    },
+    "gallery": {
+      "eyebrow": "Algunos momentos",
+      "title": "Momentos que prometen"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es el regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "text": "Te agradeceremos que nos lo confirmes antes del {deadline}.",
+      "after": "Gracias por estar. Lo prometido, prometido está.",
+      "today": "Hoy es el día. Nos vemos allí."
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "dresscode",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-4.jpg",
+    "assets/foto-5.jpg",
+    "assets/foto-6.jpg",
+    "assets/foto-7.jpg",
+    "assets/foto-8.jpg"
+  ]
+}

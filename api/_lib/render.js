@@ -17,7 +17,7 @@ export const TEMPLATES = ["clasica", "editorial", "minimal", "verbena", "postal"
   "monograma", "negro", "toile", "palacio", "jardin", "lino", "azulejo", "carrete", "carta", "vegetal", "capilla", "botanica",
   "costa", "estrellas", "galeria", "ciudades", "vendimia", "cartografia", "cuento", "bordado", "kintsugi", "partitura",
   "cumbre", "origami", "regencia", "encaje", "chocolate", "laca", "caligrafia", "riviera", "seda", "feston",
-  "perla", "marmol", "terciopelo", "grabado"];
+  "perla", "marmol", "terciopelo", "grabado", "infinito", "hilo", "persiana", "floracion", "promesa"];
 
 export const templateExists = (template) =>
   TEMPLATES.includes(template) || (/^[a-z0-9-]+$/.test(template || "") && existsSync(join(ROOT, templateDir(template), "index.html")));
