@@ -42,9 +42,9 @@ a { color: inherit; }
   border-radius: 999px; padding: 13px 24px; font: 600 15px/1 var(--font-body);
   text-decoration: none; cursor: pointer; transition: filter .15s;
 }
-.btn:hover { filter: brightness(1.1); }
+@media (hover: hover) { .btn:hover { filter: brightness(1.1); } }
 .btn--ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn--ghost:hover { border-color: var(--ink); filter: none; }
+@media (hover: hover) { .btn--ghost:hover { border-color: var(--ink); filter: none; } }
 .btn--small { padding: 9px 16px; font-size: 14px; }
 .btn--wide { width: 100%; }
 .btn:disabled { opacity: .55; cursor: not-allowed; filter: none; }
@@ -290,11 +290,11 @@ body.has-nudge { padding-bottom: 64px; }
 .fineprint a, .consent a { color: inherit; }
 .foot__legal { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; }
 .foot__legal a { color: var(--muted); }
-.foot { display: grid; gap: 10px; }
+.foot { display: grid; gap: 10px; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
 .tiers__note { margin-top: 14px; }
-.tiers__guarantee { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15px; font-weight: 600; color: var(--ink); }
-.tiers__guarantee::before { content: ""; flex: none; width: 10px; height: 6px; margin: 0 4px 3px 2px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
-.tiers__guarantee a { font-weight: 400; color: var(--muted); }
+.tiers__guarantee { margin-top: 10px; display: flex; align-items: flex-start; gap: 12px; font-size: 15px; font-weight: 600; color: var(--ink); }
+.tiers__guarantee::before { content: ""; flex: none; width: 10px; height: 6px; margin: .5em 0 0 2px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+.tiers__guarantee a { margin-left: 4px; font-weight: 400; color: var(--muted); white-space: nowrap; }
 
 /* Secciones que la pareja enciende y apaga en la vista previa (app/stage.js) */
 .stage__view { position: relative; }
@@ -349,7 +349,7 @@ body.has-nudge { padding-bottom: 64px; }
   border: 1px solid var(--ink); border-radius: 999px; background: var(--surface); color: var(--ink);
   font: 600 14px/1.15 var(--font-body); text-align: center; cursor: pointer; transition: background-color .15s, color .15s;
 }
-.cookies__btn:hover { background: var(--ink); color: var(--bg); }
+@media (hover: hover) { .cookies__btn:hover { background: var(--ink); color: var(--bg); } }
 
 /* Configurar cookies */
 .cookies-settings { width: min(520px, calc(100vw - 32px)); max-height: calc(100svh - 32px); padding: 0; border: 0; border-radius: 14px;
@@ -591,7 +591,7 @@ body.has-nudge { padding-bottom: 64px; }
 .stage__dock { width: 100%; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; }
 .style-dock { display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
 .style-dock__arrow { width: 42px; height: 42px; flex: none; border: 0; border-radius: 50%; background: none; color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; }
-.style-dock__arrow:hover { background: var(--accent-soft); color: var(--accent); }
+@media (hover: hover) { .style-dock__arrow:hover { background: var(--accent-soft); color: var(--accent); } }
 .style-dock__name { display: grid; justify-items: center; min-width: 180px; padding: 2px 10px; text-align: center; touch-action: pan-y; user-select: none; -webkit-user-select: none;
   cursor: grab; transform: translateX(var(--drag, 0px)); transition: transform .3s cubic-bezier(.16, 1, .3, 1); }
 .style-dock__name small { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
@@ -626,6 +626,7 @@ body.has-nudge { padding-bottom: 64px; }
   width: max-content; max-width: calc(100% - 32px); padding: 7px 7px 7px 20px; border-radius: 999px; background: var(--ink); color: var(--bg);
   box-shadow: 0 18px 40px var(--shadow); font-size: 15px; animation: nudge-in .5s cubic-bezier(.16, 1, .3, 1); }
 .save-nudge .close { color: inherit; opacity: .7; }
+.save-nudge .btn { flex: none; white-space: nowrap; }
 @keyframes nudge-in { from { opacity: 0; transform: translate(-50%, -12px); } }
 .share-pop { position: absolute; z-index: 4; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   width: min(370px, calc(100% - 32px)); display: grid; gap: 10px; padding: 18px; background: var(--surface); border: 1px solid var(--line);
@@ -695,7 +696,7 @@ body.has-nudge { padding-bottom: 64px; }
   background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .7) 50%, transparent 70%) var(--accent-soft);
   background-size: 220% 100%; animation: shimmer 1.4s linear infinite; }
 @keyframes shimmer { to { background-position: -120% 0; } }
-.pick-card:hover .pick-card__shot { transform: translateY(-3px); box-shadow: 0 26px 44px -24px var(--shadow); }
+@media (hover: hover) { .pick-card:hover .pick-card__shot { transform: translateY(-3px); box-shadow: 0 26px 44px -24px var(--shadow); } }
 .pick-card:focus-visible { outline: none; }
 .pick-card:focus-visible .pick-card__shot { outline: 2px solid var(--accent); outline-offset: 3px; }
 .pick-card__label { display: flex; align-items: center; gap: 8px; min-width: 0; padding-inline: 2px; }
@@ -785,7 +786,7 @@ body.has-nudge { padding-bottom: 64px; }
 @keyframes gate-in { from { opacity: 0; transform: translateY(18px) scale(.96); } }
 .gate__close { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; display: grid; place-items: center; padding: 0 0 2px;
   border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; opacity: .75; }
-.gate__close:hover { opacity: 1; background: var(--bg); }
+@media (hover: hover) { .gate__close:hover { opacity: 1; background: var(--bg); } }
 .gate__art { width: 118px; height: auto; overflow: visible; margin-top: 2px; }
 .gate__float { animation: gate-float 3.2s ease-in-out infinite; transform-origin: 80px 70px; }
 @keyframes gate-float { 50% { transform: translateY(-4px) rotate(-2deg); } }

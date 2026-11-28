@@ -139,6 +139,7 @@ export const showStyle = (id) => switchStyle(id);
 export function openStage() {
   $("#stage").hidden = false;
   syncScrollLock();
+  centerChip("auto");
   $("#stage [data-close]").focus();
 }
 
@@ -161,12 +162,15 @@ function markStyle() {
   $("#dock-count").textContent = `Estilo ${i + 1} de ${list.length}`;
   document.querySelectorAll("#stage-styles [data-style]").forEach((b) =>
     b.setAttribute("aria-checked", b.dataset.style === state.style.id));
-  // Los estilos van en una fila que se desliza: que el elegido quede a la vista.
+  requestAnimationFrame(() => centerChip("smooth"));
+}
+
+// Los estilos van en una fila que se desliza: que el elegido quede a la vista.
+function centerChip(behavior) {
   const row = $("#stage-styles"), chip = row.querySelector('[aria-checked="true"]');
-  if (chip) requestAnimationFrame(() => {
-    const r = row.getBoundingClientRect(), c = chip.getBoundingClientRect();
-    if (r.width) row.scrollBy({ left: c.left - r.left - (r.width - c.width) / 2, behavior: "smooth" });
-  });
+  if (!chip) return;
+  const r = row.getBoundingClientRect(), c = chip.getBoundingClientRect();
+  if (r.width) row.scrollBy({ left: c.left - r.left - (r.width - c.width) / 2, behavior });
 }
 
 // Los datos ya están cargados: con la misma plantilla, cambiar de estilo es reenviar el config;

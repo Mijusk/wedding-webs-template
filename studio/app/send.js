@@ -45,7 +45,13 @@ export function setupSend(context) {
   $("#stage-save").addEventListener("click", () => openSend("barra"));
   $("#save-nudge-yes").addEventListener("click", () => { hideNudge(true); openSend("aviso"); });
   $("#save-nudge-no").addEventListener("click", () => hideNudge(true));
+  // Con otro panel abierto (compartir, secciones, modo invitado) el aviso estorbaba encima.
+  ["#stage-share", "#stage-sections", "#stage-guest", "#stage-edit"].forEach((id) =>
+    $(id).addEventListener("click", () => { if (!$("#save-nudge").hidden) hideNudge(true); }));
 }
+
+// Algo encima de la web en este momento: el aviso espera a que lo cierren.
+const busy = () => ["#share-pop", "#sections-panel", "#guest-panel", "#edit-panel", "#data-prompt", "#gate"].some((id) => !$(id).hidden);
 
 // El móvil, como lo escriben: "" si vale, o el aviso para la pareja.
 export function phoneError(phone) {
@@ -88,8 +94,9 @@ export const sendOpen = () => !$("#send").hidden;
 export function scheduleSaveNudge(ms = 20000) {
   clearTimeout(nudgeTimer);
   if (nudged || $("#stage-save").disabled) return;
-  nudgeTimer = setTimeout(() => {
+  nudgeTimer = setTimeout(function show() {
     if ($("#stage").hidden || $("#stage-save").hidden || sendOpen()) return;
+    if (busy()) { nudgeTimer = setTimeout(show, 8000); return; }
     $("#save-nudge").hidden = false;
     nudged = true;
   }, ms);

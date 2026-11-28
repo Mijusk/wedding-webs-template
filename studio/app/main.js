@@ -32,7 +32,7 @@ async function start() {
   const catalog = makeCatalog(studio);
   initAnalytics(studio);
   initAds(studio);
-  const { styles, available, templateIds, demoPhotos, urlOf, configFor, previewFor, withTheme } = catalog;
+  const { styles, available, demoPhotos, urlOf, configFor, previewFor, withTheme } = catalog;
 
   document.title = studio.brand.name;
   const faq = faqItems(studio);
@@ -43,10 +43,9 @@ async function start() {
   if ($("#brand-tagline").getAttribute("aria-label") !== studio.brand.tagline) $("#brand-tagline").textContent = studio.brand.tagline;
 
   // Estilos
-  const templates = new Set(templateIds);
   const soon = styles.filter((s) => s.status !== "available").map((s) => s.name);
   $("#styles-note").textContent =
-    `Ahora mismo hay ${templates.size === 1 ? "una plantilla" : `${templates.size} plantillas`} en ${available.length} estilos.`
+    `${available.length} estilos, y todos se pueden probar gratis con vuestros nombres.`
     + (soon.length ? ` ${soon.join(", ")} está en camino.` : "");
   renderStyleCards($("#styles-grid"), catalog);
   limitToTwoRows($("#styles-grid"), $("#styles-more"));
@@ -58,7 +57,7 @@ async function start() {
     await showExample(styles.find((s) => s.id === t.dataset.demo));
   });
 
-  revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact, .foot");
+  revealOnScroll(".hero__foot .lead, .section-head, .style-card, .steps__list li, .tier, .contact");
 
   // Generador
   setupPricing({ studio, templateUrl: (style) => new URL(urlOf(style), location.href) });

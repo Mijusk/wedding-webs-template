@@ -45,12 +45,21 @@ export function setupPicker(context) {
   $("#picker-names").addEventListener("click", () => { closePicker(); ctx.onNames?.(); });
 
   if (!("IntersectionObserver" in window)) return boxes.forEach(load);
+  // Se cargan las que están a la vista (o casi). Si bajan rápido, las que ya pasaron salen de la
+  // cola, para que las que tienen delante no esperen a las de arriba.
   const near = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) enqueue(e.target);
+    for (const e of entries) {
+      e.target.dataset.near = e.isIntersecting ? "1" : "";
+      if (e.isIntersecting) enqueue(e.target);
+      else if (e.target.dataset.state === "queued") delete e.target.dataset.state;
+    }
   }, { root: $("#picker"), rootMargin: "200px 0px" });
+  // Las muy lejanas se descargan, pero solo con la cuadrícula abierta: al cerrarla (para ver una
+  // web) se quedan como estaban, y «Ver todas» vuelve a enseñarlas al momento.
   const far = new IntersectionObserver((entries) => {
+    if ($("#picker").hidden) return;
     for (const e of entries) if (!e.isIntersecting) unload(e.target);
-  }, { root: $("#picker"), rootMargin: "2400px 0px" });
+  }, { root: $("#picker"), rootMargin: "1600px 0px" });
   boxes.forEach((b) => { near.observe(b); far.observe(b); });
 }
 
@@ -69,17 +78,25 @@ async function load(box) {
   box.dataset.state = "loading";
   const style = ctx.studio.styles.find((s) => s.id === box.closest("[data-style]").dataset.style);
   try {
-    await showInFrame(box.querySelector("iframe"), ctx.studio.templates[style.template].url, await ctx.configFor(style, wedding));
+    // Si se descarga a medias (han bajado mucho), deja el hueco a otra en vez de esperar al límite.
+    const dropped = new Promise((_, reject) => { box.drop = () => reject(new Error("descargada")); });
+    await Promise.race([showInFrame(box.querySelector("iframe"), ctx.studio.templates[style.template].url, await ctx.configFor(style, wedding)), dropped]);
     if (box.dataset.state === "loading") box.dataset.state = "ready";
   } catch (e) {
+    if (e.message === "descargada") return;
     if (box.dataset.state === "loading") delete box.dataset.state;
     console.error("[WeddingWebs] tarjeta", style.id, e);
+    // Con mala conexión: otro intento al rato, si sigue a la vista.
+    setTimeout(() => { if (box.dataset.near && !box.dataset.state) enqueue(box); }, 3000);
+  } finally {
+    box.drop = null;
   }
 }
 
 function unload(box) {
   if (!box.dataset.state) return;
   delete box.dataset.state;
+  box.drop?.();
   const frame = box.querySelector("iframe");
   frame.dataset.src = "";
   frame.dataset.ready = "";
