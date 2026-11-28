@@ -1,0 +1,171 @@
+{
+  "locale": "es-ES",
+  "event": {
+    "type": "boda",
+    "couple": [
+      "Inés",
+      "Gonzalo"
+    ],
+    "date": "2027-09-18T18:00:00+02:00",
+    "end": "2027-09-19T03:00:00+02:00",
+    "tagline": "Un día para vivirlo una y otra vez",
+    "photo": "assets/portada.jpg",
+    "photoAlt": "Inés y Gonzalo entre olivos"
+  },
+  "story": {
+    "chapters": [
+      {
+        "meta": "Sevilla, 2018",
+        "text": "Nos presentó una amiga en común en una terraza de la Alameda. Hablamos tanto que nos cerraron el bar.",
+        "photo": "assets/foto-3.jpg",
+        "photoAlt": "Inés y Gonzalo sentados en un muro del pueblo"
+      },
+      {
+        "meta": "Cadaqués, 2025",
+        "text": "Siete años y tres mudanzas después, en una cena con velas frente al mar, Gonzalo sacó un anillo. Inés dijo que sí antes de que terminara la frase.",
+        "photo": "assets/foto-4.jpg",
+        "photoAlt": "Inés y Gonzalo brindando en una cena junto al mar"
+      },
+      {
+        "meta": "18 de septiembre de 2027",
+        "text": "Ahora queremos repetirlo todo contigo: la terraza, la cena y la música hasta tarde.",
+        "photo": "assets/foto-6.jpg",
+        "photoAlt": "Inés y Gonzalo en un viñedo al atardecer"
+      }
+    ]
+  },
+  "venue": {
+    "name": "Hacienda Los Naranjos",
+    "address": "Camino de la Vega, s/n · Carmona, Sevilla",
+    "city": "Carmona",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Carmona%2C%20Sevilla"
+  },
+  "schedule": [
+    {
+      "time": "18:00",
+      "label": "Ceremonia",
+      "place": "En el patio de los naranjos"
+    },
+    {
+      "time": "19:30",
+      "label": "Cóctel",
+      "place": "En los jardines, con la puesta de sol"
+    },
+    {
+      "time": "21:30",
+      "label": "Cena",
+      "place": "Bajo las guirnaldas de luces"
+    },
+    {
+      "time": "00:00",
+      "label": "Fiesta",
+      "place": "Hasta que vuelva a empezar"
+    }
+  ],
+  "gifts": {
+    "holder": "Inés Navarro y Gonzalo Ruiz",
+    "iban": "ES91 2100 0418 4502 0005 1332"
+  },
+  "rsvp": {
+    "deadline": "2027-08-01",
+    "buttonLabel": "Confirmar asistencia",
+    "endpoint": ""
+  },
+  "copy": {
+    "hero": {
+      "eyebrow": "Nos casamos",
+      "hint": "Desliza",
+      "index": "Partes de la invitación"
+    },
+    "details": {
+      "eyebrow": "Lo esencial",
+      "title": "Cuándo y dónde",
+      "when": "Cuándo",
+      "where": "Dónde",
+      "timeSuffix": "h",
+      "countdown": "Faltan {days} días",
+      "countdownOne": "Falta un día",
+      "countdownToday": "Es hoy",
+      "calendar": "Añadir al calendario",
+      "calendarTitle": "Boda de {a} y {b}",
+      "map": "Ver en el mapa"
+    },
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": ""
+    },
+    "schedule": {
+      "eyebrow": "El día",
+      "title": "De la ceremonia a la última canción",
+      "text": "Horarios orientativos."
+    },
+    "dresscode": {
+      "eyebrow": "Vestimenta",
+      "title": "Qué ponerse",
+      "text": ""
+    },
+    "gallery": {
+      "eyebrow": "Algunos momentos",
+      "title": "Nosotros"
+    },
+    "gifts": {
+      "eyebrow": "Regalo",
+      "title": "Tu presencia es el regalo",
+      "text": "Si además quieres tener un detalle con nosotros, te dejamos aquí nuestra cuenta.",
+      "holderLabel": "Titular",
+      "ibanLabel": "IBAN",
+      "copy": "Copiar IBAN",
+      "copied": "IBAN copiado",
+      "reveal": "Ver los datos de la cuenta"
+    },
+    "closing": {
+      "eyebrow": "Confirmación",
+      "title": "¿Vienes?",
+      "text": "Te agradeceremos que nos lo confirmes antes del {deadline}.",
+      "after": "Gracias por estar. Lo volveríamos a vivir una y otra vez.",
+      "today": "Hoy es el día. Nos vemos allí.",
+      "loop": "Sigue bajando y vuelve a empezar",
+      "again": "Volver al principio"
+    },
+    "rsvp": {
+      "eyebrow": "Confirmación",
+      "title": "¿Nos acompañas?",
+      "deadlineNote": "Confírmanos antes del {deadline}.",
+      "name": "Nombre y apellidos",
+      "attending": "Asistencia",
+      "yes": "Sí, allí estaré",
+      "no": "No podré ir",
+      "song": "Una canción que no puede faltar",
+      "songPlaceholder": "Opcional",
+      "submit": "Enviar respuesta",
+      "sending": "Enviando…",
+      "errorName": "Escribe tu nombre para saber quién eres.",
+      "errorAttending": "Marca si vienes o no.",
+      "errorNetwork": "No se ha podido guardar tu respuesta. Revisa tu conexión y vuelve a intentarlo; si sigue fallando, avísanos por otra vía.",
+      "closedText": "Ya hemos cerrado la lista de invitados. Si necesitas cambiar algo, escríbenos directamente.",
+      "thanksYesTitle": "¡Gracias, {name}!",
+      "thanksYesText": "Te esperamos.",
+      "thanksSong": "Tomamos nota de «{song}».",
+      "thanksNoTitle": "Te echaremos de menos",
+      "thanksNoText": "Gracias por avisarnos, {name}.",
+      "close": "Cerrar"
+    }
+  },
+  "sections": [
+    "hero",
+    "details",
+    "story",
+    "schedule",
+    "gallery",
+    "gifts",
+    "closing",
+    "rsvp"
+  ],
+  "gallery": [
+    "assets/foto-7.jpg",
+    "assets/foto-8.jpg",
+    "assets/foto-5.jpg",
+    "assets/foto-9.jpg",
+    "assets/foto-2.jpg"
+  ]
+}

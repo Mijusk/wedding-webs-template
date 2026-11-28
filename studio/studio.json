@@ -12,6 +12,10 @@
       "name": "Editorial",
       "url": "../plantillas/editorial/"
     },
+    "infinito": {
+      "name": "Infinito",
+      "url": "../plantillas/infinito/"
+    },
     "minimal": {
       "name": "Minimal",
       "url": "../plantillas/minimal/"
@@ -197,6 +201,18 @@
       ],
       "description": "Foto a pantalla completa, vuestra historia en capítulos y una página que pasa de la tarde a la noche al bajar.",
       "theme": "editorial"
+    },
+    {
+      "id": "infinito",
+      "name": "Infinito",
+      "template": "infinito",
+      "theme": "infinito",
+      "status": "available",
+      "swatch": [
+        "#15120f",
+        "#d9c39d"
+      ],
+      "description": "Cada parte de vuestra web vive dentro de una foto: al bajar, la cámara entra por un arco y aparece la siguiente. La última ventana enseña otra vez la portada. Cine elegante en tinta y champán."
     },
     {
       "id": "minimal",
