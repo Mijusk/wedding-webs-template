@@ -1,5 +1,6 @@
 import { $, esc, syncScrollLock } from "./util.js";
 import { showInFrame, fitScaled } from "./preview.js";
+import { setupFilters, replayIn } from "./filters.js";
 
 // «Probar», paso 2: todos los estilos en tarjetas (en el móvil, dos por fila), cada una con un
 // trocito de su web ya con los nombres de la pareja. Al tocar una, se abre esa web entera.
@@ -12,6 +13,7 @@ let ctx = null;
 let wedding = null;   // la boda que se enseña en las tarjetas (null: el ejemplo de cada plantilla)
 let current = "";     // el estilo que están viendo, si vienen de la vista previa
 let opener = null;
+let filters = null;    // los botones de tipo (app/filters.js)
 const queue = [];
 let loading = 0;
 const MAX_LOADING = 3;
@@ -33,6 +35,21 @@ export function setupPicker(context) {
     </button></li>`).join("");
   const boxes = [...grid.querySelectorAll(".scaled")];
   boxes.forEach(fitScaled);
+  // Filtrar por tipo: las que no son del tipo se esconden (y así ni se cargan ni ocupan memoria).
+  filters = setupFilters($("#picker-filters"), {
+    studio: ctx.studio, styles: available, desde: "probar",
+    onChange: () => {
+      const shown = [];
+      for (const li of grid.children) {
+        li.hidden = !filters.matches(li.firstElementChild.dataset.style);
+        if (!li.hidden) shown.push(li.firstElementChild);
+      }
+      replayIn(shown);
+      // Si ya habían bajado, al principio de la cuadrícula, con los botones a la vista.
+      const top = grid.offsetTop - $("#picker-filters").offsetHeight - 10;
+      if ($("#picker").scrollTop > top) $("#picker").scrollTop = top;
+    },
+  });
 
   grid.addEventListener("click", (e) => {
     const card = e.target.closest("[data-style]");
@@ -104,6 +121,7 @@ export function openPicker(w, { now = "" } = {}) {
     : "Tocad uno y lo veis entero.";
   $("#picker-names").hidden = !(a && b) || Boolean(now);
   $("#picker-step").hidden = Boolean(now);
+  if (now && !filters.matches(now)) filters.select(""); // el que están viendo, siempre a la vista
   document.querySelectorAll("#picker-grid [data-style]").forEach((c) => {
     c.classList.toggle("is-current", c.dataset.style === now);
     c.setAttribute("aria-current", c.dataset.style === now ? "true" : "false");

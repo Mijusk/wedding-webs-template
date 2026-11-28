@@ -115,6 +115,40 @@ main section, .contact { scroll-margin-top: 80px; }
 }
 .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .06em; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
 
+/* Filtrar los estilos por tipo (app/filters.js): una fila de botones encima de las tarjetas. En el
+   móvil, una sola fila que se desliza de lado, con el borde difuminado para que se note que sigue. */
+main { grid-template-columns: minmax(0, 1fr); } /* que la fila que se desliza no ensanche la página */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: -14px 0 30px; }
+.filters-bar:has(> .filters[hidden]) { display: none; }
+.filters-bar > .filters { margin: 0; }
+.chip { flex: none; display: inline-flex; align-items: baseline; gap: 7px; padding: 9px 15px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px/1.2 var(--font-body);
+  white-space: nowrap; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color .25s, border-color .25s, color .25s, transform .2s; }
+.chip__n { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; transition: color .25s; }
+@media (hover: hover) { .chip:hover { border-color: var(--ink); } }
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.chip[aria-pressed="true"] .chip__n { color: color-mix(in srgb, var(--bg) 64%, transparent); }
+/* Las que aparecen al cambiar de tipo entran una detrás de otra (filters.js > replayIn) */
+.style-card.is-filtered, .pick-card.is-filtered { animation: filter-in .55s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--fi, 0) * 45ms); }
+@keyframes filter-in { from { opacity: 0; transform: translateY(14px); } }
+/* En «Todas las plantillas», fija bajo la cabecera mientras se baja (--top-h: su alto, filters.js) */
+.filters-bar--sticky { position: sticky; z-index: 5; top: calc(var(--top-h, 60px) + env(safe-area-inset-top, 0px));
+  margin: -14px 0 22px; padding-block: 10px; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); }
+@media (max-width: 760px) {
+  .filters { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 30px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 30px), transparent); }
+  .filters::-webkit-scrollbar { display: none; }
+  .filters { margin-top: -18px; margin-bottom: 22px; }
+  .filters-bar > .filters { margin-block: 0; }
+  .filters-bar--sticky { margin: -18px 0 18px; }
+  .chip { padding: 10px 15px; }
+}
+
 /* Pasos (secuencia real, de ahí los números) */
 .steps__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; counter-reset: step; }
 .steps__list li { display: grid; gap: 6px; align-content: start; border-top: 1px solid var(--ink); padding-top: 18px; counter-increment: step; }
@@ -715,6 +749,14 @@ body.has-nudge { padding-bottom: 64px; }
   .pick-card__name { font-size: 18px; }
 }
 @media (max-width: 760px) { .picker { bottom: var(--cookies-h, 0px); } }
+/* Los tipos, fijos arriba mientras se baja por la cuadrícula; a la derecha queda sitio para la × */
+.picker__bar { position: sticky; z-index: 1; top: calc(-1 * (20px + env(safe-area-inset-top, 0px))); max-width: 1160px; margin: -6px auto 18px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 56px 12px 0; background: var(--bg); }
+@media (max-width: 760px) {
+  .picker__bar { margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    padding: calc(15px + env(safe-area-inset-top, 0px)) 58px 10px 0; margin-top: -6px; margin-bottom: 14px; }
+  .picker__bar > .filters { margin-inline: 0; }
+}
 
 /* Vista previa: «Ver todas», junto a la barra de estilos */
 .dock-row { display: flex; align-items: center; gap: 8px; min-width: 0; }

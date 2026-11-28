@@ -146,7 +146,8 @@
       <h2 id="styles-title">Elegid cómo se ve</h2>
       <p class="section-note" id="styles-note"></p>
     </div>
-    <div class="styles__grid" id="styles-grid"></div>
+    <div class="filters" id="styles-filters" hidden></div>
+    <div class="styles__grid" id="styles-grid" data-filters="styles-filters"></div>
     <p class="styles__more" id="styles-more" hidden><a class="btn btn--ghost" href="plantillas.html" data-count>Ver todas las plantillas</a></p>
   </section>
 
@@ -325,6 +326,7 @@
     </div>
     <button class="close" type="button" data-close aria-label="Cerrar">×</button>
   </div>
+  <div class="filters-bar picker__bar"><div class="filters" id="picker-filters" hidden></div></div>
   <ul class="picker__grid" id="picker-grid" aria-label="Estilos"></ul>
 </div>
 
