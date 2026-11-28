@@ -6,14 +6,14 @@ Para Luis. Lo que pasa desde que una pareja prueba hasta que tiene su web, y qu�
 
 1. La pareja prueba en el escaparate (nombres › estilo › sus datos encima de la web). Queda en **Panel › Contactos** con todo lo que probó.
 2. Reserva un plan. Se crea su **pedido** y le llega por email su enlace de **seguimiento** (`/seguimiento/CÓDIGO`): ahí paga, ve cómo va, aprueba propuestas o pide cambios, y descarga la factura.
-3. Al crear su web, la pareja queda dada de alta en **su panel** (`/pareja/`). Entra con un enlace que le llega por email y vale para siempre (también lo copias en el editor de la boda › «Pareja y acceso a su panel»). Ahí gestiona invitados y respuestas y cambia horarios, dirección y regalo.
+3. Al crear su web, la pareja queda dada de alta en **su panel** (`/pareja/`). Entra con un enlace que vale para siempre. Le llega por email cuando lo pide desde su seguimiento o con el email «Web publicada» (también lo copias en el editor de la boda › «Pareja y acceso a su panel»). Ahí gestiona invitados y respuestas y cambia horarios, dirección y regalo.
 
 ## Esencial (tal cual): 4 pasos
 
 1. Apunta el pago (ficha del cliente › su pedido › «Apuntar un pago») si no ha pagado con tarjeta.
 2. Ficha del cliente › **Crear su web**. Sale ya con lo que probaron (deja marcada la casilla «Empezar desde la web que probaron» y su mismo estilo). Pon la dirección (`maria-y-pablo`).
 3. En el editor, sube sus fotos (te las mandan por WhatsApp o email).
-4. **Publicar**. Les llega el email con su web.
+4. **Publicar**. Les llega el email con su web y cómo entrar en su panel, si tienes encendida la automatización **«Web publicada»** (Panel › Automatizaciones). Enciéndela una vez y ya no tienes que mandar nada a mano.
 
 ## Completa (con cambios)
 
