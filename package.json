@@ -2,7 +2,7 @@
   "name": "wedding-webs",
   "private": true,
   "type": "module",
-  "description": "WeddingWebs: escaparate, 47 plantillas, panel y API. Sin dependencias ni paso de compilación.",
+  "description": "WeddingWebs: escaparate, 48 plantillas, panel y API. Sin dependencias ni paso de compilación.",
   "engines": {
     "node": ">=20"
   },

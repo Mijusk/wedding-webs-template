@@ -46,6 +46,7 @@ const WEBS = [
   ["../plantillas/marmol/", "Mármol"],
   ["../plantillas/terciopelo/", "Terciopelo"],
   ["../plantillas/grabado/", "Grabado"],
+  ["../plantillas/jornada/", "Del día a la noche"],
 ];
 
 export async function fillWebSelect(select) {

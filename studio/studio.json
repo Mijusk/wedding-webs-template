@@ -183,6 +183,10 @@
     "grabado": {
       "name": "Grabado",
       "url": "../plantillas/grabado/"
+    },
+    "jornada": {
+      "name": "Del día a la noche",
+      "url": "../plantillas/jornada/"
     }
   },
   "styles": [
@@ -197,6 +201,18 @@
       ],
       "description": "Foto a pantalla completa, vuestra historia en capítulos y una página que pasa de la tarde a la noche al bajar.",
       "theme": "editorial"
+    },
+    {
+      "id": "jornada",
+      "name": "Del día a la noche",
+      "template": "jornada",
+      "theme": "jornada",
+      "status": "available",
+      "swatch": [
+        "#f1cf9c",
+        "#161b33"
+      ],
+      "description": "Bajar por la web es vivir el día: vuestra foto dentro de vuestros nombres, el cielo pasa del sol a las estrellas con la puesta de sol real de vuestra boda y las fotos flotan en capas. La más espectacular."
     },
     {
       "id": "minimal",
