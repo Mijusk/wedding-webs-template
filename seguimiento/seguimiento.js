@@ -236,6 +236,9 @@ function requestBlock(p, latest, rounds) {
     : left > 0 ? `Sería la ronda ${rounds.used + 1} de ${rounds.included}.`
     : `Ya habéis usado las ${rounds.included} rondas de vuestro plan. Si queréis más, escribidnos.`;
   const list = [...p.requests].reverse();
+  // Atelier (a medida), antes de la primera propuesta: preguntas guiadas en vez del cuadro en blanco,
+  // para que el encargo llegue completo. Se manda como un mensaje más (no cuenta como ronda).
+  if (!latest && p.plan?.code === "a-medida" && !p.requests.some((r) => r.kind === "cambio")) return briefBlock();
   return html`<section class="panel-block" id="cambios" aria-labelledby="req-t">
     <h2 id="req-t">${latest ? `Pedir cambios sobre la propuesta ${latest.number}` : "¿Algo que debamos saber?"}</h2>
     ${rounds.included != null && rounds.included > 0 ? html`<p class="rounds" style="margin-bottom:12px">Cambios de diseño: <b>${rounds.used} de ${rounds.included}</b> rondas usadas. Corregir datos y erratas no cuenta.</p>` : ""}
@@ -258,7 +261,46 @@ function requestBlock(p, latest, rounds) {
   </section>`;
 }
 
+const BRIEF = [
+  ["idea", "¿Cómo os imagináis vuestra web?", "Por ejemplo: como nuestra invitación de papel, muy floral, con mucho blanco, que se note que es en la playa…", 4],
+  ["colores", "Colores y tipo de letra", "Los colores de la boda, si tenéis. «Algo clásico», «moderno», «hecho a mano»…", 2],
+  ["referencias", "Referencias que os gusten", "Enlaces de Pinterest, Instagram, webs, la invitación… Uno por línea.", 3],
+  ["vuestro", "Algo muy vuestro que deba salir", "Cómo os conocisteis, una mascota, el pueblo, una canción, una frase…", 3],
+  ["no", "Lo que no queréis de ninguna manera", "Opcional.", 2],
+];
+
+function briefBlock() {
+  return html`<section class="panel-block" id="cambios" aria-labelledby="req-t">
+    <h2 id="req-t">Contadnos vuestra web a medida</h2>
+    <p class="small muted" style="margin-bottom:12px">Con esto preparamos la primera propuesta. Rellenad lo que sepáis: lo demás lo hablamos. No cuenta como ronda de cambios.</p>
+    <form class="form stack" data-brief novalidate style="gap:12px">
+      ${BRIEF.map(([k, label, ph, rows]) => html`<div class="field"><label for="b-${k}">${label}</label>
+        <textarea id="b-${k}" name="${k}" rows="${rows}" maxlength="700" placeholder="${ph}"></textarea></div>`)}
+      <p class="error" data-req-err role="alert"></p>
+      <div class="btn-row"><button class="btn btn--primary" type="submit">Enviar</button></div>
+    </form>
+  </section>`;
+}
+
 function bind(code, p, latest) {
+  $("[data-brief]")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target, err = $("[data-req-err]");
+    const parts = BRIEF.map(([k, label]) => [label, form[k].value.trim()]).filter(([, v]) => v);
+    if (!parts.length || parts.reduce((n, [, v]) => n + v.length, 0) < 10) { err.textContent = "Contadnos al menos cómo os la imagináis."; return form.idea.focus(); }
+    const mensaje = `Encargo a medida\n\n${parts.map(([l, v]) => `${l}\n${v}`).join("\n\n")}`.slice(0, 4000);
+    const btn = form.querySelector("button[type=submit]");
+    btn.disabled = true; btn.textContent = "Enviando…";
+    try {
+      await api({ accion: "cambio", c: code, tipo: "cambio", mensaje, propuesta: null });
+      toast("¡Recibido! Nos ponemos con vuestra propuesta.");
+      start();
+    } catch (ex) {
+      btn.disabled = false; btn.textContent = "Enviar";
+      err.textContent = ex.code === "demasiadas" ? "Habéis mandado muchos mensajes hoy. Si es urgente, escribidnos." : "No se ha podido enviar. Probad otra vez.";
+    }
+  });
+
   $("[data-ask]")?.addEventListener("click", () => {
     const form = $("[data-request]");
     form.scrollIntoView({ behavior: "smooth", block: "center" });

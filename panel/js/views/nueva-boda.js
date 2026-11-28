@@ -1,7 +1,7 @@
 // Nueva boda: lo mínimo (pareja, fecha, lugar y estilo) y al editor. Si viene de un lead, ya está relleno.
 import { db, weddingDomain } from "../supa.js";
 import { html, render, $, debounce } from "../ui.js";
-import { styles, newWeddingConfig, utcOffset } from "../catalogo.js";
+import { styles, newWeddingConfig, withSamplePhotos, utcOffset } from "../catalogo.js";
 import { validate, describe } from "/lib/config-schema.js";
 
 let schema = null;
@@ -52,6 +52,9 @@ export default async function nuevaBoda({ el, query, go }) {
           : html`<span class="muted">${location.origin}/b/</span><input id="w-slug" name="slug" pattern="[a-z0-9][a-z0-9-]{1,58}[a-z0-9]" required>`}</div>
         <span class="hint">Solo minúsculas, números y guiones. Es lo que verán los invitados en el enlace.</span>
       </div>
+      ${lead?.trial_config ? html`<label class="check"><input type="checkbox" name="trial" checked>
+        <span>Empezar desde la web que probaron (sus textos, horario, secciones y lo que cambiaron). Las fotos salen de ejemplo hasta que subas las suyas.
+        Solo si dejas su mismo estilo; si eliges otro, se empieza de cero con sus datos.</span></label>` : ""}
       <p class="error" data-err></p>
       <div class="btn-row"><button class="btn btn--primary" type="submit">Crear y abrir el editor</button><a class="btn" href="#/bodas">Cancelar</a></div>
     </form>`);
@@ -75,16 +78,22 @@ export default async function nuevaBoda({ el, query, go }) {
     if (missing) { err.textContent = `Falta: ${missing.closest(".field").querySelector("label").textContent}.`; return missing.focus(); }
     if (!/^[a-z0-9][a-z0-9-]{1,58}[a-z0-9]$/.test(d.slug)) { err.textContent = "La dirección solo puede llevar minúsculas, números y guiones (mínimo 3)."; return slug.focus(); }
     const st = sts.find((s) => s.id === d.style);
-    const config = await newWeddingConfig(st, {
+    const fresh = await newWeddingConfig(st, {
       couple: [d.a.trim(), d.b.trim()], date: d.date, time: d.time, venue: d.venue.trim(), city: d.city.trim(),
     });
+    // Esencial = «tal cual la probaron»: se parte de su prueba entera y solo se ponen encima los datos de este formulario.
+    let config = fresh;
+    if (d.trial && lead?.trial_config && sameStyle(lead.trial_config, st)) {
+      const fromTrial = fromTrialConfig(await withSamplePhotos(lead.trial_config, st.template), fresh);
+      if (!validate(await loadSchema(), fromTrial).length) config = fromTrial;
+    }
     if (d.tz !== "Europe/Madrid") {
       const fix = (iso) => iso.replace(/([+-]\d{2}:\d{2}|Z)$/, utcOffset(iso.slice(0, 10), iso.slice(11, 16), d.tz));
       config.event.date = fix(config.event.date);
       config.event.end = fix(config.event.end);
       config.timeZone = d.tz;
     }
-    if (lead?.trial_config?.sections && lead.trial_config.theme === st.theme) config.sections = lead.trial_config.sections;
+    if (config === fresh && lead?.trial_config?.sections && sameStyle(lead.trial_config, st)) config.sections = lead.trial_config.sections;
     const problems = validate(await loadSchema(), config);
     if (problems.length) { err.textContent = describe(problems); return; }
     try {
@@ -103,4 +112,22 @@ export default async function nuevaBoda({ el, query, go }) {
       err.textContent = ex.code === "23505" ? "Esa dirección ya la tiene otra boda. Elige otra." : ex.message;
     }
   });
+}
+
+const sameStyle = (trial, st) => trial.theme === st.theme && (!trial.template || trial.template === st.template);
+
+// La web que probaron, con los datos del formulario encima (nombres, fecha, hora y lugar, por si Luis los
+// ha corregido). Lo demás (textos, horario, secciones, regalo…) se queda como lo dejaron.
+export function fromTrialConfig(trial, fresh) {
+  const c = structuredClone(trial);
+  delete c.template;
+  c.theme = fresh.theme;
+  const sameStart = String(c.event?.date || "").slice(0, 16) === fresh.event.date.slice(0, 16);
+  c.event = { ...c.event, couple: fresh.event.couple, photoAlt: fresh.event.photoAlt,
+    date: sameStart ? c.event.date : fresh.event.date, end: sameStart && c.event?.end ? c.event.end : fresh.event.end };
+  const sameVenue = String(c.venue?.name || "").trim().toLowerCase() === String(fresh.venue.name || "").trim().toLowerCase();
+  if (!sameVenue || !c.venue) c.venue = fresh.venue;
+  if (!sameStart && c.rsvp) c.rsvp.deadline = fresh.rsvp?.deadline;
+  c.rsvp = { ...(c.rsvp || {}), endpoint: fresh.rsvp?.endpoint ?? "" };
+  return c;
 }
