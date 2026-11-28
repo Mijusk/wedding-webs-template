@@ -1,16 +1,20 @@
 import { dateParts, time, daysUntil, esc, fill, interpolate, rsvpClosed, weddingPhase } from "./format.js";
 import { calendarUrl } from "./calendar.js";
 
-// «Persiana»: una tarde de verano en una casa encalada. La portada empieza a la sombra de la
-// persiana echada, con hilos de luz entre las lamas; las lamas se abren y entran franjas de sol
-// sobre la foto, que se mueven y se apagan al bajar. Por las paredes pasa el sol que entra por una
-// persiana y la sombra de un olivo; cada foto entra a la sombra de las lamas y el sol la ilumina.
+// «Persiana»: una tarde de verano en una casa encalada. La portada es una ventana en la pared con
+// una persiana de madera echada; las lamas se entreabren, la luz entra y cae en franjas por la
+// pared, y al bajar la persiana sube y deja ver la foto. Por las paredes pasa el sol y la sombra de
+// un olivo; las fotos de la historia tienen su propia persiana, que se abre al llegar.
 // Aquí solo está el contenido; el movimiento está en js/motion.js.
 
 export const arrow = `<span class="link__arrow" aria-hidden="true">→</span>`;
 
-// La sombra de las lamas de una persiana. Cada una sabe su posición (--k de 0 a 1) para abrirse en ola.
-export const blind = (n) => `<div class="blind" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i class="slat" style="--k:${(i / (n - 1)).toFixed(3)}"></i>`).join("")}<i class="blind__rail"></i></div>`;
+// Una persiana de madera: barra, lamas, dos cintas y la barra de abajo (y el cordón, si se pide).
+// Cada lama sabe su posición (--k de 0 a 1) para abrirse en ola.
+export const blind = (n, { cord = false } = {}) => `<div class="blind" aria-hidden="true">
+            <div class="blind__body"><div class="blind__slats">${Array.from({ length: n }, (_, i) => `<i class="slat" style="--k:${(i / (n - 1)).toFixed(3)}"></i>`).join("")}</div><i class="blind__bottom"></i><i class="blind__tape blind__tape--l"></i><i class="blind__tape blind__tape--r"></i></div>
+            <i class="blind__head"></i>${cord ? `<i class="blind__cord"></i>` : ""}
+          </div>`;
 
 const head = ({ eyebrow, title, id, text }) => `
     <header class="head" data-rise>
@@ -19,12 +23,12 @@ const head = ({ eyebrow, title, id, text }) => `
       ${text ? `<p class="head__text">${esc(text)}</p>` : ""}
     </header>`;
 
-// Una ventana con foto y la sombra de su persiana, que se abre al bajar (js/motion.js).
+// Una ventana con foto y, si lleva lamas, su persiana de madera, que se abre al bajar (js/motion.js).
 const windowed = (src, alt = "", { focus = "", slats = 11, cls = "" } = {}) => `
-      <figure class="window ${cls}" data-window>
+      <figure class="window ${cls}"${slats ? " data-window" : " data-rise"}>
         <div class="window__in">
           <img src="${esc(src)}" alt="${esc(alt)}" loading="lazy" decoding="async"${focus ? ` style="object-position:${esc(focus)}"` : ""}>
-          ${blind(slats)}
+          ${slats ? blind(slats) : ""}
         </div>
       </figure>`;
 
@@ -35,24 +39,30 @@ export function hero(config) {
   const d = dateParts(event.date, locale);
   const place = venue.city || venue.name || "";
   const len = Math.max(String(a).length, String(b).length, 4);
+  const len2 = Math.max(String(a).length + String(b).length + 2, 9);
   return `
   <section class="hero" data-hero aria-labelledby="hero-title">
     <div class="hero__stage">
-      <div class="hero__photo"><img src="${esc(event.photo)}" alt="${esc(event.photoAlt || `${a} y ${b}`)}" fetchpriority="high" decoding="async"${event.photoFocus ? ` style="object-position:${esc(event.photoFocus)}"` : ""}></div>
-      ${blind(22)}
-      <i class="hero__shade" aria-hidden="true"></i>
-      <i class="hero__glow" aria-hidden="true"></i>
-      <i class="hero__dim" aria-hidden="true"></i>
-      <i class="hero__fade" aria-hidden="true"></i>
-      <div class="hero__body">
-        ${t.eyebrow ? `<p class="eyebrow hero__eyebrow">${esc(t.eyebrow)}</p>` : ""}
-        <h1 class="hero__names" id="hero-title" style="--len:${len}">
-          <span class="hero__name">${esc(a)}</span>
-          <span class="hero__amp"><span class="visually-hidden"> y </span><span aria-hidden="true">&amp;</span></span>
-          <span class="hero__name">${esc(b)}</span>
-        </h1>
-        <p class="hero__date"><span class="cap">${esc(d.weekday)}</span>, ${esc(d.dayMonth)} ${esc(d.year)}${place ? ` <span aria-hidden="true">·</span> ${esc(place)}` : ""}</p>
-        ${t.hint ? `<p class="hero__hint" aria-hidden="true">${esc(t.hint)}</p>` : ""}
+      <i class="hero__sun" aria-hidden="true"></i>
+      <i class="sunbeam" aria-hidden="true"></i>
+      <div class="hero__layout">
+        <figure class="casement">
+          <div class="casement__in">
+            <img src="${esc(event.photo)}" alt="${esc(event.photoAlt || `${a} y ${b}`)}" fetchpriority="high" decoding="async"${event.photoFocus ? ` style="object-position:${esc(event.photoFocus)}"` : ""}>
+            ${blind(15, { cord: true })}
+          </div>
+          <i class="casement__sill" aria-hidden="true"></i>
+        </figure>
+        <div class="hero__body">
+          ${t.eyebrow ? `<p class="eyebrow hero__eyebrow">${esc(t.eyebrow)}</p>` : ""}
+          <h1 class="hero__names" id="hero-title" style="--len:${len};--len2:${len2}">
+            <span class="hero__name">${esc(a)}</span>
+            <span class="hero__amp"><span class="visually-hidden"> y </span><span aria-hidden="true">&amp;</span></span>
+            <span class="hero__name">${esc(b)}</span>
+          </h1>
+          <p class="hero__date"><span class="cap">${esc(d.weekday)}</span>, ${esc(d.dayMonth)} ${esc(d.year)}${place ? ` <span aria-hidden="true">·</span> ${esc(place)}` : ""}</p>
+          ${t.hint ? `<p class="hero__hint" aria-hidden="true">${esc(t.hint)}</p>` : ""}
+        </div>
       </div>
     </div>
   </section>`;
@@ -153,7 +163,7 @@ export function gallery(config) {
   return `
   <section class="wall gallery" aria-labelledby="gallery-title">
     ${head({ eyebrow: t.eyebrow, title: t.title, id: "gallery-title" })}
-    <div class="windows" data-count="${photos.length}">${photos.map((src, i) => windowed(src, `${a} y ${b}`, { focus: i % 2 ? "50% 35%" : "", slats: 9, cls: `is-${i % 3}` })).join("")}
+    <div class="windows" data-count="${photos.length}">${photos.map((src, i) => windowed(src, `${a} y ${b}`, { focus: i % 2 ? "50% 35%" : "", slats: 0, cls: `is-${i % 3}` })).join("")}
     </div>
   </section>`;
 }

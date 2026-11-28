@@ -1,7 +1,6 @@
-/* «Persiana»: casa encalada y la luz de una tarde de junio, que entra por la persiana y dibuja
-   rayas de sol y sombra sobre las fotos y las paredes.
-   La sombra de cada lama adelgaza con calc() a partir de --o (cuánto está abierta la persiana) y
-   --k (posición de la lama, para que se abran en ola); js/motion.js solo escribe esas variables. */
+/* «Persiana»: una casa encalada, una persiana de madera y la luz de una tarde de junio.
+   Las lamas giran con calc() a partir de --o (cuánto está abierta la persiana) y --k (posición de
+   cada lama, para que se abran en ola); js/motion.js solo escribe esas variables. */
 :root {
   --paper: #ede3d3;
   --paper-2: #e4d8c4;
@@ -12,9 +11,7 @@
   --accent-2: #b0603f;
   --on-accent: #f8f3ea;
   --error: #a9452b;
-  --shadow: rgb(56 34 14 / .46); /* sombra cálida de las lamas */
   --frame: #f3ece0;
-  --cream: #f8f1e3;
   --font-display: "Spectral", Georgia, serif;
   --font-body: "Spectral", Georgia, serif;
   --font-label: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
@@ -35,65 +32,106 @@ body {
 .button { font: 500 12.5px/1.3 var(--font-label); letter-spacing: .26em; }
 .house { position: relative; overflow-x: clip; }
 
-/* ---------- la luz de la persiana (portada y fotos) ----------
-   No se ve la persiana, sino lo que hace: bandas de sombra suave y en diagonal (skewY) que, al
-   abrirse las lamas, adelgazan y dejan pasar franjas de sol. Con la persiana echada solo se cuelan
-   hilos de luz entre lama y lama. Todo con transform y opacity. */
-.blind {
-  position: absolute; inset: -34% 0; z-index: 2; display: flex; flex-direction: column; pointer-events: none;
-  transform: translate3d(0, calc(var(--drift, 0) * 1%), 0) skewY(-11deg);
-  opacity: calc(1 - var(--fade, 0));
+/* ---------- persiana de madera (portada y fotos de la historia) ----------
+   Lamas de roble claro con su veta (assets/madera.webp), dos cintas de lino y una barra arriba.
+   Cada lama gira de verdad (rotateX con perspectiva) según --t, que sale de --o (cuánto está
+   abierta) y --k (su posición): se abren en ola de arriba abajo. Con --lift la persiana sube y se
+   recoge bajo la barra. Con la persiana echada, entre lama y lama se cuela un hilo de luz. */
+.blind { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+.blind__body {
+  position: absolute; inset: 0; display: flex; flex-direction: column; padding-top: var(--head, 14px);
+  transform: translate3d(0, calc(var(--lift, 0) * -101%), 0);
 }
+.blind__slats { flex: 1; display: flex; flex-direction: column; perspective: 900px; }
 .slat {
-  --a: clamp(0, calc(var(--o, 0) * 1.5 - var(--k) * .5), 1);
-  flex: 1 1 0;
-  background: linear-gradient(180deg, transparent, rgb(52 32 14 / .3) 18%, var(--shadow) 36%, var(--shadow) 64%, rgb(52 32 14 / .3) 82%, transparent);
-  transform: scaleY(calc(1.08 - var(--a) * .68));
+  --t: clamp(0, calc(var(--o, 0) * 1.5 - var(--k) * .5), 1);
+  flex: 1 1 0; position: relative; border-radius: 1px;
+  background:
+    linear-gradient(180deg, rgb(255 236 200 / .3), transparent 34%, transparent 64%, rgb(70 38 12 / .36)),
+    url("../assets/madera.webp") calc(var(--k) * -431px) calc(var(--k) * -23px) / 512px auto;
+  box-shadow: 0 1px 1px rgb(60 32 10 / .38), inset 0 1px rgb(255 236 200 / .3);
+  transform: rotateX(calc(var(--t) * 78deg)) scaleY(1.05);
 }
-.blind__rail { display: none; }
+/* La cara que recibe el sol al girar */
+.slat::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(255 228 172 / .55), rgb(255 228 172 / .1)); opacity: var(--t); }
+/* Hilo de luz entre las lamas cerradas */
+.slat::before { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; z-index: 1; height: 1.5px; background: rgb(255 226 170); box-shadow: 0 0 8px 1px rgb(255 206 140 / .6); opacity: calc(.9 - var(--t) * 5); }
+.blind__tape { position: absolute; top: 0; bottom: 0; width: clamp(5px, 1.6%, 9px); background: linear-gradient(90deg, #e3d6bf, #f3ead9 45%, #ddd0b8); box-shadow: 0 0 2px rgb(60 40 20 / .25); }
+.blind__tape--l { left: 17%; }
+.blind__tape--r { right: 17%; }
+.blind__bottom { flex: none; height: calc(var(--head, 14px) * .8); background: url("../assets/madera.webp") 0 -40px / 512px auto; box-shadow: 0 4px 8px rgb(50 28 10 / .35), inset 0 1px rgb(255 236 200 / .35); }
+.blind__head { position: absolute; top: 0; left: 0; right: 0; z-index: 3; height: var(--head, 14px); background: linear-gradient(180deg, rgb(255 238 205 / .3), transparent 50%, rgb(60 30 8 / .3)), url("../assets/madera.webp") -200px -10px / 512px auto; box-shadow: 0 3px 6px rgb(50 28 10 / .35); }
+/* Cordón con su bellota de madera, que cuelga de la barra */
+.blind__cord { position: absolute; z-index: 3; top: var(--head, 14px); right: 7%; width: 2px; height: 58%; background: #efe4d0; box-shadow: 0 0 1px rgb(60 40 20 / .4); }
+.blind__cord::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 9px; height: 15px; border-radius: 45% 45% 50% 50% / 35% 35% 65% 65%; transform: translateX(-50%); background: url("../assets/madera.webp") -80px 0 / 256px auto; box-shadow: inset -2px -2px 3px rgb(60 30 8 / .4); }
 
-/* ---------- portada ---------- */
-.hero { position: relative; z-index: 2; height: 185vh; height: 185svh; background: #3a2e21; }
-.hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; color: var(--cream); }
-.hero__photo { position: absolute; inset: 0; transform: scale(calc(1.12 - var(--hp, 0) * .12)); will-change: transform; }
-.hero__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 24%; }
-.hero .blind { inset: calc(-26% - 14vw) 0; will-change: transform, opacity; }
-.hero .slat { --a: clamp(0, calc(var(--o, 0) * 1.6 - var(--k) * .6), 1); }
-.hero__shade { position: absolute; inset: 0; z-index: 3; background: linear-gradient(0deg, rgb(22 17 10 / .7), rgb(22 17 10 / .25) 38%, transparent 62%), linear-gradient(180deg, rgb(22 17 10 / .35), transparent 22%); }
-.hero__glow { position: absolute; inset: 0; z-index: 3; background: radial-gradient(95% 62% at 84% 2%, rgb(255 210 150 / .46), transparent 64%); opacity: 0; transition: opacity 1.6s ease .2s; }
-.hero.is-ready .hero__glow { opacity: 1; }
-.hero__dim { position: absolute; inset: 0; z-index: 4; background: rgb(40 26 12 / .32); opacity: var(--dim, 1); pointer-events: none; }
-/* Al final, la foto se funde con la pared de la sección siguiente */
-.hero__fade { position: absolute; inset: auto 0 0; z-index: 6; height: 46%; background: linear-gradient(180deg, transparent, rgb(237 227 211 / .82) 62%, var(--paper)); opacity: var(--end, 0); pointer-events: none; }
-.hero__body {
-  position: absolute; inset: auto 0 0; z-index: 5; display: grid; justify-items: center; text-align: center;
-  padding: 0 var(--gutter) max(30px, 6svh);
-  opacity: calc(1 - var(--hp, 0) * 1.4);
+/* ---------- portada: una ventana en la pared encalada ----------
+   Al entrar, las lamas se entreabren y la luz de la tarde entra y cae en franjas por la pared; al
+   bajar, se abren del todo y la persiana sube. La portada se queda fija mientras tanto (sticky)
+   y, como su fondo es la misma pared, la web sigue sin corte. */
+.hero { position: relative; z-index: 2; height: 175vh; height: 175svh; }
+.hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: grid; place-items: center; }
+/* Luz cálida de tarde sobre la pared, que entra al abrirse */
+.hero__sun { position: absolute; inset: 0; background: radial-gradient(70% 55% at 62% 58%, rgb(255 214 150 / .5), transparent 70%); opacity: calc(.25 + var(--o, 0) * .75); }
+/* El sol que entra por las lamas y cae en franjas por la pared, a un lado de la ventana */
+.sunbeam {
+  position: absolute; right: -24%; bottom: -10%; width: min(92vw, 720px); aspect-ratio: 560 / 800;
+  background: url("../assets/luz.webp") center / contain no-repeat;
+  transform: rotate(-6deg) scaleY(calc(.82 + var(--o, 0) * .18)); transform-origin: 30% 0; opacity: calc(var(--o, 0) * .95);
 }
-.hero__eyebrow { color: rgb(255 238 210 / .9); }
+.hero__layout {
+  position: relative; z-index: 1; display: grid; justify-items: center; align-content: center; gap: max(14px, 2.6svh);
+  width: 100%; height: 100%; padding: max(26px, 5svh) var(--gutter) max(30px, 5svh); text-align: center;
+}
+.casement { --h: min(49svh, 110vw); position: relative; margin: 0; height: var(--h); aspect-ratio: 3 / 4; }
+.casement__in {
+  position: absolute; inset: 0; overflow: hidden; background: #6f5a40;
+  border: clamp(8px, 1.4svh, 14px) solid #f7f1e6;
+  box-shadow: inset 0 0 0 1px rgb(80 60 40 / .18), inset 6px 8px 14px rgb(60 40 20 / .28), 0 0 0 1px rgb(90 70 50 / .12), 0 28px 44px -26px rgb(60 38 18 / .55);
+}
+.casement__in > img { width: 100%; height: 100%; object-fit: cover; transform: scale(calc(1.08 - var(--o, 0) * .08)); }
+.casement .blind { --head: clamp(12px, 2.2svh, 20px); }
+/* Alféizar */
+.casement__sill { position: absolute; left: -7%; right: -7%; bottom: calc(-1 * clamp(8px, 1.3svh, 12px)); height: clamp(8px, 1.3svh, 12px); background: linear-gradient(180deg, #fbf7ef, #e9dfcd); box-shadow: 0 10px 18px -8px rgb(60 38 18 / .45); border-radius: 1px; }
+.hero__body { display: grid; justify-items: center; container-type: inline-size; width: 100%; max-width: 40rem; }
+.hero__eyebrow { margin-bottom: 4px; }
 .hero__names {
-  --fs: min(calc((100vw - 2 * var(--gutter)) / (var(--len) * .5)), 13.5svh, 124px);
-  display: grid; justify-items: center; margin: 12px 0 14px;
-  font: italic 200 var(--fs)/.92 var(--font-display); letter-spacing: -.01em;
-  text-shadow: 0 2px 24px rgb(20 12 4 / .35);
+  --fs: min(calc(100cqi / (var(--len2) * .5)), 7.6svh, 96px);
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: .22em; margin: 0;
+  font: italic 200 var(--fs)/1 var(--font-display); letter-spacing: -.01em; color: var(--ink);
 }
-.hero__amp { font-size: .42em; line-height: 1.1; font-style: italic; color: rgb(255 226 180); margin: .1em 0; }
-.hero__date { font: 500 11.5px/1.6 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: rgb(255 244 228 / .92); }
-.hero__hint { display: grid; justify-items: center; gap: 8px; margin-top: 18px; font: italic 300 16px/1.3 var(--font-display); color: rgb(255 240 215 / .88); }
-.hero__hint::after { content: ""; width: 1px; height: 28px; background: linear-gradient(rgb(255 236 200), transparent); transform-origin: top; animation: hint 2.4s ease-in-out infinite; }
+.hero__amp { font-size: .62em; color: var(--accent-2); }
+.hero__date { margin-top: max(8px, 1.4svh); font: 500 11.5px/1.6 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--ink); }
+.hero__hint { display: grid; justify-items: center; gap: 6px; margin-top: max(8px, 1.6svh); font: italic 300 15px/1.3 var(--font-display); color: var(--muted); }
+.hero__hint::after { content: ""; width: 1px; height: 24px; background: linear-gradient(var(--accent-2), transparent); transform-origin: top; animation: hint 2.4s ease-in-out infinite; }
 @keyframes hint { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { opacity: 0; } }
 html:not(.is-still) .hero__eyebrow, html:not(.is-still) .hero__names, html:not(.is-still) .hero__date, html:not(.is-still) .hero__hint {
-  opacity: 0; transform: translateY(14px); transition: opacity 1.4s ease, transform 1.6s var(--ease-out);
+  opacity: 0; transform: translateY(12px); transition: opacity 1.2s ease, transform 1.4s var(--ease-out);
 }
-.hero.is-ready .hero__eyebrow { opacity: 1; transform: none; transition-delay: .25s; }
-.hero.is-ready .hero__names { opacity: 1; transform: none; transition-delay: .5s; }
-.hero.is-ready .hero__date { opacity: 1; transform: none; transition-delay: .85s; }
+html:not(.is-still) .casement { opacity: 0; transform: translateY(10px) scale(.985); transition: opacity 1.1s ease, transform 1.4s var(--ease-out); }
+.hero.is-ready .casement { opacity: 1; transform: none; }
+.hero.is-ready .hero__eyebrow { opacity: 1; transform: none; transition-delay: .35s; }
+.hero.is-ready .hero__names { opacity: 1; transform: none; transition-delay: .55s; }
+.hero.is-ready .hero__date { opacity: 1; transform: none; transition-delay: .8s; }
 .hero.is-done .hero__hint { opacity: 1; transform: none; }
-@media (min-width: 880px) and (min-aspect-ratio: 1/1) {
-  .hero__names { --fs: min(calc((100vw - 2 * var(--gutter)) / (var(--len) * 1.15 + 1)), 17svh, 168px); display: flex; align-items: baseline; gap: .18em; }
-  .hero__amp { font-size: .5em; }
-  .hero__body { padding-bottom: 7svh; }
+/* Pantallas apaisadas: la ventana a un lado y los nombres al otro */
+@media (min-aspect-ratio: 1/1) {
+  .hero__layout { grid-template-columns: auto minmax(0, 34rem); justify-content: center; align-items: center; column-gap: clamp(24px, 7vw, 120px); text-align: left; }
+  .casement { --h: min(74svh, 700px); }
+  .hero__body { justify-items: start; }
+  .hero__names { --fs: min(calc(100cqi / (var(--len) * .5)), 15svh, 132px); flex-direction: column; align-items: flex-start; line-height: .95; }
+  .hero__amp { margin: .06em 0 .02em .1em; }
+  .sunbeam { right: auto; left: 38%; bottom: -24%; width: min(48vw, 760px); }
 }
+/* Pantallas bajas y apaisadas (la vista previa pequeña del escaparate, un móvil tumbado) */
+@media (min-aspect-ratio: 1/1) and (max-height: 520px) {
+  .hero__layout { column-gap: 18px; padding-inline: 16px; }
+  .casement { --h: 66svh; }
+  .hero__eyebrow { white-space: nowrap; letter-spacing: .22em; font-size: 10px; }
+  .hero__date { font-size: 9.5px; letter-spacing: .16em; }
+  .hero__hint { font-size: 13px; }
+}
+.is-still .sunbeam { opacity: .8; transform: rotate(-6deg); }
 
 /* ---------- paredes ---------- */
 .wall { position: relative; padding: var(--space) var(--gutter) 0; }
@@ -147,10 +185,11 @@ html:not(.is-still) [data-rise]:not(.is-up) { opacity: 0; transform: translateY(
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12), 0 22px 40px -26px rgb(60 38 18 / .6);
 }
 .window__in > img { width: 100%; height: 100%; object-fit: cover; transform: scale(calc(1.07 - var(--o, 0) * .07)); }
-/* Cada foto entra a la sombra de la persiana; al llegar al centro, el sol la ilumina entera. */
-.window .blind { inset: -38% 0; --drift: calc(var(--o, 0) * 9); --fade: clamp(0, calc((var(--o, 0) - .62) * 2.8), 1); }
-.window .slat { --a: clamp(0, calc(var(--o, 0) * 1.7 - var(--k) * .6), 1); }
-.wall.is-near .window .blind { will-change: transform, opacity; }
+/* Las fotos de la historia tienen su persiana de madera: al llegar al centro, las lamas se abren y
+   la persiana sube. */
+.window .blind { --head: 12px; --lift: clamp(0, calc((var(--o, 0) - .74) * 4.2), 1); }
+.window .slat { --t: clamp(0, calc(var(--o, 0) * 1.7 - var(--k) * .6), 1); }
+.wall.is-near .window .blind__body { will-change: transform; }
 
 /* Historia */
 .chapters { display: grid; gap: clamp(84px, 12vw, 140px); max-width: 1040px; margin: 70px auto 0; }
@@ -229,10 +268,10 @@ html:not(.is-still) [data-rise]:not(.is-up) { opacity: 0; transform: translateY(
 .rsvp-dialog { background: var(--paper); }
 .rsvp-dialog .rsvp-title { font-style: italic; font-weight: 200; }
 
-/* Movimiento reducido: sin sombras de persiana, con la luz quieta. */
-.is-still .blind, .is-still .hero__dim, .is-still .hero__fade { display: none; }
-.is-still .hero { height: 100vh; height: 100svh; }
-.is-still .hero__photo { transform: none; }
-.is-still .hero__glow { opacity: 1; }
+/* Movimiento reducido: las persianas recogidas y la luz quieta. */
+.is-still .blind { display: none; }
+.is-still .hero { height: auto; }
+.is-still .hero__stage { position: relative; height: auto; min-height: 100vh; min-height: 100svh; }
+.is-still .casement__in > img { transform: none; }
 .is-still .patch__leaves, .is-still .hero__hint::after { animation: none; }
 .is-still .patch__light, .is-still .window__in > img { transform: none; }
