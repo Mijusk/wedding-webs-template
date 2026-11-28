@@ -1,16 +1,17 @@
 import { run, isStill, clamp, smooth, span, easeInOut } from "./loop.js";
 
 // Movimiento de «Persiana». Todo sale de la posición del scroll y se escribe como variables de
-// CSS (una por cosa): las lamas giran y la persiana sube con calc() en css/style.css.
-//   Portada: al abrir, las lamas se entreabren solas (entra la luz); al bajar, se abren del todo
-//            y la persiana sube. La portada se queda fija mientras tanto (sticky).
-//   Ventanas: cada foto tiene su persiana, que se abre cuando la foto llega al centro.
+// CSS (una por cosa): la sombra de las lamas adelgaza con calc() en css/style.css.
+//   Portada: al abrir, las lamas se entreabren solas y entran franjas de sol sobre la foto; al
+//            bajar, se abren del todo, la luz se desliza (el sol se mueve) y se apaga, y la foto
+//            se funde con la pared. La portada se queda fija mientras tanto (sticky).
+//   Ventanas: cada foto entra a la sombra de las lamas, que se abren cuando llega al centro.
 //   Programa: cada hora se ilumina al pasar por la franja de sol (el centro de la pantalla).
 //   Sol: en cada pared hay una mancha de sol y sombra de olivo que se desplaza despacio.
 // Con «reducir movimiento», las persianas no salen y todo está quieto y visible.
 
-const INTRO_MS = 2100;
-const INTRO_OPEN = 0.56;   // cuánto se abren las lamas solas al principio
+const INTRO_MS = 1300;
+const INTRO_OPEN = 0.6;    // cuánto se abren las lamas solas al principio
 
 let hero = null;
 let walls = [];
@@ -49,19 +50,21 @@ function frame({ y, vh, t }) {
   // Portada
   if (hero) {
     if (!introStart) introStart = t;
-    const ip = introPlayed ? 1 : clamp((t - introStart - 200) / INTRO_MS);
+    const ip = introPlayed ? 1 : clamp((t - introStart - 120) / INTRO_MS);
     if (ip < 1) busy = true;
     else if (!introPlayed) { introPlayed = true; hero.el.classList.add("is-done"); }
     const travel = Math.max(1, hero.h - vh);
     const hp = clamp((y - hero.top) / travel);
-    const scrolled = hp > 0 ? INTRO_OPEN + (1 - INTRO_OPEN) * smooth(0, 0.42, hp) : 0;
+    const scrolled = hp > 0 ? INTRO_OPEN + (1 - INTRO_OPEN) * smooth(0, 0.5, hp) : 0;
     const open = Math.max(INTRO_OPEN * easeInOut(ip), scrolled);
     // Cada variable va solo en el elemento que la usa: así el navegador recalcula lo mínimo.
     set(hero.blind, "o", open);
-    set(hero.blind, "lift", smooth(0.34, 1, hp));
-    set(hero.dim, "dim", 1 - smooth(0.05, 0.75, ip));
+    set(hero.blind, "drift", hp * 16);
+    set(hero.blind, "fade", smooth(0.4, 0.9, hp));
+    set(hero.dim, "dim", 1 - smooth(0, 0.8, ip));
     set(hero.photo, "hp", hp);
     set(hero.body, "hp", hp);
+    set(hero.fade, "end", smooth(0.55, 1, hp));
   }
   // Paredes: el sol se desplaza según dónde esté la pared en la pantalla (-1 abajo, 1 arriba).
   for (const w of walls) {
@@ -88,7 +91,7 @@ function frame({ y, vh, t }) {
 export function startMotion(root) {
   const h = root.querySelector("[data-hero]");
   const part = (sel) => ({ el: h.querySelector(sel) || h });
-  hero = h ? { el: h, blind: part(".blind"), dim: part(".hero__dim"), photo: part(".hero__photo"), body: part(".hero__body") } : null;
+  hero = h ? { el: h, blind: part(".blind"), dim: part(".hero__dim"), photo: part(".hero__photo"), body: part(".hero__body"), fade: part(".hero__fade") } : null;
   walls = [...root.querySelectorAll(".wall")].map((el, i) => {
     // Una mancha de sol por pared, a un lado y a otro; sombra de olivo en una sí y otra no.
     if (!el.querySelector(".patch")) el.insertAdjacentHTML("afterbegin", `<div class="patch patch--${i % 2 ? "r" : "l"}${i % 2 ? "" : " has-leaves"}" aria-hidden="true"><i class="patch__light"></i>${i % 2 ? "" : `<i class="patch__leaves"></i>`}</div>`);

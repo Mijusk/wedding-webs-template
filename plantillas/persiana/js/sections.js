@@ -1,15 +1,15 @@
 import { dateParts, time, daysUntil, esc, fill, interpolate, rsvpClosed, weddingPhase } from "./format.js";
 import { calendarUrl } from "./calendar.js";
 
-// «Persiana»: una tarde de verano en una casa encalada. La web empieza a oscuras, con la persiana
-// echada y la luz colándose entre las lamas; las lamas se abren y, al bajar, la persiana sube y
-// deja ver la foto. Después, por las paredes pasa el sol que entra por una persiana y la sombra de
-// un olivo; las fotos tienen su propia ventana y su persiana se abre al llegar.
+// «Persiana»: una tarde de verano en una casa encalada. La portada empieza a la sombra de la
+// persiana echada, con hilos de luz entre las lamas; las lamas se abren y entran franjas de sol
+// sobre la foto, que se mueven y se apagan al bajar. Por las paredes pasa el sol que entra por una
+// persiana y la sombra de un olivo; cada foto entra a la sombra de las lamas y el sol la ilumina.
 // Aquí solo está el contenido; el movimiento está en js/motion.js.
 
 export const arrow = `<span class="link__arrow" aria-hidden="true">→</span>`;
 
-// Las lamas de una persiana. Cada una sabe su posición (--k de 0 a 1) para abrirse en ola.
+// La sombra de las lamas de una persiana. Cada una sabe su posición (--k de 0 a 1) para abrirse en ola.
 export const blind = (n) => `<div class="blind" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i class="slat" style="--k:${(i / (n - 1)).toFixed(3)}"></i>`).join("")}<i class="blind__rail"></i></div>`;
 
 const head = ({ eyebrow, title, id, text }) => `
@@ -19,7 +19,7 @@ const head = ({ eyebrow, title, id, text }) => `
       ${text ? `<p class="head__text">${esc(text)}</p>` : ""}
     </header>`;
 
-// Una ventana con foto y su persiana, que se abre al bajar (js/motion.js).
+// Una ventana con foto y la sombra de su persiana, que se abre al bajar (js/motion.js).
 const windowed = (src, alt = "", { focus = "", slats = 11, cls = "" } = {}) => `
       <figure class="window ${cls}" data-window>
         <div class="window__in">
@@ -39,10 +39,11 @@ export function hero(config) {
   <section class="hero" data-hero aria-labelledby="hero-title">
     <div class="hero__stage">
       <div class="hero__photo"><img src="${esc(event.photo)}" alt="${esc(event.photoAlt || `${a} y ${b}`)}" fetchpriority="high" decoding="async"${event.photoFocus ? ` style="object-position:${esc(event.photoFocus)}"` : ""}></div>
-      ${blind(18)}
+      ${blind(22)}
       <i class="hero__shade" aria-hidden="true"></i>
       <i class="hero__glow" aria-hidden="true"></i>
       <i class="hero__dim" aria-hidden="true"></i>
+      <i class="hero__fade" aria-hidden="true"></i>
       <div class="hero__body">
         ${t.eyebrow ? `<p class="eyebrow hero__eyebrow">${esc(t.eyebrow)}</p>` : ""}
         <h1 class="hero__names" id="hero-title" style="--len:${len}">
