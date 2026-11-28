@@ -60,7 +60,7 @@ html:not(.is-still) .slot--lens img { visibility: hidden; }
 /* ---------- portada ---------- */
 .hero { height: calc(100vh + 120svh); }
 .hero:not(.has-tagline) { height: calc(100vh + 75svh); }
-.hero__body { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; justify-items: center; padding: max(24px, 4svh) var(--gutter); text-align: center; }
+.hero__body { position: absolute; inset: 0 0 auto; height: 100svh; z-index: 2; display: grid; align-content: center; justify-items: center; padding: max(24px, 4svh) var(--gutter); text-align: center; }
 .hero__eyebrow, .hero__date, .hero__hint { opacity: calc(1 - var(--q, 0)); }
 .hero__names {
   display: flex; flex-direction: column; align-items: center; gap: 2svh; margin: 2.6svh 0 3svh;
@@ -76,7 +76,7 @@ html:not(.is-still) .slot--lens img { visibility: hidden; }
 .hero__hint::after { content: ""; width: 1px; height: 30px; background: linear-gradient(var(--accent), transparent); transform-origin: top; animation: hint 2.4s ease-in-out infinite; }
 @keyframes hint { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { opacity: 0; } }
 .hero__tagline {
-  position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: max(78px, 12svh); max-width: 12.5em;
+  position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: calc(100vh - 100svh + max(78px, 12svh)); max-width: 12.5em;
   font: italic 400 clamp(34px, 9.4vw, 80px)/1.08 var(--font-display); letter-spacing: -.01em; color: var(--photo-ink);
   text-wrap: balance; text-shadow: 0 2px 30px rgb(0 0 0 / .25); opacity: var(--show, 0);
 }
@@ -130,14 +130,14 @@ html:not(.is-still) [data-rise]:not(.head):not(.swatches):not(.is-up) { opacity:
 .chapters { display: block; max-width: none; gap: 0; }
 .chapter { display: block; text-align: left; }
 .chapter.has-photo { height: calc(100vh + 125svh); }
-.chapter__body { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; gap: min(26px, 3svh); max-width: var(--col); margin: 0 auto; padding: 0 var(--gutter); opacity: var(--bf, 1); }
+.chapter__body { position: absolute; inset: 0 0 auto; height: 100svh; z-index: 2; display: grid; align-content: center; gap: min(26px, 3svh); max-width: var(--col); margin: 0 auto; padding: 0 var(--gutter); opacity: var(--bf, 1); }
 .chapter__meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 11.5px/1.5 var(--font-label); letter-spacing: .3em; text-transform: uppercase; color: var(--accent); }
 .chapter__num { color: var(--muted); letter-spacing: .18em; }
 .chapter__text { font: 400 clamp(18px, min(9.2vw, 6.6svh), 70px)/1.13 var(--font-display); letter-spacing: -.012em; color: var(--ink); max-width: 16em; text-wrap: pretty; }
 .chapter.is-long .chapter__text { font-size: clamp(16px, min(7.4vw, 5.4svh), 56px); }
 .chapter.is-longer .chapter__text { font-size: clamp(15px, min(6vw, 4.4svh), 46px); }
 .chapter__caption {
-  position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: max(84px, 12svh);
+  position: absolute; z-index: 3; left: var(--gutter); right: var(--gutter); bottom: calc(100vh - 100svh + max(84px, 12svh));
   font: italic 400 clamp(32px, 8vw, 68px)/1.05 var(--font-display); color: var(--photo-ink); text-shadow: 0 2px 30px rgb(0 0 0 / .25);
   opacity: var(--c, 0); transform: translateY(calc((1 - var(--c, 0)) * 16px));
 }
@@ -188,7 +188,7 @@ html:not(.is-still) .swatches:not(.is-up) .swatch__name, html:not(.is-still) .sw
 
 /* Cierre */
 .closing { margin-top: var(--space); padding: 0; height: calc(100vh + 110svh); }
-.closing__body { position: absolute; inset: 0; z-index: 2; display: grid; align-content: center; justify-items: center; gap: 0; padding: max(28px, 5svh) var(--gutter); overflow: visible; text-align: center; }
+.closing__body { position: absolute; inset: 0 0 auto; height: 100svh; z-index: 2; display: grid; align-content: center; justify-items: center; gap: 0; padding: max(28px, 5svh) var(--gutter); overflow: visible; text-align: center; }
 .closing__eyebrow { margin-bottom: 14px; }
 .closing__title { font-size: clamp(30px, min(13vw, 12svh), 120px); line-height: .98; letter-spacing: -.02em; max-width: 9em; color: var(--photo-ink); text-wrap: balance; }
 .slot--closing { display: block; width: auto; height: clamp(70px, 26svh, 300px); aspect-ratio: 7 / 10; margin: 4svh 0; }
@@ -214,13 +214,13 @@ html:not(.is-still) .swatches:not(.is-up) .swatch__name, html:not(.is-still) .sw
 .is-still .slot { transform: none; opacity: 1; }
 .is-still .plan__item { --g: 1; }
 .is-still .hero .lens, .is-still .closing .lens, .is-still .veil { display: none; }
-.is-still .hero__body, .is-still .closing__body { position: relative; inset: auto; min-height: 100svh; }
+.is-still .hero__body, .is-still .closing__body { position: relative; inset: auto; height: auto; min-height: 100svh; }
 .is-still .hero__tagline { position: relative; inset: auto; margin: 0 auto; padding: 0 var(--gutter) var(--space); color: var(--ink); text-align: center; text-shadow: none; opacity: 1; }
 .is-still .hero__name { opacity: 1; }
 .is-still .chapter.has-photo { max-width: var(--col); margin: 0 auto; padding: 12svh var(--gutter) 0; }
 .is-still .chapter .slot--lens { display: none; }
-.is-still .chapter__body { position: relative; inset: auto; padding: 0; opacity: 1; }
-.is-still .chapter .lens { position: relative; inset: auto; display: block; margin-top: 34px; width: 100%; aspect-ratio: 4 / 5; max-height: 80vh; border-radius: 18px; opacity: 1; }
+.is-still .chapter__body { position: relative; inset: auto; height: auto; padding: 0; opacity: 1; }
+.is-still .chapter .lens { position: relative; inset: auto; display: block; margin: 0 0 30px; width: 100%; aspect-ratio: 4 / 5; max-height: 80vh; border-radius: 18px; opacity: 1; }
 .is-still .chapter .lens img { position: static; width: 100%; height: 100%; }
 .is-still .chapter__caption { display: none; }
 .is-still .closing__title { color: var(--ink); }
