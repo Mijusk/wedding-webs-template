@@ -8,6 +8,7 @@ import { prepare } from "/lib/fotos.js";
 import { loadSchema } from "./nueva-boda.js";
 import { formatIban, ibanOk } from "/lib/iban.js";
 import { textGroups, setText, plain } from "../textos.js";
+import { claudeBrief } from "../claude.js";
 
 const BUCKET = "wedding-assets";
 const TZS = [["Europe/Madrid", "Península y Baleares"], ["Atlantic/Canary", "Canarias"], ["Europe/Lisbon", "Portugal"], ["Europe/London", "Reino Unido"], ["Europe/Paris", "Francia, Italia, Alemania…"], ["America/Mexico_City", "México"], ["America/New_York", "Nueva York"]];
@@ -86,6 +87,7 @@ export default async function boda(ctx) {
     <div class="editor__bar">
       <span data-state class="saved">${w.published_at ? `Publicada por última vez el ${fmtDateTime(w.published_at)}` : "Sin publicar"}</span>
       <div class="btn-row">
+        <button class="btn" type="button" data-claude title="Copia un texto con sus datos y lo que han pedido, para pegarlo en el chat de Claude">Pedir a Claude</button>
         <button class="btn" type="button" data-share>Enlace de vista previa</button>
         <button class="btn" type="button" data-save>Guardar borrador</button>
         <button class="btn btn--primary" type="button" data-publish>${["publicada", "archivada"].includes(w.status) ? "Publicar cambios" : "Publicar"}</button>
@@ -687,6 +689,33 @@ export default async function boda(ctx) {
       api("/api/pedido", { accion: "publicada", wedding_id: id }).catch(() => {});
       toast(`Publicada (versión ${r.version}).`, { action: "Abrir la web", onAction: () => window.open(publicUrl, "_blank", "noopener") });
       boda(ctx);
+    } catch (e) { fail(e); }
+  });
+
+  $("[data-claude]", el).addEventListener("click", async () => {
+    try {
+      const [lines, lead] = await Promise.all([
+        orders[0] ? db.select("order_lines", { select: "description,position", order_id: `eq.${orders[0].id}`, order: "position" }) : [],
+        w.lead_id ? db.one("leads", { select: "message", id: `eq.${w.lead_id}` }).catch(() => null) : null,
+      ]);
+      const numberOf = Object.fromEntries(proposals.map((x) => [x.id, x.number]));
+      const text = claudeBrief({
+        w, config, lead, publicUrl, previewUrl,
+        plan: lines[0]?.description || null,
+        requests: requests.map((r) => ({ ...r, proposal_number: numberOf[r.proposal_id] })),
+      });
+      showDialog(html`<div class="dlg"><h2>Pedir a Claude</h2>
+        <p class="muted">Copia esto y pégalo en el chat del proyecto de WeddingWebs. Lleva sus datos, su plan, lo que han pedido y la web entera.
+          Claude te devuelve el JSON para pegarlo abajo en «Avanzado: todos los textos (JSON)» › Aplicar.${dirty ? " Ojo: tienes cambios sin guardar; también van en el texto." : ""}</p>
+        <textarea class="code" readonly rows="12" data-brief></textarea>
+        <div class="dlg__actions"><button class="btn" type="button" data-close>Cerrar</button><button class="btn btn--primary" type="button" data-copy-brief>Copiar</button></div></div>`);
+      const box = document.querySelector("[data-brief]");
+      box.value = text;
+      box.closest("dialog").querySelector("[data-copy-brief]").addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(text); toast("Copiado. Pégalo en el chat de Claude."); }
+        catch { box.select(); toast("Selecciona el texto y cópialo (Ctrl+C).", { error: true }); }
+      });
+      await navigator.clipboard?.writeText(text).then(() => toast("Copiado. Pégalo en el chat de Claude."), () => {});
     } catch (e) { fail(e); }
   });
 
