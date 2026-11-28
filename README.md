@@ -86,7 +86,7 @@ No hay paso de build. Las plantillas y el escaparate también funcionan con `npx
 | `plantillas/grabado/` | Lámina a plumilla de la finca que se dibuja sola, foto como lámina numerada y tipografía Caslon de imprenta.. Autocontenida |
 | `plantillas/infinito/` | Dinámica: cada parte vive dentro de una foto y, al bajar, la cámara entra por un arco hasta la siguiente; tinta y champán. Autocontenida |
 | `plantillas/hilo/` | Dinámica: un hilo rojo se cose por la web al bajar, une los nombres, cuelga las fotos como guirnalda y acaba en un lazo en el botón. Autocontenida |
-| `plantillas/persiana/` | Dinámica: la luz de la tarde entra por la persiana y dibuja rayas de sol y sombra sobre la portada y las fotos, que se abren al bajar; manchas de sol y sombra de olivo por las paredes. Autocontenida |
+| `plantillas/persiana/` | Dinámica: una ventana en la pared encalada con persiana de lamas de madera que se abren al entrar y suben al bajar; la luz de la tarde cae en franjas por la pared, las fotos de la historia tienen su persiana y por las paredes pasan manchas de sol y la sombra de un olivo. Autocontenida |
 | `plantillas/floracion/` | Dinámica: una flor se abre pétalo a pétalo con la foto en el corazón, capullos que florecen en cada parte y pétalos que caen. Autocontenida |
 | `plantillas/promesa/` | Dinámica: tipografía en movimiento sobre ciruela; las frases se encienden al leer y las fotos en óvalo crecen hasta llenar la pantalla. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
