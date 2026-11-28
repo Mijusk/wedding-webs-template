@@ -7,7 +7,7 @@ import { showInFrame, fitScaled } from "./preview.js";
 //
 // Cada tarjeta es una web de verdad dentro de un iframe: se cargan solo las que están cerca de la
 // pantalla, pocas a la vez, y las que quedan muy lejos se descargan para no agotar la memoria
-// del móvil con 47 webs abiertas.
+// del móvil con más de 50 webs abiertas.
 let ctx = null;
 let wedding = null;   // la boda que se enseña en las tarjetas (null: el ejemplo de cada plantilla)
 let current = "";     // el estilo que están viendo, si vienen de la vista previa

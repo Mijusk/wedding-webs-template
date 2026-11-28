@@ -16,6 +16,22 @@
       "name": "Infinito",
       "url": "../plantillas/infinito/"
     },
+    "hilo": {
+      "name": "Hilo rojo",
+      "url": "../plantillas/hilo/"
+    },
+    "persiana": {
+      "name": "Persiana",
+      "url": "../plantillas/persiana/"
+    },
+    "floracion": {
+      "name": "Floración",
+      "url": "../plantillas/floracion/"
+    },
+    "promesa": {
+      "name": "Promesa",
+      "url": "../plantillas/promesa/"
+    },
     "minimal": {
       "name": "Minimal",
       "url": "../plantillas/minimal/"
@@ -213,6 +229,54 @@
         "#d9c39d"
       ],
       "description": "Cada parte de vuestra web vive dentro de una foto: al bajar, la cámara entra por un arco y aparece la siguiente. La última ventana enseña otra vez la portada. Cine elegante en tinta y champán."
+    },
+    {
+      "id": "hilo",
+      "name": "Hilo rojo",
+      "template": "hilo",
+      "theme": "hilo",
+      "status": "available",
+      "swatch": [
+        "#f6f0e6",
+        "#a8222d"
+      ],
+      "description": "Un hilo rojo se va cosiendo por la web mientras bajáis: une vuestros nombres, sujeta las fotos como una guirnalda y acaba en un lazo en «Confirmar asistencia»."
+    },
+    {
+      "id": "persiana",
+      "name": "Persiana",
+      "template": "persiana",
+      "theme": "persiana",
+      "status": "available",
+      "swatch": [
+        "#ede3d3",
+        "#5b6948"
+      ],
+      "description": "Una tarde de verano tras la persiana: se abre al entrar, la luz entra entre las lamas y la sombra del olivo se mueve sobre el papel. Calma mediterránea."
+    },
+    {
+      "id": "floracion",
+      "name": "Floración",
+      "template": "floracion",
+      "theme": "floracion",
+      "status": "available",
+      "swatch": [
+        "#f8f0ea",
+        "#a3465d"
+      ],
+      "description": "Una flor que se abre pétalo a pétalo mientras bajáis, y pétalos que se sueltan y acompañan la lectura. Romántica y delicada."
+    },
+    {
+      "id": "promesa",
+      "name": "Promesa",
+      "template": "promesa",
+      "theme": "promesa",
+      "status": "available",
+      "swatch": [
+        "#1a1318",
+        "#e3b3a6"
+      ],
+      "description": "Tipografía en movimiento sobre ciruela: las frases se encienden según se leen y las fotos, en óvalos entre las palabras como camafeos, crecen hasta llenar la pantalla. Editorial y moderna."
     },
     {
       "id": "minimal",

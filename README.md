@@ -2,7 +2,7 @@
 
 Webs de boda configurables desde un único config. HTML, CSS y JS sin framework ni paso de build.
 
-Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 47 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
+Ahora también es un pequeño SaaS: **cada boda es una fila en la base de datos** (Supabase) y una sola ruta, `/b/<slug>`, sirve cualquier boda con cualquiera de las 52 plantillas. Luis lleva leads, clientes, pedidos y bodas desde el **panel** (`/panel/`), y cada pareja tiene el suyo (`/pareja/`): invitados con enlace personal, respuestas en vivo, Excel para el catering y datos prácticos.
 
 | Documento | Para qué |
 | --- | --- |
@@ -84,6 +84,11 @@ No hay paso de build. Las plantillas y el escaparate también funcionan con `npx
 | `plantillas/marmol/` | Mármol de Carrara en SVG, marco de oro con la inscripción en capitales romanas y cierre en Nero Marquina con vetas doradas.. Autocontenida |
 | `plantillas/terciopelo/` | Tema oscuro de terciopelo verde, tres velas que se encienden y tiemblan, foto en marco de oro y llamas en el programa.. Autocontenida |
 | `plantillas/grabado/` | Lámina a plumilla de la finca que se dibuja sola, foto como lámina numerada y tipografía Caslon de imprenta.. Autocontenida |
+| `plantillas/infinito/` | Dinámica: cada parte vive dentro de una foto y, al bajar, la cámara entra por un arco hasta la siguiente; tinta y champán. Autocontenida |
+| `plantillas/hilo/` | Dinámica: un hilo rojo se cose por la web al bajar, une los nombres, cuelga las fotos como guirnalda y acaba en un lazo en el botón. Autocontenida |
+| `plantillas/persiana/` | Dinámica: la persiana de la portada se abre y entra la luz de la tarde; manchas de sol y sombra de olivo que se mueven por las paredes. Autocontenida |
+| `plantillas/floracion/` | Dinámica: una flor se abre pétalo a pétalo con la foto en el corazón, capullos que florecen en cada parte y pétalos que caen. Autocontenida |
+| `plantillas/promesa/` | Dinámica: tipografía en movimiento sobre ciruela; las frases se encienden al leer y las fotos en óvalo crecen hasta llenar la pantalla. Autocontenida |
 | `integrations/leads.gs` | Apps Script para los contactos del escaparate: guarda pruebas y reservas en una hoja y te avisa por email |
 | `integrations/google-sheets.gs` | Apps Script que recibe las respuestas en la hoja de la pareja |
 | `fonts/`, `plantillas/*/fonts/`, `studio/fonts/` | Fuentes alojadas en la propia web (sin conectar con Google, por privacidad) |
