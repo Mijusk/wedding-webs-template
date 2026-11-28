@@ -100,7 +100,8 @@ tres toques: nombres → estilo → su web con datos de ejemplo):
 
 1. `probar_abierto` (con `desde`: portada_nombres, boton, boton_fijo, estilos).
 2. `paso_generador` con `paso: nombres`: han escrito los dos nombres.
-3. `estilos_abiertos` y `estilo_elegido` (con `estilo` y `posicion` en la cuadrícula).
+3. `estilos_abiertos` y `estilo_elegido` (con `estilo` y `posicion` en la cuadrícula). Si filtran por
+   tipo, `filtro_estilos` (con `tipo` y `desde`: probar, portada o plantillas).
 4. `prueba_generada`: ya ven su web.
 5. `aviso_datos` (`accion`: visto, si, no) y `datos_puestos` (`completos`: si/no): el aviso que sale
    al bajar por la web y el panel para poner fecha, lugar y fotos encima de ella.
